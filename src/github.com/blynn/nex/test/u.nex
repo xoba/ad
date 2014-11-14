@@ -1,0 +1,44 @@
+/[零一二三四五六七八九十百千]+/ { fmt.Print(zhToInt(txt())) }
+/[٠-٩]/ {
+  // The above character class might show up right-to-left in a browser.
+  // The equivalent of 0 should be on the left, and the equivalent of 9 should
+  // be on the right.
+  //
+  // The Eastern Arabic numerals are ٠١٢٣٤٥٦٧٨٩.
+  fmt.Print([]rune(txt())[0] - rune('٠'))
+}
+/./ { fmt.Print(txt()) }
+//
+package main
+import ("fmt";"os")
+func zhToInt(s string) int {
+  n := 0
+  prev := 0
+  f := func(m int) {
+    if 0 == prev { prev = 1 }
+    n += m * prev
+    prev = 0
+  }
+  for _, c := range s {
+    for m, v := range []rune("一二三四五六七八九") {
+      if v == c {
+	prev = m+1
+	goto continue2
+      }
+    }
+    switch c {
+    case '零':
+    case '十': f(10)
+    case '百': f(100)
+    case '千': f(1000)
+    }
+continue2:
+  }
+  n += prev
+  return n
+}
+func main() {
+  lex := NewLexer(os.Stdin)
+  txt := func() string { return lex.Text() }
+  NN_FUN(lex)
+}

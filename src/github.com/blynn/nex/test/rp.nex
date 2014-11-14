@@ -1,0 +1,9 @@
+/[ \t]/  { /* Skip blanks and tabs. */ }
+/[0-9]*/ { lval.n,_ = strconv.Atoi(yylex.Text()); return NUM }
+/./ { return int(yylex.Text()[0]) }
+//
+package main
+import ("os";"strconv")
+func main() {
+  yyParse(NewLexer(os.Stdin))
+}

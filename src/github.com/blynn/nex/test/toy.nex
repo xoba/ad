@@ -1,0 +1,22 @@
+/[0-9]+/          { println("An integer:", txt()) }
+/[0-9]+\.[0-9]*/  { println("A float:", txt()) }
+/if|then|begin|end|procedure|function/
+                  { println("A keyword:", txt()) }
+/[a-z][a-z0-9]*/  { println("An identifier:", txt()) }
+/\+|-|\*|\//      { println("An operator:", txt()) }
+/[ \t\n]+/        { /* eat up whitespace */ }
+/./               { println("Unrecognized character:", txt()) }
+/{[^\{\}\n]*}/    { /* eat up one-line comments */ }
+//
+package main
+import "os"
+func main() {
+  lex := NewLexer(os.Stdin)
+  txt := func() string { return lex.Text() }
+  NN_FUN(lex)
+  // I changed a regex because the original appears to be wrong:
+  //   "{"[\^{}}\n]*"}"     /* eat up one-line comments */
+  //
+  // The original has a few other bugs, e.g. a missing '<' before "math.h",
+  // and a missing noyywrap option prevents compilation.
+}

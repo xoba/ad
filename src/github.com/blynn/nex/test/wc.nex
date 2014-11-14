@@ -1,0 +1,14 @@
+/[^\n]*\n/ < {}
+  /[^ \t\r\n]*/ < {}
+    /./  { nChars++ }
+  >      { nWords++ }
+  /./    { nChars++ }
+>        { nLines++ }
+//
+package main
+import ("fmt";"os")
+func main() {
+  var nLines, nWords, nChars int
+  NN_FUN(NewLexer(os.Stdin))
+  fmt.Printf("%d %d %d\n", nLines, nWords, nChars)
+}
