@@ -1,7 +1,12 @@
 /[ \t\n]/  { /* Skip whitespace */ }
 
-/[0-9]+\.?[0-9]*/ {  }
+/[0-9]+\.?[0-9]*/ { n,_ := strconv.ParseFloat(yylex.Text(),64); lval.node = Num(n); fmt.Println(lval.node); return NUM; }
 
 //
 
 package parser
+
+import (
+ "fmt"
+ "strconv"
+	)

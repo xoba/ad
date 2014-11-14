@@ -2,6 +2,7 @@ package main
 
 import (
 	"xoba/ad"
+	"xoba/ad/parser"
 
 	"github.com/xoba/goutil"
 	"github.com/xoba/goutil/tool"
@@ -17,4 +18,5 @@ func init() {
 		tool.Register(tool.Named(name+","+desc, tool.RunFunc(f)))
 	}
 	add("ad", "play with ad", ad.Run)
+	add("parse", "play with parsing", parser.Run)
 }

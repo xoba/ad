@@ -1,4 +1,9 @@
 package parser
+
+import (
+	"fmt"
+	"strconv"
+)
 import ("bufio";"io";"strings")
 type frame struct {
   i int
@@ -150,17 +155,17 @@ dollar:  // Handle $.
 {[]bool{false, true}, []func(rune) int{  // Transitions
 func(r rune) int {
 	switch(r) {
-		case 32: return 1
 		case 9: return 1
 		case 10: return 1
+		case 32: return 1
 	}
 	return -1
 },
 func(r rune) int {
 	switch(r) {
+		case 10: return -1
 		case 32: return -1
 		case 9: return -1
-		case 10: return -1
 	}
 	return -1
 },
@@ -271,7 +276,7 @@ func (yylex *Lexer) Lex(lval *yySymType) int {
 			{ /* Skip whitespace */ }
 			continue
 		case 1:
-			{  }
+			{ n,_ := strconv.ParseFloat(yylex.Text(),64); lval.node = Num(n); fmt.Println(lval.node); return NUM; }
 			continue
 		}
 		break

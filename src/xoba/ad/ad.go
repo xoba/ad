@@ -4,5 +4,5 @@ package ad
 import "fmt"
 
 func Run(args []string) {
-	fmt.Println("hw")
+	fmt.Println("hello world!")
 }

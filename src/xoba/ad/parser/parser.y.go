@@ -310,7 +310,7 @@ yydefault:
 	case 2:
 		//line parser.y:16
 		{
-			fmt.Println(yyS[yypt-1])
+			fmt.Println("parsed")
 		}
 	}
 	goto yystack /* stack new state and value */

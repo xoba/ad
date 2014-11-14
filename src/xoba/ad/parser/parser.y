@@ -13,5 +13,5 @@ import "fmt"
 %% 
 
 program: {}
-| program NUM { fmt.Println($1); }
+| program NUM { fmt.Println("parsed"); }
 ;
