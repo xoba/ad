@@ -1,5 +1,6 @@
 %{ 
 package parser 
+import "fmt"
 
 %} 
  
@@ -11,3 +12,6 @@ package parser
 
 %% 
 
+program: {}
+| program NUM { fmt.Println($1); }
+;
