@@ -27,11 +27,11 @@ const (
 type NodeType string
 
 type Node struct {
-	Type NodeType `json:"T,omitempty"`
-	S    string   `json:",omitempty"`
-	F    float64  `json:",omitempty"`
-	N    []*Node  `json:",omitempty"`
-	name string   `json:",omitempty"`
+	Type     NodeType `json:"T,omitempty"`
+	S        string   `json:",omitempty"`
+	F        float64  `json:",omitempty"`
+	Children []*Node  `json:"C,omitempty"`
+	Name     string   `json:"N,omitempty"`
 }
 
 func (n Node) String() string {
@@ -51,8 +51,7 @@ func Run(args []string) {
 	steps = append(steps, vp.getVars(lex.rhs)...)
 	steps = append(steps, sp.program(lex.rhs)...)
 	y := steps[len(steps)-1].lhs
-	for i, s := range steps {
-		fmt.Printf("%d. %v\n", i, s)
+	for _, s := range steps {
 		fmt.Fprintln(pgm, s)
 	}
 	var list []string
@@ -140,20 +139,20 @@ func (v *VarParser) getVars(rhs *Node) (out []Step) {
 	switch rhs.Type {
 	case identifierNT:
 		if _, ok := v.vars[rhs.S]; !ok {
-			rhs.name = fmt.Sprintf("v%d", v.i)
-			v.vars[rhs.S] = rhs.name
+			rhs.Name = fmt.Sprintf("v%d", v.i)
+			v.vars[rhs.S] = rhs.Name
 			v.i++
 			step := Step{
 				decl: true,
-				lhs:  rhs.name,
+				lhs:  rhs.Name,
 				rhs:  rhs.S,
 			}
 			out = append(out, step)
 		} else {
-			rhs.name = v.vars[rhs.S]
+			rhs.Name = v.vars[rhs.S]
 		}
 	case functionNT:
-		for _, n := range rhs.N {
+		for _, n := range rhs.Children {
 			out = append(out, v.getVars(n)...)
 		}
 	}
@@ -174,23 +173,27 @@ type Step struct {
 }
 
 func (s Step) String() string {
-	if s.decl {
+	if true {
 		return fmt.Sprintf("%s := %s;", s.lhs, s.rhs)
 	} else {
 		return fmt.Sprintf("%s := %s; // f = %q; args = %q", s.lhs, s.rhs, s.f, s.args)
 	}
 }
 
+func computeDerivatives(steps []Step) {
+
+}
+
 func (s *StepParser) program(rhs *Node) (out []Step) {
 	switch rhs.Type {
 	case numberNT:
-		rhs.name = fmt.Sprintf("%f", rhs.F)
+		rhs.Name = fmt.Sprintf("%f", rhs.F)
 	case functionNT:
 		var args []string
-		for _, n := range rhs.N {
+		for _, n := range rhs.Children {
 			steps := s.program(n)
 			out = append(out, steps...)
-			args = append(args, n.name)
+			args = append(args, n.Name)
 		}
 		step := Step{
 			lhs:  fmt.Sprintf("s%d", s.i),
@@ -199,7 +202,7 @@ func (s *StepParser) program(rhs *Node) (out []Step) {
 			args: args,
 		}
 		out = append(out, step)
-		rhs.name = step.lhs
+		rhs.Name = step.lhs
 		s.i++
 	}
 	return out
@@ -207,9 +210,9 @@ func (s *StepParser) program(rhs *Node) (out []Step) {
 
 func Function(ident string, args ...*Node) *Node {
 	return &Node{
-		Type: functionNT,
-		S:    ident,
-		N:    args,
+		Type:     functionNT,
+		S:        ident,
+		Children: args,
 	}
 }
 

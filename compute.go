@@ -22,16 +22,16 @@ func Compute(x, y, z float64) float64 {
 	v0 := x
 	v1 := z
 	v2 := y
-	s0 := pow(v1, 3.000000)             // f = "pow"; args = ["v1" "3.000000"]
-	s1 := sqrt(s0)                      // f = "sqrt"; args = ["s0"]
-	s2 := add(v0, s1)                   // f = "add"; args = ["v0" "s1"]
-	s3 := multiply(-1.000000, 5.000000) // f = "multiply"; args = ["-1.000000" "5.000000"]
-	s4 := multiply(s3, v0)              // f = "multiply"; args = ["s3" "v0"]
-	s5 := add(s4, 55.000000)            // f = "add"; args = ["s4" "55.000000"]
-	s6 := multiply(99.000000, s5)       // f = "multiply"; args = ["99.000000" "s5"]
-	s7 := divide(s6, 6.000000)          // f = "divide"; args = ["s6" "6.000000"]
-	s8 := add(s2, s7)                   // f = "add"; args = ["s2" "s7"]
-	s9 := add(s8, v2)                   // f = "add"; args = ["s8" "v2"]
+	s0 := pow(v1, 3.000000)
+	s1 := sqrt(s0)
+	s2 := add(v0, s1)
+	s3 := multiply(-1.000000, 5.000000)
+	s4 := multiply(s3, v0)
+	s5 := add(s4, 55.000000)
+	s6 := multiply(99.000000, s5)
+	s7 := divide(s6, 6.000000)
+	s8 := add(s2, s7)
+	s9 := add(s8, v2)
 	return s9
 }
 
