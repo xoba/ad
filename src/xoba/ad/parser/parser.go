@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -46,9 +45,15 @@ func Run(args []string) {
 	pgm := new(bytes.Buffer)
 	vars := make(map[string]string)
 	vp := &VarParser{vars: vars}
-	vp.getVars(pgm, lex.rhs)
 	sp := &StepParser{i: 1, vars: vars}
-	y := sp.linearize(pgm, lex.rhs)
+	var steps []Step
+	steps = append(steps, vp.getVars(lex.rhs)...)
+	steps = append(steps, sp.program(lex.rhs)...)
+	y := steps[len(steps)-1].lhs
+	for i, s := range steps {
+		fmt.Printf("%d. %v\n", i, s)
+		fmt.Fprintln(pgm, s)
+	}
 	var list []string
 	for v := range vars {
 		list = append(list, v)
@@ -116,22 +121,27 @@ type VarParser struct {
 }
 
 // gets all the vars and names them in tree
-func (v *VarParser) getVars(w io.Writer, rhs *Node) {
+func (v *VarParser) getVars(rhs *Node) (out []Step) {
 	switch rhs.Type {
 	case identifierNT:
 		if _, ok := v.vars[rhs.S]; !ok {
 			rhs.name = fmt.Sprintf("v_%d", v.i)
 			v.vars[rhs.S] = rhs.name
 			v.i++
-			fmt.Fprintf(w, "%s := %s\n", rhs.name, rhs.S)
+			step := Step{
+				lhs: rhs.name,
+				rhs: rhs.S,
+			}
+			out = append(out, step)
 		} else {
 			rhs.name = v.vars[rhs.S]
 		}
 	case functionNT, binaryNT:
 		for _, n := range rhs.N {
-			v.getVars(w, n)
+			out = append(out, v.getVars(n)...)
 		}
 	}
+	return
 }
 
 type StepParser struct {
@@ -139,28 +149,47 @@ type StepParser struct {
 	vars map[string]string
 }
 
-func (s *StepParser) linearize(w io.Writer, rhs *Node) string {
+type Step struct {
+	lhs string
+	rhs string
+}
+
+func (s Step) String() string {
+	return fmt.Sprintf("%s := %s;", s.lhs, s.rhs)
+}
+
+func (s *StepParser) program(rhs *Node) (out []Step) {
 	switch rhs.Type {
 	case numberNT:
 		rhs.name = fmt.Sprintf("%f", rhs.F)
 	case functionNT:
 		var args []string
 		for _, n := range rhs.N {
-			s.linearize(w, n)
+			steps := s.program(n)
+			out = append(out, steps...)
 			args = append(args, n.name)
 		}
-		fmt.Fprintf(w, "v%d := %s (%s)\n", s.i, rhs.S, strings.Join(args, ","))
-		rhs.name = fmt.Sprintf("v%d", s.i)
+		step := Step{
+			lhs: fmt.Sprintf("v%d", s.i),
+			rhs: fmt.Sprintf("%s(%s)", rhs.S, strings.Join(args, ",")),
+		}
+		out = append(out, step)
+		rhs.name = step.lhs
 		s.i++
 	case binaryNT:
 		for _, n := range rhs.N {
-			s.linearize(w, n)
+			steps := s.program(n)
+			out = append(out, steps...)
 		}
-		fmt.Fprintf(w, "v%d := %s %s %s\n", s.i, rhs.N[0].name, rhs.S, rhs.N[1].name)
-		rhs.name = fmt.Sprintf("v%d", s.i)
+		step := Step{
+			lhs: fmt.Sprintf("v%d", s.i),
+			rhs: fmt.Sprintf("%s %s %s", rhs.N[0].name, rhs.S, rhs.N[1].name),
+		}
+		out = append(out, step)
+		rhs.name = step.lhs
 		s.i++
 	}
-	return rhs.name
+	return out
 }
 
 func Function(ident string, args ...*Node) *Node {
