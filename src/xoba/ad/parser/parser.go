@@ -22,6 +22,11 @@ import (
 // don't name any varibles like this prefix in your expressions:
 const private = "x_a8b32499"
 
+func Functions(p string) string {
+	_, b := GenTemplates("src/xoba/ad/parser/templates", private)
+	return b
+}
+
 var formula string = Formula(3)
 
 func Formula(n int) string {
@@ -75,7 +80,7 @@ func derivative(num, denom Step) string {
 	}
 	var list []string
 	for _, a := range args {
-		list = append(list, fmt.Sprintf("d_%s_%s(%d,%s)", private, num.f, a, strings.Join(num.args, ",")))
+		list = append(list, fmt.Sprintf("d_%s_%s(%d,%s)", num.f, private, a, strings.Join(num.args, ",")))
 	}
 	return strings.Join(list, "+")
 }
@@ -276,7 +281,7 @@ func (s *StepParser) program(rhs *Node) (out []Step) {
 		}
 		step := Step{
 			lhs:  fmt.Sprintf("s_%d_%s", s.i, private),
-			rhs:  fmt.Sprintf("%s_%s(%s)", private, rhs.S, strings.Join(args, ",")),
+			rhs:  fmt.Sprintf("%s_%s(%s)", rhs.S, private, strings.Join(args, ",")),
 			f:    rhs.S,
 			args: args,
 		}

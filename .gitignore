@@ -3,3 +3,4 @@ bin
 pkg
 .hg
 compute.go
+*.test
