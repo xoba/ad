@@ -69,7 +69,7 @@ func {{.private}}_sqrt(a float64) float64 {
 	return math.Sqrt(a)
 }
 func d_{{.private}}_sqrt(_int, a float64) float64 {
-	return 0.5 * math.Pow(a, -1.5)
+	return 0.5 * math.Pow(a, -0.5)
 }
 
 func {{.private}}_exp(a float64) float64 {
