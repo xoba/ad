@@ -21,6 +21,7 @@ var yyToknames = []string{
 	"'-'",
 	"'*'",
 	"'/'",
+	"'^'",
 }
 var yyStatenames = []string{}
 
@@ -35,53 +36,53 @@ var yyExca = []int{
 	-2, 0,
 }
 
-const yyNprod = 12
+const yyNprod = 13
 const yyPrivate = 57344
 
 var yyTokenNames []string
 var yyStates []string
 
-const yyLast = 43
+const yyLast = 48
 
 var yyAct = []int{
 
-	5, 10, 11, 12, 13, 14, 3, 23, 24, 15,
-	16, 17, 18, 19, 20, 21, 10, 11, 12, 13,
-	12, 13, 26, 4, 1, 25, 10, 11, 12, 13,
-	6, 7, 22, 2, 9, 0, 0, 0, 8, 10,
-	11, 12, 13,
+	5, 10, 11, 12, 13, 14, 15, 3, 28, 16,
+	17, 18, 19, 20, 21, 22, 23, 10, 11, 12,
+	13, 14, 4, 2, 25, 26, 1, 27, 10, 11,
+	12, 13, 14, 6, 7, 24, 0, 9, 0, 12,
+	13, 14, 8, 10, 11, 12, 13, 14,
 }
 var yyPact = []int{
 
-	28, -1000, -5, 17, 26, 32, -1000, -7, 26, 26,
-	26, 26, 26, 26, 26, 19, -1000, 11, 11, -1000,
-	-1000, -6, -1000, -1000, 26, 9, -1000,
+	18, -1000, -5, 16, 29, 36, -1000, -7, 29, 29,
+	29, 29, 29, 29, 29, 29, 21, -1000, 30, 30,
+	-1000, -1000, -1000, 10, -1000, -1000, 29, -6, -1000,
 }
 var yyPgo = []int{
 
-	0, 24, 0,
+	0, 26, 0,
 }
 var yyR1 = []int{
 
 	0, 1, 2, 2, 2, 2, 2, 2, 2, 2,
-	2, 2,
+	2, 2, 2,
 }
 var yyR2 = []int{
 
 	0, 4, 1, 1, 3, 4, 6, 2, 3, 3,
-	3, 3,
+	3, 3, 3,
 }
 var yyChk = []int{
 
-	-1000, -1, 5, 11, 6, -2, 4, 5, 12, 8,
-	7, 8, 9, 10, 12, -2, -2, -2, -2, -2,
-	-2, -2, 13, 13, 14, -2, 13,
+	-1000, -1, 5, 12, 6, -2, 4, 5, 13, 8,
+	7, 8, 9, 10, 11, 13, -2, -2, -2, -2,
+	-2, -2, -2, -2, 14, 14, 15, -2, 14,
 }
 var yyDef = []int{
 
 	0, -2, 0, 0, 0, 1, 2, 3, 0, 0,
-	0, 0, 0, 0, 0, 0, 7, 8, 9, 10,
-	11, 0, 4, 5, 0, 0, 6,
+	0, 0, 0, 0, 0, 0, 0, 7, 8, 9,
+	10, 11, 12, 0, 4, 5, 0, 0, 6,
 }
 var yyTok1 = []int{
 
@@ -89,9 +90,12 @@ var yyTok1 = []int{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	12, 13, 9, 7, 14, 8, 3, 10, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 11, 3,
-	3, 6,
+	13, 14, 9, 7, 15, 8, 3, 10, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 12, 3,
+	3, 6, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 11,
 }
 var yyTok2 = []int{
 
@@ -365,22 +369,27 @@ yydefault:
 	case 8:
 		//line parser.y:27
 		{
-			yyVAL.node = Binary('+', yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("add", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 9:
 		//line parser.y:28
 		{
-			yyVAL.node = Binary('-', yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("subtract", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 10:
 		//line parser.y:29
 		{
-			yyVAL.node = Binary('*', yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("multiply", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 11:
 		//line parser.y:30
 		{
-			yyVAL.node = Binary('/', yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("divide", yyS[yypt-2].node, yyS[yypt-0].node)
+		}
+	case 12:
+		//line parser.y:31
+		{
+			yyVAL.node = Function("pow", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	}
 	goto yystack /* stack new state and value */

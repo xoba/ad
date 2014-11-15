@@ -86,6 +86,22 @@ func Compute({{.vars}} float64) float64 {
 {{.program}} return {{.y}};
 }
 
+func add(a,b float64) float64 {
+return a+b;
+}
+
+func multiply(a,b float64) float64 {
+return a*b;
+}
+
+func subtract(a,b float64) float64 {
+return a-b;
+}
+
+func divide(a,b float64) float64 {
+return a/b;
+}
+
 func sqrt(a float64) float64 {
 return math.Sqrt(a);
 }
