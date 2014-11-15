@@ -212,12 +212,16 @@ grad_{{.private}} := make(map[string]float64)
 	})
 
 	f.Close()
-	cmd := exec.Command("gofmt", "-w", "compute.go")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+	if err := Gofmt("compute.go"); err != nil {
 		log.Fatalf("oops: %v\n", err)
 	}
+}
+
+func Gofmt(p string) error {
+	cmd := exec.Command("gofmt", "-w", p)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 type VarParser struct {

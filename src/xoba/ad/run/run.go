@@ -18,5 +18,6 @@ func init() {
 		tool.Register(tool.Named(name+","+desc, tool.RunFunc(f)))
 	}
 	add("ad", "play with ad", ad.Run)
+	add("templates", "run templates", parser.RunTemplates)
 	add("parse", "play with parsing", parser.Run)
 }
