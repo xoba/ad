@@ -30,7 +30,7 @@ func Formula(n int) string {
 		term := fmt.Sprintf("%f * x%d", rand.Float64(), i)
 		terms = append(terms, term)
 	}
-	return fmt.Sprintf("f := s2 + log(1 + exp(-y * (%s)))", strings.Join(terms, "+"))
+	return fmt.Sprintf("f := sqrt(x) + pow(a,b) + a-b+c/d + log(1 + exp(-y * (%s)))", strings.Join(terms, "+"))
 }
 
 func computeDerivatives(w io.Writer, steps []Step) {
