@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"sort"
@@ -19,15 +20,25 @@ import (
 )
 
 const (
-	formula = `a := pow(z,y) + pow(x,2) + log(z+y*x*(exp(x) + x*y+x/y))`
+	formulax = `a := pow(z,y) + pow(x,2) + log(z+y*x*(exp(x) + x*y+x/y))`
 )
+
+var formula string = Formula(10)
+
+func Formula(n int) string {
+	var terms []string
+	for i := 0; i < n; i++ {
+		term := fmt.Sprintf("%f * x%d", rand.Float64(), i)
+		terms = append(terms, term)
+	}
+	return "y:= " + strings.Join(terms, "+")
+}
 
 func computeDerivatives(w io.Writer, steps []Step) {
 	n := len(steps)
 	for i := 0; i < n; i++ {
 		j := n - i - 1
 		step := steps[j]
-		//fmt.Printf("%d. %s\n", j, step)
 		x0 := 0.0
 		if i == 0 {
 			x0 = 1.0
@@ -39,7 +50,6 @@ func computeDerivatives(w io.Writer, steps []Step) {
 				fmt.Fprintf(w, "b%s += b%s * %s\n", step.lhs, s3.lhs, d)
 			}
 		}
-		//	fmt.Fprintf(w, "fmt.Printf(\"b%s = %%f\\n\",b%s) // %v: %s\n", step.lhs, step.lhs, step.decl, step.rhs)
 		if step.decl {
 			fmt.Fprintf(w, "grad[\"%s\"] = b%s\n", step.rhs, step.lhs)
 		}
@@ -114,7 +124,7 @@ func Run(args []string) {
 			fmt.Fprintf(cg, "%s += delta\n", k)
 			fmt.Fprintln(cg, formula)
 			fmt.Fprintf(cg, "%s -= delta\n", k)
-			fmt.Fprintf(cg, "fmt.Printf(\"df/d%s = %%f\\n\",(a-tmp)/delta)\n", k)
+			fmt.Fprintf(cg, "fmt.Printf(\"df/d%s = %%f\\n\",(%s-tmp)/delta)\n", k, lex.lhs.S)
 			fmt.Fprintln(cg, "}")
 		}
 	}
@@ -122,7 +132,6 @@ func Run(args []string) {
 	pgm := new(bytes.Buffer)
 	for _, s := range steps {
 		fmt.Fprintln(pgm, s)
-		//	fmt.Fprintf(pgm, "fmt.Printf(\"%s = %%f\\n\",%s);\n", s.lhs, s.lhs)
 	}
 	computeDerivatives(pgm, steps)
 	var list []string
@@ -309,11 +318,7 @@ type StepParser struct {
 }
 
 func (s Step) String() string {
-	if true {
-		return fmt.Sprintf("%s := %s;", s.lhs, s.rhs)
-	} else {
-		return fmt.Sprintf("%s := %s; // f = %q; args = %q", s.lhs, s.rhs, s.f, s.args)
-	}
+	return fmt.Sprintf("%s := %s;", s.lhs, s.rhs)
 }
 
 func (s *StepParser) program(rhs *Node) (out []Step) {
