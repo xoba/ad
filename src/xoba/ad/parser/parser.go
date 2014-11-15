@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	formula  = `a := x*(x + y*y)`
+	formula  = `a := log(z+y*x*(exp(x) + x*y+x/y))`
 	formula2 = `a := x+sqrt(pow(z,3)) + 99*(-5*x + 55)/6 + y`
 )
 
@@ -28,7 +28,7 @@ func computeDerivatives(w io.Writer, steps []Step) {
 	for i := 0; i < n; i++ {
 		j := n - i - 1
 		step := steps[j]
-		fmt.Printf("%d. %s\n", j, step)
+		//fmt.Printf("%d. %s\n", j, step)
 		x0 := 0.0
 		if i == 0 {
 			x0 = 1.0
@@ -36,14 +36,40 @@ func computeDerivatives(w io.Writer, steps []Step) {
 		fmt.Fprintf(w, "b%s := %f\n", step.lhs, x0)
 		for k := j + 1; k < n; k++ {
 			s3 := steps[k]
-			fmt.Fprintf(w, "// b%s += b%s * %s\n", step.lhs, s3.lhs, derivative(s3, step))
+			if d := derivative(s3, step); len(d) > 0 {
+				fmt.Fprintf(w, "b%s += b%s * %s\n", step.lhs, s3.lhs, d)
+			}
 		}
-		fmt.Fprintf(w, "fmt.Printf(\"b%s = %%f\\n\",b%s)\n", step.lhs, step.lhs)
+		//	fmt.Fprintf(w, "fmt.Printf(\"b%s = %%f\\n\",b%s) // %v: %s\n", step.lhs, step.lhs, step.decl, step.rhs)
+		if step.decl {
+			fmt.Fprintf(w, "grad[\"%s\"] = b%s\n", step.rhs, step.lhs)
+		}
 	}
 }
 
+type Step struct {
+	decl bool
+	lhs  string
+	rhs  string
+	f    string
+	args []string
+}
+
 func derivative(num, denom Step) string {
-	return fmt.Sprintf("d%s / d%s (%s)", num.lhs, denom.lhs, num.rhs)
+	var args []int
+	for i, a := range num.args {
+		if a == denom.lhs {
+			args = append(args, i)
+		}
+	}
+	if len(args) == 0 {
+		return ""
+	}
+	var list []string
+	for _, a := range args {
+		list = append(list, fmt.Sprintf("d%s(%d,%s)", num.f, a, strings.Join(num.args, ",")))
+	}
+	return strings.Join(list, "+")
 }
 
 type NodeType string
@@ -126,18 +152,19 @@ fmt.Println("running compute.go");
 rand.Seed(time.Now().UTC().UnixNano())
 {{.decls}} {{.formula}} 
 fmt.Printf("formula: %f\n",{{.lhs}});
-c:= Compute({{.vars}})
+c, grad:= Compute({{.vars}})
 fmt.Printf("parsed : %f\n",c)
 fmt.Printf("diff   : %f\n",{{.lhs}}-c)
-
+fmt.Printf("grad = %v\n",grad);
 {{.computeGradients}}
 
 }
 
 {{.funcs}}
 
-func Compute({{.vars}} float64) float64 {
-{{.program}} return {{.y}};
+func Compute({{.vars}} float64) (float64,map[string]float64) {
+grad := make(map[string]float64)
+{{.program}} return {{.y}},grad;
 }
 
 `))
@@ -195,21 +222,21 @@ func ddivide(i int, a, b float64) float64 {
 func sqrt(a float64) float64 {
 	return math.Sqrt(a)
 }
-func dsqrt(a float64) float64 {
+func dsqrt(_int, a float64) float64 {
 	return 0.5 * math.Pow(a, -1.5)
 }
 
 func exp(a float64) float64 {
 	return math.Exp(a)
 }
-func dexp(a float64) float64 {
+func dexp(_ int, a float64) float64 {
 	return exp(a)
 }
 
 func log(a float64) float64 {
 	return math.Log(a)
 }
-func dlog(a float64) float64 {
+func dlog(_ int, a float64) float64 {
 	return 1 / a
 }
 
@@ -274,14 +301,6 @@ func (v *VarParser) getVars(rhs *Node) (out []Step) {
 type StepParser struct {
 	i    int
 	vars map[string]string
-}
-
-type Step struct {
-	decl bool
-	lhs  string
-	rhs  string
-	f    string
-	args []string
 }
 
 func (s Step) String() string {
