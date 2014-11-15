@@ -2,3 +2,4 @@
 bin
 pkg
 .hg
+compute.go
