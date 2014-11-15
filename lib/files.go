@@ -25,7 +25,7 @@ func main() {
 			if strings.Contains(path, "flymake_") && strings.HasSuffix(path, ".go") {
 				return
 			}
-			for _, e := range strings.Split("go,y,css,html,js", ",") {
+			for _, e := range strings.Split("go,y,css,html,js,nex", ",") {
 				if strings.HasSuffix(path, "."+e) {
 					list = append(list, file{path, info.ModTime()})
 				}

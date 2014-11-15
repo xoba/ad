@@ -7,7 +7,7 @@ import __yyfmt__ "fmt"
 //line parser.y:5
 type yySymType struct {
 	yys  int
-	node Node
+	node *Node
 }
 
 const NUM = 57346

@@ -3,7 +3,7 @@
     %} 
  
 %union {
-  node Node
+  node *Node
 } 
  
 %token NUM
