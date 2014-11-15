@@ -43,7 +43,11 @@ func Run(args []string) {
 	lex := NewContext(NewLexer(strings.NewReader(formula)))
 	yyParse(lex)
 	pgm := new(bytes.Buffer)
-	y, vars := linearize(pgm, lex.rhs)
+	vars := make(map[string]string)
+	vp := &VarParser{vars: vars}
+	vp.getVars(pgm, lex.rhs)
+	sp := &StepParser{i: 1, vars: vars}
+	y := sp.linearize(pgm, lex.rhs)
 	var list []string
 	for v := range vars {
 		list = append(list, v)
@@ -94,48 +98,68 @@ return math.Pow(a,b)
 	)
 	f.Close()
 	cmd := exec.Command("gofmt", "-w", "compute.go")
-	check(cmd.Run())
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("oops: %v\n", err)
+	}
 }
 
-const formula = `a := sqrt(pow(z,3)) + 99*(5*x + 55)/6 + y`
+const formula = `a := x+sqrt(pow(z,3)) + 99*(5*x + 55)/6 + y`
 
-var i int
+type VarParser struct {
+	i    int
+	vars map[string]string
+}
 
-func linearize(w io.Writer, rhs *Node) (string, map[string]struct{}) {
-	vars := make(map[string]struct{})
-	add := func(_ string, m map[string]struct{}) {
-		for k := range m {
-			vars[k] = struct{}{}
+// gets all the vars and names them in tree
+func (v *VarParser) getVars(w io.Writer, rhs *Node) {
+	switch rhs.Type {
+	case identifierNT:
+		if _, ok := v.vars[rhs.S]; !ok {
+			rhs.name = fmt.Sprintf("v_%d", v.i)
+			v.vars[rhs.S] = rhs.name
+			v.i++
+			fmt.Fprintf(w, "%s := %s\n", rhs.name, rhs.S)
+		} else {
+			rhs.name = v.vars[rhs.S]
+		}
+	case functionNT, binaryNT:
+		for _, n := range rhs.N {
+			v.getVars(w, n)
 		}
 	}
+}
+
+type StepParser struct {
+	i    int
+	vars map[string]string
+}
+
+func (s *StepParser) linearize(w io.Writer, rhs *Node) string {
 	switch rhs.Type {
 	case numberNT:
-		fmt.Fprintf(w, "v%d := %f\n", i, rhs.F)
-		rhs.name = fmt.Sprintf("v%d", i)
-		i++
-	case identifierNT:
-		fmt.Fprintf(w, "v%d := %s\n", i, rhs.S)
-		rhs.name = fmt.Sprintf("v%d", i)
-		vars[rhs.S] = struct{}{}
-		i++
+		fmt.Fprintf(w, "v%d := %f\n", s.i, rhs.F)
+		rhs.name = fmt.Sprintf("v%d", s.i)
+		s.i++
 	case functionNT:
 		var args []string
 		for _, n := range rhs.N {
-			add(linearize(w, n))
+			s.linearize(w, n)
 			args = append(args, n.name)
 		}
-		fmt.Fprintf(w, "v%d := %s (%s)\n", i, rhs.S, strings.Join(args, ","))
-		rhs.name = fmt.Sprintf("v%d", i)
-		i++
+		fmt.Fprintf(w, "v%d := %s (%s)\n", s.i, rhs.S, strings.Join(args, ","))
+		rhs.name = fmt.Sprintf("v%d", s.i)
+		s.i++
 	case binaryNT:
 		for _, n := range rhs.N {
-			add(linearize(w, n))
+			s.linearize(w, n)
 		}
-		fmt.Fprintf(w, "v%d := %s %s %s\n", i, rhs.N[0].name, rhs.S, rhs.N[1].name)
-		rhs.name = fmt.Sprintf("v%d", i)
-		i++
+		fmt.Fprintf(w, "v%d := %s %s %s\n", s.i, rhs.N[0].name, rhs.S, rhs.N[1].name)
+		rhs.name = fmt.Sprintf("v%d", s.i)
+		s.i++
 	}
-	return rhs.name, vars
+	return rhs.name
 }
 
 func Function(ident string, args ...*Node) *Node {
