@@ -20,7 +20,7 @@ import (
 )
 
 // don't name any varibles like this prefix in your expressions:
-const private = "x_a8b32499"
+const private = "xxxa8b32499"
 
 func Functions(p string) string {
 	_, b := GenTemplates("src/xoba/ad/parser/templates", private)
@@ -47,15 +47,15 @@ func computeDerivatives(w io.Writer, steps []Step) {
 		if i == 0 {
 			x0 = 1.0
 		}
-		fmt.Fprintf(w, "b%s := %f\n", step.lhs, x0)
+		fmt.Fprintf(w, "b_%s := %f\n", step.lhs, x0)
 		for k := j + 1; k < n; k++ {
 			s3 := steps[k]
 			if d := derivative(s3, step); len(d) > 0 {
-				fmt.Fprintf(w, "b%s += b%s * %s\n", step.lhs, s3.lhs, d)
+				fmt.Fprintf(w, "b_%s += b_%s * %s\n", step.lhs, s3.lhs, d)
 			}
 		}
 		if step.decl {
-			fmt.Fprintf(w, "grad_%s[\"%s\"] = b%s\n", private, step.rhs, step.lhs)
+			fmt.Fprintf(w, "grad_%s[\"%s\"] = b_%s\n", private, step.rhs, step.lhs)
 		}
 	}
 }
