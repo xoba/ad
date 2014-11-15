@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -17,13 +18,32 @@ import (
 	"text/template"
 )
 
-const formula = `a := x+sqrt(pow(z,3)) + 99*(-5*x + 55)/6 + y`
+const (
+	formula  = `a := x*(x + y*y)`
+	formula2 = `a := x+sqrt(pow(z,3)) + 99*(-5*x + 55)/6 + y`
+)
 
-func computeDerivatives(steps []Step) {
-	for i := 0; i < len(steps); i++ {
-		j := len(steps) - i - 1
-		fmt.Println(steps[j])
+func computeDerivatives(w io.Writer, steps []Step) {
+	n := len(steps)
+	for i := 0; i < n; i++ {
+		j := n - i - 1
+		step := steps[j]
+		fmt.Printf("%d. %s\n", j, step)
+		x0 := 0.0
+		if i == 0 {
+			x0 = 1.0
+		}
+		fmt.Fprintf(w, "b%s := %f\n", step.lhs, x0)
+		for k := j + 1; k < n; k++ {
+			s3 := steps[k]
+			fmt.Fprintf(w, "// b%s += b%s * %s\n", step.lhs, s3.lhs, derivative(s3, step))
+		}
+		fmt.Fprintf(w, "fmt.Printf(\"b%s = %%f\\n\",b%s)\n", step.lhs, step.lhs)
 	}
+}
+
+func derivative(num, denom Step) string {
+	return fmt.Sprintf("d%s / d%s (%s)", num.lhs, denom.lhs, num.rhs)
 }
 
 type NodeType string
@@ -51,7 +71,6 @@ func (n Node) String() string {
 func Run(args []string) {
 	lex := NewContext(NewLexer(strings.NewReader(formula)))
 	yyParse(lex)
-	pgm := new(bytes.Buffer)
 	vars := make(map[string]string)
 	vp := &VarParser{vars: vars}
 	sp := &StepParser{vars: vars}
@@ -75,10 +94,12 @@ func Run(args []string) {
 		}
 	}
 
-	computeDerivatives(steps)
+	pgm := new(bytes.Buffer)
 	for _, s := range steps {
 		fmt.Fprintln(pgm, s)
+		fmt.Fprintf(pgm, "fmt.Printf(\"%s = %%f\\n\",%s);\n", s.lhs, s.lhs)
 	}
+	computeDerivatives(pgm, steps)
 	var list []string
 	for v := range vars {
 		list = append(list, v)
@@ -101,52 +122,104 @@ import (
 "math/rand"
 )
 func main() {
+fmt.Println("running compute.go");
 rand.Seed(time.Now().UTC().UnixNano())
 {{.decls}} {{.formula}} 
 fmt.Printf("formula: %f\n",{{.lhs}});
-fmt.Printf("parsed : %f\n",Compute({{.vars}}))
-fmt.Printf("diff   : %f\n",{{.lhs}}-Compute({{.vars}}))
+c:= Compute({{.vars}})
+fmt.Printf("parsed : %f\n",c)
+fmt.Printf("diff   : %f\n",{{.lhs}}-c)
 
 {{.computeGradients}}
 
 }
 
+{{.funcs}}
+
 func Compute({{.vars}} float64) float64 {
 {{.program}} return {{.y}};
 }
 
-func add(a, b float64) float64 {
+`))
+
+	const funcs = `func add(a, b float64) float64 {
 	return a + b
+}
+func dadd(i int, a, b float64) float64 {
+	return 1
 }
 
 func multiply(a, b float64) float64 {
 	return a * b
 }
+func dmultiply(i int, a, b float64) float64 {
+	switch i {
+	case 0:
+		return b
+	case 1:
+		return a
+	default:
+		panic("illegal index")
+	}
+}
 
 func subtract(a, b float64) float64 {
 	return a - b
+}
+func dsubtract(i int, a, b float64) float64 {
+	switch i {
+	case 0:
+		return 1
+	case 1:
+		return -1
+	default:
+		panic("illegal index")
+	}
 }
 
 func divide(a, b float64) float64 {
 	return a / b
 }
+func ddivide(i int, a, b float64) float64 {
+	switch i {
+	case 0:
+		return 1 / b
+	case 1:
+		return -a / (b * b)
+	default:
+		panic("illegal index")
+	}
+	panic("unimplemented")
+}
 
 func sqrt(a float64) float64 {
 	return math.Sqrt(a)
+}
+func dsqrt(a float64) float64 {
+	return 0.5 * math.Pow(a, -1.5)
 }
 
 func exp(a float64) float64 {
 	return math.Exp(a)
 }
+func dexp(a float64) float64 {
+	return exp(a)
+}
 
 func log(a float64) float64 {
 	return math.Log(a)
+}
+func dlog(a float64) float64 {
+	return 1 / a
 }
 
 func pow(a, b float64) float64 {
 	return math.Pow(a, b)
 }
-`))
+func dpow(i int, a, b float64) float64 {
+	panic("unimplemented")
+}
+`
 
 	t.Execute(f, map[string]interface{}{
 		"decls":            decls.String(),
@@ -155,6 +228,7 @@ func pow(a, b float64) float64 {
 		"vars":             strings.Join(list, ", "),
 		"program":          pgm.String(),
 		"y":                y,
+		"funcs":            funcs,
 		"computeGradients": cg.String(),
 	})
 

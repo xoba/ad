@@ -8,86 +8,143 @@ import (
 )
 
 func main() {
+	fmt.Println("running compute.go")
 	rand.Seed(time.Now().UTC().UnixNano())
 	x := rand.Float64()
 	fmt.Printf("x = %f\n", x)
 	y := rand.Float64()
 	fmt.Printf("y = %f\n", y)
-	z := rand.Float64()
-	fmt.Printf("z = %f\n", z)
-	a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
+	a := x * (x + y*y)
 	fmt.Printf("formula: %f\n", a)
-	fmt.Printf("parsed : %f\n", Compute(x, y, z))
-	fmt.Printf("diff   : %f\n", a-Compute(x, y, z))
+	c := Compute(x, y)
+	fmt.Printf("parsed : %f\n", c)
+	fmt.Printf("diff   : %f\n", a-c)
 
 	delta := 0.000010
 	tmp := a
 	{
 		x += delta
-		a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
+		a := x * (x + y*y)
 		x -= delta
 		fmt.Printf("df/dx = %f\n", (a-tmp)/delta)
 	}
 	{
-		z += delta
-		a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
-		z -= delta
-		fmt.Printf("df/dz = %f\n", (a-tmp)/delta)
-	}
-	{
 		y += delta
-		a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
+		a := x * (x + y*y)
 		y -= delta
 		fmt.Printf("df/dy = %f\n", (a-tmp)/delta)
 	}
 
 }
 
-func Compute(x, y, z float64) float64 {
-	v0 := x
-	v1 := z
-	v2 := y
-	s0 := pow(v1, 3.000000)
-	s1 := sqrt(s0)
-	s2 := add(v0, s1)
-	s3 := multiply(-1.000000, 5.000000)
-	s4 := multiply(s3, v0)
-	s5 := add(s4, 55.000000)
-	s6 := multiply(99.000000, s5)
-	s7 := divide(s6, 6.000000)
-	s8 := add(s2, s7)
-	s9 := add(s8, v2)
-	return s9
-}
-
 func add(a, b float64) float64 {
 	return a + b
+}
+func dadd(i int, a, b float64) float64 {
+	return 1
 }
 
 func multiply(a, b float64) float64 {
 	return a * b
 }
+func dmultiply(i int, a, b float64) float64 {
+	switch i {
+	case 0:
+		return b
+	case 1:
+		return a
+	default:
+		panic("illegal index")
+	}
+}
 
 func subtract(a, b float64) float64 {
 	return a - b
+}
+func dsubtract(i int, a, b float64) float64 {
+	switch i {
+	case 0:
+		return 1
+	case 1:
+		return -1
+	default:
+		panic("illegal index")
+	}
 }
 
 func divide(a, b float64) float64 {
 	return a / b
 }
+func ddivide(i int, a, b float64) float64 {
+	switch i {
+	case 0:
+		return 1 / b
+	case 1:
+		return -a / (b * b)
+	default:
+		panic("illegal index")
+	}
+	panic("unimplemented")
+}
 
 func sqrt(a float64) float64 {
 	return math.Sqrt(a)
+}
+func dsqrt(a float64) float64 {
+	return 0.5 * math.Pow(a, -1.5)
 }
 
 func exp(a float64) float64 {
 	return math.Exp(a)
 }
+func dexp(a float64) float64 {
+	return exp(a)
+}
 
 func log(a float64) float64 {
 	return math.Log(a)
 }
+func dlog(a float64) float64 {
+	return 1 / a
+}
 
 func pow(a, b float64) float64 {
 	return math.Pow(a, b)
+}
+func dpow(i int, a, b float64) float64 {
+	panic("unimplemented")
+}
+
+func Compute(x, y float64) float64 {
+	v0 := x
+	fmt.Printf("v0 = %f\n", v0)
+	v1 := y
+	fmt.Printf("v1 = %f\n", v1)
+	s0 := multiply(v1, v1)
+	fmt.Printf("s0 = %f\n", s0)
+	s1 := add(v0, s0)
+	fmt.Printf("s1 = %f\n", s1)
+	s2 := multiply(v0, s1)
+	fmt.Printf("s2 = %f\n", s2)
+	bs2 := 1.000000
+	fmt.Printf("bs2 = %f\n", bs2)
+	bs1 := 0.000000
+	// bs1 += bs2 * ds2 / ds1 (multiply(v0,s1))
+	fmt.Printf("bs1 = %f\n", bs1)
+	bs0 := 0.000000
+	// bs0 += bs1 * ds1 / ds0 (add(v0,s0))
+	// bs0 += bs2 * ds2 / ds0 (multiply(v0,s1))
+	fmt.Printf("bs0 = %f\n", bs0)
+	bv1 := 0.000000
+	// bv1 += bs0 * ds0 / dv1 (multiply(v1,v1))
+	// bv1 += bs1 * ds1 / dv1 (add(v0,s0))
+	// bv1 += bs2 * ds2 / dv1 (multiply(v0,s1))
+	fmt.Printf("bv1 = %f\n", bv1)
+	bv0 := 0.000000
+	// bv0 += bv1 * dv1 / dv0 (y)
+	// bv0 += bs0 * ds0 / dv0 (multiply(v1,v1))
+	// bv0 += bs1 * ds1 / dv0 (add(v0,s0))
+	// bv0 += bs2 * ds2 / dv0 (multiply(v0,s1))
+	fmt.Printf("bv0 = %f\n", bv0)
+	return s2
 }
