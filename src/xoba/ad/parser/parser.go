@@ -116,19 +116,19 @@ func Run(args []string) {
 	checker := new(bytes.Buffer)
 	if true {
 		dx := 0.00001
-		fmt.Fprintf(checker, "delta := %f\n", dx)
-		fmt.Fprintf(checker, `calc := func() float64 {
+		fmt.Fprintf(checker, "delta_%s := %f\n", private, dx)
+		fmt.Fprintf(checker, `calc_%s := func() float64 {
 %s
 return %s
 }
-`, formula, lex.lhs.S)
-		fmt.Fprintln(checker, "tmp1 := calc()")
+`, private, formula, lex.lhs.S)
+		fmt.Fprintf(checker, "tmp1_%s := calc_%s()\n", private, private)
 		for k := range vars {
 			fmt.Fprintln(checker, "{")
-			fmt.Fprintf(checker, "%s += delta\n", k)
-			fmt.Fprintln(checker, "tmp2 := calc()")
-			fmt.Fprintf(checker, "%s -= delta\n", k)
-			fmt.Fprintf(checker, "grad_%s[%q] = (tmp2 - tmp1)/delta\n", private, k)
+			fmt.Fprintf(checker, "%s += delta_%s\n", k, private)
+			fmt.Fprintf(checker, "tmp2_%s := calc_%s()\n", private, private)
+			fmt.Fprintf(checker, "%s -= delta_%s\n", k, private)
+			fmt.Fprintf(checker, "grad_%s[%q] = (tmp2_%s - tmp1_%s)/delta_%s\n", private, k, private, private, private)
 			fmt.Fprintln(checker, "}")
 		}
 	}
@@ -169,7 +169,7 @@ rand.Seed(time.Now().UTC().UnixNano())
 	fmt.Printf("ad value: %f\n", c1)
 	fmt.Printf("ad grad : %v\n", grad1)
 
-	c2, grad2 := ComputeNum({{.vars}})
+	c2, grad2 := ComputeNumerical({{.vars}})
 	fmt.Printf("num value: %f\n", c2)
 	fmt.Printf("num grad : %v\n", grad2)
 
@@ -192,9 +192,9 @@ grad_{{.private}} := make(map[string]float64)
 {{.program}} return {{.y}},grad_{{.private}};
 }
 
-func ComputeNum({{.vars}} float64) (float64,map[string]float64) {
+func ComputeNumerical({{.vars}} float64) (float64,map[string]float64) {
 grad_{{.private}} := make(map[string]float64)
-{{.checker}} return tmp1,grad_{{.private}};
+{{.checker}} return tmp1_{{.private}},grad_{{.private}};
 }
 
 `))
