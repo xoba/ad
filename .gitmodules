@@ -1,3 +1,6 @@
 [submodule "src/github.com/xoba/goutil"]
 	path = src/github.com/xoba/goutil
 	url = git@github.com:xoba/goutil.git
+[submodule "src/github.com/blynn/nex"]
+	path = src/github.com/blynn/nex
+	url = git@github.com:xoba/nex.git
