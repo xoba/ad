@@ -1,6 +1,6 @@
 %{ 
   package parser 
-    %} 
+%} 
  
 %union {
   node *Node

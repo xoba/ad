@@ -1,13 +1,8 @@
 /[ \t\r\n]/  { /* Skip whitespace */ }
 
-/[0-9]+\.?[0-9]*/ { 
-  lval.node = LexNumber(yylex.Text()); return NUM; 
- }
+/[0-9]+\.?[0-9]*/ { lval.node = LexNumber(yylex.Text()); return NUM; }
 
-/[A-Za-z_]+[A-Za-z0-9_]*/ { 
-  lval.node = LexIdentifier(yylex.Text()); 
-  return IDENT; 
- }
+/[A-Za-z_]+[A-Za-z0-9_]*/ { lval.node = LexIdentifier(yylex.Text()); return IDENT; }
 
 /./ { return int(yylex.Text()[0]); }
 

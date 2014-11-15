@@ -150,19 +150,19 @@ dollar:  // Handle $.
 {[]bool{false, true}, []func(rune) int{  // Transitions
 func(r rune) int {
 	switch(r) {
+		case 10: return 1
 		case 32: return 1
 		case 9: return 1
 		case 13: return 1
-		case 10: return 1
 	}
 	return -1
 },
 func(r rune) int {
 	switch(r) {
-		case 32: return -1
 		case 9: return -1
 		case 13: return -1
 		case 10: return -1
+		case 32: return -1
 	}
 	return -1
 },
@@ -331,15 +331,10 @@ func (yylex *Lexer) Lex(lval *yySymType) int {
 			{ /* Skip whitespace */ }
 			continue
 		case 1:
-			{ 
-  lval.node = LexNumber(yylex.Text()); return NUM; 
- }
+			{ lval.node = LexNumber(yylex.Text()); return NUM; }
 			continue
 		case 2:
-			{ 
-  lval.node = LexIdentifier(yylex.Text()); 
-  return IDENT; 
- }
+			{ lval.node = LexIdentifier(yylex.Text()); return IDENT; }
 			continue
 		case 3:
 			{ return int(yylex.Text()[0]); }
