@@ -27,9 +27,16 @@ func Functions(p string) string {
 	return b
 }
 
-var formula string = Formula(3)
+var formula string = Formula(10)
 
 func Formula(n int) string {
+	if true {
+		var terms []string
+		for i := 0; i < n; i++ {
+			terms = append(terms, fmt.Sprintf("x%d", i))
+		}
+		return "f:=" + strings.Join(terms, "*")
+	}
 	var terms []string
 	for i := 0; i < n; i++ {
 		term := fmt.Sprintf("%f * x%d", rand.Float64(), i)
