@@ -74,6 +74,7 @@ rand.Seed(time.Now().UTC().UnixNano())
 %s %s 
 fmt.Printf("formula: %%f\n",%s);
 fmt.Printf("parsed : %%f\n",Compute(%s))
+fmt.Printf("diff   : %%f\n",%s-Compute(%s))
 }
 
 func Compute(%s float64) float64 {
@@ -93,8 +94,11 @@ return math.Pow(a,b)
 		formula,
 		lex.lhs.S,
 		strings.Join(list, ", "),
+		lex.lhs.S,
 		strings.Join(list, ", "),
-		pgm.String(), y,
+		strings.Join(list, ", "),
+		pgm.String(),
+		y,
 	)
 	f.Close()
 	cmd := exec.Command("gofmt", "-w", "compute.go")
@@ -139,9 +143,7 @@ type StepParser struct {
 func (s *StepParser) linearize(w io.Writer, rhs *Node) string {
 	switch rhs.Type {
 	case numberNT:
-		fmt.Fprintf(w, "v%d := %f\n", s.i, rhs.F)
-		rhs.name = fmt.Sprintf("v%d", s.i)
-		s.i++
+		rhs.name = fmt.Sprintf("%f", rhs.F)
 	case functionNT:
 		var args []string
 		for _, n := range rhs.N {
