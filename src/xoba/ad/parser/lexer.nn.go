@@ -150,10 +150,10 @@ dollar:  // Handle $.
 {[]bool{false, true}, []func(rune) int{  // Transitions
 func(r rune) int {
 	switch(r) {
-		case 10: return 1
 		case 32: return 1
 		case 9: return 1
 		case 13: return 1
+		case 10: return 1
 	}
 	return -1
 },

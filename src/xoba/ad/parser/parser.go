@@ -264,9 +264,9 @@ func pow(a, b float64) float64 {
 func dpow(i int, a, b float64) float64 {
 	switch i {
 	case 0:
-		return b* math.Pow(a,b-1)
+		return b * math.Pow(a, b-1)
 	case 1:
-		return math.Pow(a,b) * math.Log(a)
+		return math.Pow(a, b) * math.Log(a)
 	default:
 		panic("illegal index")
 	}
