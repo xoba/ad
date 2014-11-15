@@ -45,7 +45,7 @@ func Run(args []string) {
 	pgm := new(bytes.Buffer)
 	vars := make(map[string]string)
 	vp := &VarParser{vars: vars}
-	sp := &StepParser{i: 1, vars: vars}
+	sp := &StepParser{vars: vars}
 	var steps []Step
 	steps = append(steps, vp.getVars(lex.rhs)...)
 	steps = append(steps, sp.program(lex.rhs)...)
@@ -125,7 +125,7 @@ func (v *VarParser) getVars(rhs *Node) (out []Step) {
 	switch rhs.Type {
 	case identifierNT:
 		if _, ok := v.vars[rhs.S]; !ok {
-			rhs.name = fmt.Sprintf("v_%d", v.i)
+			rhs.name = fmt.Sprintf("v%d", v.i)
 			v.vars[rhs.S] = rhs.name
 			v.i++
 			step := Step{
@@ -170,7 +170,7 @@ func (s *StepParser) program(rhs *Node) (out []Step) {
 			args = append(args, n.name)
 		}
 		step := Step{
-			lhs: fmt.Sprintf("v%d", s.i),
+			lhs: fmt.Sprintf("s%d", s.i),
 			rhs: fmt.Sprintf("%s(%s)", rhs.S, strings.Join(args, ",")),
 		}
 		out = append(out, step)
@@ -182,7 +182,7 @@ func (s *StepParser) program(rhs *Node) (out []Step) {
 			out = append(out, steps...)
 		}
 		step := Step{
-			lhs: fmt.Sprintf("v%d", s.i),
+			lhs: fmt.Sprintf("s%d", s.i),
 			rhs: fmt.Sprintf("%s %s %s", rhs.N[0].name, rhs.S, rhs.N[1].name),
 		}
 		out = append(out, step)

@@ -19,19 +19,19 @@ func main() {
 }
 
 func Compute(x, y, z float64) float64 {
-	v_0 := x
-	v_1 := z
-	v_2 := y
-	v1 := pow(v_1, 3.000000)
-	v2 := sqrt(v1)
-	v3 := v_0 + v2
-	v4 := 5.000000 * v_0
-	v5 := v4 + 55.000000
-	v6 := 99.000000 * v5
-	v7 := v6 / 6.000000
-	v8 := v3 + v7
-	v9 := v8 + v_2
-	return v9
+	v0 := x
+	v1 := z
+	v2 := y
+	s0 := pow(v1, 3.000000)
+	s1 := sqrt(s0)
+	s2 := v0 + s1
+	s3 := 5.000000 * v0
+	s4 := s3 + 55.000000
+	s5 := 99.000000 * s4
+	s6 := s5 / 6.000000
+	s7 := s2 + s6
+	s8 := s7 + v2
+	return s8
 }
 
 func sqrt(a float64) float64 {
