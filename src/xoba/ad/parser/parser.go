@@ -1,4 +1,7 @@
 // parsing mathematical expressions
+//
+//go:generate nex lexer.nex
+//go:generate go tool yacc -o parser.y.go parser.y
 package parser
 
 import (
@@ -16,15 +19,13 @@ import (
 
 const formula = `a := x+sqrt(pow(z,3)) + 99*(-5*x + 55)/6 + y`
 
-//go:generate nex lexer.nex
-//go:generate go tool yacc -o parser.y.go parser.y
+type NodeType string
+
 const (
 	numberNT     NodeType = "NUM"
 	identifierNT NodeType = "IDENT"
 	functionNT   NodeType = "FUNC"
 )
-
-type NodeType string
 
 type Node struct {
 	Type     NodeType `json:"T,omitempty"`
@@ -86,28 +87,36 @@ func Compute({{.vars}} float64) float64 {
 {{.program}} return {{.y}};
 }
 
-func add(a,b float64) float64 {
-return a+b;
+func add(a, b float64) float64 {
+	return a + b
 }
 
-func multiply(a,b float64) float64 {
-return a*b;
+func multiply(a, b float64) float64 {
+	return a * b
 }
 
-func subtract(a,b float64) float64 {
-return a-b;
+func subtract(a, b float64) float64 {
+	return a - b
 }
 
-func divide(a,b float64) float64 {
-return a/b;
+func divide(a, b float64) float64 {
+	return a / b
 }
 
 func sqrt(a float64) float64 {
-return math.Sqrt(a);
+	return math.Sqrt(a)
 }
 
-func pow(a,b float64) float64 {
-return math.Pow(a,b)
+func exp(a float64) float64 {
+	return math.Exp(a)
+}
+
+func log(a float64) float64 {
+	return math.Log(a)
+}
+
+func pow(a, b float64) float64 {
+	return math.Pow(a, b)
 }
 `))
 

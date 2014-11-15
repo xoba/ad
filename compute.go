@@ -55,6 +55,14 @@ func sqrt(a float64) float64 {
 	return math.Sqrt(a)
 }
 
+func exp(a float64) float64 {
+	return math.Exp(a)
+}
+
+func log(a float64) float64 {
+	return math.Log(a)
+}
+
 func pow(a, b float64) float64 {
 	return math.Pow(a, b)
 }
