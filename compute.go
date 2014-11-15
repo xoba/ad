@@ -3,28 +3,45 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
+	"time"
 )
 
 func main() {
+	rand.Seed(time.Now().UTC().UnixNano())
 	x := rand.Float64()
 	y := rand.Float64()
-	a := 99*(5*x+55)/6 + y
+	z := rand.Float64()
+	a := sqrt(pow(z, 3)) + 99*(5*x+55)/6 + y
 	fmt.Printf("formula: %f\n", a)
-	fmt.Printf("parsed : %f\n", Compute(x, y))
+	fmt.Printf("parsed : %f\n", Compute(x, y, z))
 }
 
-func Compute(x, y float64) float64 {
-	v0 := 99.000000
-	v1 := 5.000000
-	v2 := x
-	v3 := v1 * v2
-	v4 := 55.000000
-	v5 := v3 + v4
-	v6 := v0 * v5
-	v7 := 6.000000
-	v8 := v6 / v7
-	v9 := y
-	v10 := v8 + v9
-	return v10
+func Compute(x, y, z float64) float64 {
+	v0 := z
+	v1 := 3.000000
+	v2 := pow(v0, v1)
+	v3 := sqrt(v2)
+	v4 := 99.000000
+	v5 := 5.000000
+	v6 := x
+	v7 := v5 * v6
+	v8 := 55.000000
+	v9 := v7 + v8
+	v10 := v4 * v9
+	v11 := 6.000000
+	v12 := v10 / v11
+	v13 := v3 + v12
+	v14 := y
+	v15 := v13 + v14
+	return v15
+}
+
+func sqrt(a float64) float64 {
+	return math.Sqrt(a)
+}
+
+func pow(a, b float64) float64 {
+	return math.Pow(a, b)
 }

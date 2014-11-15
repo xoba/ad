@@ -39,8 +39,6 @@ func (n Node) String() string {
 	return string(buf)
 }
 
-const formula = `a := 99*(5*x + 55)/6 + y`
-
 func Run(args []string) {
 	lex := NewContext(NewLexer(strings.NewReader(formula)))
 	yyParse(lex)
@@ -63,9 +61,12 @@ func Run(args []string) {
 package main
 import (
 "fmt"
+"math"
+"time"
 "math/rand"
 )
 func main() {
+rand.Seed(time.Now().UTC().UnixNano())
 %s %s 
 fmt.Printf("formula: %%f\n",%s);
 fmt.Printf("parsed : %%f\n",Compute(%s))
@@ -73,6 +74,14 @@ fmt.Printf("parsed : %%f\n",Compute(%s))
 
 func Compute(%s float64) float64 {
 %s return %s;
+}
+
+func sqrt(a float64) float64 {
+return math.Sqrt(a);
+}
+
+func pow(a,b float64) float64 {
+return math.Pow(a,b)
 }
 
 `,
@@ -87,6 +96,8 @@ func Compute(%s float64) float64 {
 	cmd := exec.Command("gofmt", "-w", "compute.go")
 	check(cmd.Run())
 }
+
+const formula = `a := sqrt(pow(z,3)) + 99*(5*x + 55)/6 + y`
 
 var i int
 
@@ -107,9 +118,19 @@ func linearize(w io.Writer, rhs *Node) (string, map[string]struct{}) {
 		rhs.name = fmt.Sprintf("v%d", i)
 		vars[rhs.S] = struct{}{}
 		i++
+	case functionNT:
+		var args []string
+		for _, n := range rhs.N {
+			add(linearize(w, n))
+			args = append(args, n.name)
+		}
+		fmt.Fprintf(w, "v%d := %s (%s)\n", i, rhs.S, strings.Join(args, ","))
+		rhs.name = fmt.Sprintf("v%d", i)
+		i++
 	case binaryNT:
-		add(linearize(w, rhs.N[0]))
-		add(linearize(w, rhs.N[1]))
+		for _, n := range rhs.N {
+			add(linearize(w, n))
+		}
 		fmt.Fprintf(w, "v%d := %s %s %s\n", i, rhs.N[0].name, rhs.S, rhs.N[1].name)
 		rhs.name = fmt.Sprintf("v%d", i)
 		i++
