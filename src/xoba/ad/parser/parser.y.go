@@ -4,9 +4,7 @@ package parser
 import __yyfmt__ "fmt"
 
 //line parser.y:3
-import "fmt"
-
-//line parser.y:7
+//line parser.y:5
 type yySymType struct {
 	yys  int
 	node Node
@@ -334,61 +332,62 @@ yydefault:
 	switch yynt {
 
 	case 1:
-		//line parser.y:20
+		//line parser.y:18
 		{
-			fmt.Println(yyS[yypt-2].node, "=", yyS[yypt-0].node)
+			c := yylex.(*context)
+			c.lhs, c.rhs = yyS[yypt-2].node, yyS[yypt-0].node
 		}
 	case 2:
-		//line parser.y:23
+		//line parser.y:21
 		{
 			yyVAL = yyS[yypt-0]
 		}
 	case 3:
-		//line parser.y:24
+		//line parser.y:22
 		{
 			yyVAL = yyS[yypt-0]
 		}
 	case 4:
-		//line parser.y:25
+		//line parser.y:23
 		{
 			yyVAL = yyS[yypt-1]
 		}
 	case 5:
-		//line parser.y:26
+		//line parser.y:24
 		{
 			yyVAL.node = Function(yyS[yypt-3].node.S, yyS[yypt-1].node)
 		}
 	case 6:
-		//line parser.y:27
+		//line parser.y:25
 		{
 		}
 	case 7:
-		//line parser.y:28
+		//line parser.y:26
 		{
 			yyVAL.node = Negate(yyS[yypt-0].node)
 		}
 	case 8:
-		//line parser.y:29
+		//line parser.y:27
 		{
 			yyVAL.node = Binary('+', yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 9:
-		//line parser.y:30
+		//line parser.y:28
 		{
 			yyVAL.node = Binary('-', yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 10:
-		//line parser.y:31
+		//line parser.y:29
 		{
 			yyVAL.node = Binary('*', yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 11:
-		//line parser.y:32
+		//line parser.y:30
 		{
 			yyVAL.node = Binary('/', yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 12:
-		//line parser.y:33
+		//line parser.y:31
 		{
 			yyVAL.node = Binary('^', yyS[yypt-2].node, yyS[yypt-0].node)
 		}

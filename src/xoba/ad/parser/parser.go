@@ -37,8 +37,10 @@ func (n Node) String() string {
 const formula = `a = f(5*x + 55)`
 
 func Run(args []string) {
-	lex := context{NewLexer(strings.NewReader(formula))}
+	lex := NewContext(NewLexer(strings.NewReader(formula)))
 	yyParse(lex)
+	fmt.Printf("lhs = %s\n", lex.lhs)
+	fmt.Printf("rhs = %s\n", lex.rhs)
 }
 
 func Function(ident string, args ...Node) Node {
@@ -82,7 +84,13 @@ func Negate(a Node) Node {
 }
 
 type context struct {
+	lhs Node
+	rhs Node
 	yyLexer
+}
+
+func NewContext(y yyLexer) *context {
+	return &context{yyLexer: y}
 }
 
 func (context) Error(e string) {

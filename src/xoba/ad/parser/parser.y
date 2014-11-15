@@ -1,8 +1,6 @@
 %{ 
-package parser 
-import "fmt"
-
-%} 
+  package parser 
+    %} 
  
 %union {
   node Node
@@ -17,7 +15,7 @@ import "fmt"
 
 %% 
 
-statement: IDENT '=' exp { fmt.Println($1.node,"=",$3.node); }
+statement: IDENT '=' exp { c := yylex.(*context); c.lhs,c.rhs = $1.node, $3.node; }
 ;
 
 exp: NUM { $$ = $1; } 
