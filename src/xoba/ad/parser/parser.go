@@ -17,15 +17,12 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
-
-	"code.google.com/p/go-uuid/uuid"
 )
 
-const (
-	formulax = `a := pow(z,y) + pow(x,2) + log(z+y*x*(exp(x) + x*y+x/y))`
-)
+// don't name any varibles like this prefix in your expressions:
+const private = "x_a8b32499"
 
-var formula string = Formula(10)
+var formula string = Formula(3)
 
 func Formula(n int) string {
 	var terms []string
@@ -33,7 +30,7 @@ func Formula(n int) string {
 		term := fmt.Sprintf("%f * x%d", rand.Float64(), i)
 		terms = append(terms, term)
 	}
-	return fmt.Sprintf("f := dx + log(1 + exp(-y * (%s)))", strings.Join(terms, "+"))
+	return fmt.Sprintf("f := s2 + log(1 + exp(-y * (%s)))", strings.Join(terms, "+"))
 }
 
 func computeDerivatives(w io.Writer, steps []Step) {
@@ -53,7 +50,7 @@ func computeDerivatives(w io.Writer, steps []Step) {
 			}
 		}
 		if step.decl {
-			fmt.Fprintf(w, "grad[\"%s\"] = b%s\n", step.rhs, step.lhs)
+			fmt.Fprintf(w, "grad_%s[\"%s\"] = b%s\n", private, step.rhs, step.lhs)
 		}
 	}
 }
@@ -78,7 +75,7 @@ func derivative(num, denom Step) string {
 	}
 	var list []string
 	for _, a := range args {
-		list = append(list, fmt.Sprintf("d%s(%d,%s)", num.f, a, strings.Join(num.args, ",")))
+		list = append(list, fmt.Sprintf("d_%s_%s(%d,%s)", private, num.f, a, strings.Join(num.args, ",")))
 	}
 	return strings.Join(list, "+")
 }
@@ -131,7 +128,7 @@ return %s
 			fmt.Fprintf(checker, "%s += delta\n", k)
 			fmt.Fprintln(checker, "tmp2 := calc()")
 			fmt.Fprintf(checker, "%s -= delta\n", k)
-			fmt.Fprintf(checker, "grad[%q] = (tmp2 - tmp1)/delta\n", k)
+			fmt.Fprintf(checker, "grad_%s[%q] = (tmp2 - tmp1)/delta\n", private, k)
 			fmt.Fprintln(checker, "}")
 		}
 	}
@@ -191,13 +188,13 @@ fmt.Printf("*** total diffs: %f\n",total);
 {{.funcs}}
 
 func ComputeAD({{.vars}} float64) (float64,map[string]float64) {
-grad := make(map[string]float64)
-{{.program}} return {{.y}},grad;
+grad_{{.private}} := make(map[string]float64)
+{{.program}} return {{.y}},grad_{{.private}};
 }
 
 func ComputeNum({{.vars}} float64) (float64,map[string]float64) {
-grad := make(map[string]float64)
-{{.checker}} return tmp1,grad;
+grad_{{.private}} := make(map[string]float64)
+{{.checker}} return tmp1,grad_{{.private}};
 }
 
 `))
@@ -210,7 +207,8 @@ grad := make(map[string]float64)
 		"program": pgm.String(),
 		"checker": checker.String(),
 		"y":       y,
-		"funcs":   funcs,
+		"funcs":   Functions(private),
+		"private": private,
 	})
 
 	f.Close()
@@ -220,17 +218,6 @@ grad := make(map[string]float64)
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("oops: %v\n", err)
 	}
-}
-
-var varMap map[string]string = make(map[string]string)
-
-func varName(n string) string {
-	out, ok := varMap[n]
-	if !ok {
-		out = fmt.Sprintf("V_%s_%s", n, uuid.New()[:8])
-		varMap[n] = out
-	}
-	return out
 }
 
 type VarParser struct {
@@ -243,7 +230,7 @@ func (v *VarParser) getVars(rhs *Node) (out []Step) {
 	switch rhs.Type {
 	case identifierNT:
 		if _, ok := v.vars[rhs.S]; !ok {
-			rhs.Name = fmt.Sprintf("v%d", v.i)
+			rhs.Name = fmt.Sprintf("v_%d_%s", v.i, private)
 			v.vars[rhs.S] = rhs.Name
 			v.i++
 			step := Step{
@@ -284,8 +271,8 @@ func (s *StepParser) program(rhs *Node) (out []Step) {
 			args = append(args, n.Name)
 		}
 		step := Step{
-			lhs:  fmt.Sprintf("s%d", s.i),
-			rhs:  fmt.Sprintf("%s(%s)", rhs.S, strings.Join(args, ",")),
+			lhs:  fmt.Sprintf("s_%d_%s", s.i, private),
+			rhs:  fmt.Sprintf("%s_%s(%s)", private, rhs.S, strings.Join(args, ",")),
 			f:    rhs.S,
 			args: args,
 		}

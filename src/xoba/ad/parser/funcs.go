@@ -1,18 +1,32 @@
 package parser
 
-const funcs = `
+import (
+	"bytes"
+	"text/template"
+)
 
-func add(a, b float64) float64 {
+func Functions(p string) string {
+	t := template.Must(template.New("compute.go").Parse(xfuncs))
+	out := new(bytes.Buffer)
+	t.Execute(out, map[string]interface{}{
+		"private": private,
+	})
+	return out.String()
+}
+
+const xfuncs = `
+
+func {{.private}}_add(a, b float64) float64 {
 	return a + b
 }
-func dadd(i int, a, b float64) float64 {
+func d_{{.private}}_add(i int, a, b float64) float64 {
 	return 1
 }
 
-func multiply(a, b float64) float64 {
+func {{.private}}_multiply(a, b float64) float64 {
 	return a * b
 }
-func dmultiply(i int, a, b float64) float64 {
+func d_{{.private}}_multiply(i int, a, b float64) float64 {
 	switch i {
 	case 0:
 		return b
@@ -23,10 +37,10 @@ func dmultiply(i int, a, b float64) float64 {
 	}
 }
 
-func subtract(a, b float64) float64 {
+func {{.private}}_subtract(a, b float64) float64 {
 	return a - b
 }
-func dsubtract(i int, a, b float64) float64 {
+func d_{{.private}}_subtract(i int, a, b float64) float64 {
 	switch i {
 	case 0:
 		return 1
@@ -37,10 +51,10 @@ func dsubtract(i int, a, b float64) float64 {
 	}
 }
 
-func divide(a, b float64) float64 {
+func {{.private}}_divide(a, b float64) float64 {
 	return a / b
 }
-func ddivide(i int, a, b float64) float64 {
+func d_{{.private}}_divide(i int, a, b float64) float64 {
 	switch i {
 	case 0:
 		return 1 / b
@@ -51,31 +65,31 @@ func ddivide(i int, a, b float64) float64 {
 	}
 }
 
-func sqrt(a float64) float64 {
+func {{.private}}_sqrt(a float64) float64 {
 	return math.Sqrt(a)
 }
-func dsqrt(_int, a float64) float64 {
+func d_{{.private}}_sqrt(_int, a float64) float64 {
 	return 0.5 * math.Pow(a, -1.5)
 }
 
-func exp(a float64) float64 {
+func {{.private}}_exp(a float64) float64 {
 	return math.Exp(a)
 }
-func dexp(_ int, a float64) float64 {
-	return exp(a)
+func d_{{.private}}_exp(_ int, a float64) float64 {
+	return math.Exp(a)
 }
 
-func log(a float64) float64 {
+func {{.private}}_log(a float64) float64 {
 	return math.Log(a)
 }
-func dlog(_ int, a float64) float64 {
+func d_{{.private}}_log(_ int, a float64) float64 {
 	return 1 / a
 }
 
-func pow(a, b float64) float64 {
+func {{.private}}_pow(a, b float64) float64 {
 	return math.Pow(a, b)
 }
-func dpow(i int, a, b float64) float64 {
+func d_{{.private}}_pow(i int, a, b float64) float64 {
 	switch i {
 	case 0:
 		return b * math.Pow(a, b-1)
@@ -85,5 +99,13 @@ func dpow(i int, a, b float64) float64 {
 		panic("illegal index")
 	}
 }
+
+func log(a float64) float64 {
+	return math.Log(a)
+}
+func exp(a float64) float64 {
+	return math.Exp(a)
+}
+
 
 `

@@ -10,36 +10,22 @@ import (
 func main() {
 	fmt.Println("running compute.go")
 	rand.Seed(time.Now().UTC().UnixNano())
-	dx := rand.Float64()
-	fmt.Printf("dx = %f\n", dx)
+	s2 := rand.Float64()
+	fmt.Printf("s2 = %f\n", s2)
 	x0 := rand.Float64()
 	fmt.Printf("x0 = %f\n", x0)
 	x1 := rand.Float64()
 	fmt.Printf("x1 = %f\n", x1)
 	x2 := rand.Float64()
 	fmt.Printf("x2 = %f\n", x2)
-	x3 := rand.Float64()
-	fmt.Printf("x3 = %f\n", x3)
-	x4 := rand.Float64()
-	fmt.Printf("x4 = %f\n", x4)
-	x5 := rand.Float64()
-	fmt.Printf("x5 = %f\n", x5)
-	x6 := rand.Float64()
-	fmt.Printf("x6 = %f\n", x6)
-	x7 := rand.Float64()
-	fmt.Printf("x7 = %f\n", x7)
-	x8 := rand.Float64()
-	fmt.Printf("x8 = %f\n", x8)
-	x9 := rand.Float64()
-	fmt.Printf("x9 = %f\n", x9)
 	y := rand.Float64()
 	fmt.Printf("y = %f\n", y)
 
-	c1, grad1 := ComputeAD(dx, x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y)
+	c1, grad1 := ComputeAD(s2, x0, x1, x2, y)
 	fmt.Printf("ad value: %f\n", c1)
 	fmt.Printf("ad grad : %v\n", grad1)
 
-	c2, grad2 := ComputeNum(dx, x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y)
+	c2, grad2 := ComputeNum(s2, x0, x1, x2, y)
 	fmt.Printf("num value: %f\n", c2)
 	fmt.Printf("num grad : %v\n", grad2)
 
@@ -55,17 +41,17 @@ func main() {
 	fmt.Printf("*** total diffs: %f\n", total)
 }
 
-func add(a, b float64) float64 {
+func xa8b32499_add(a, b float64) float64 {
 	return a + b
 }
-func dadd(i int, a, b float64) float64 {
+func d_xa8b32499_add(i int, a, b float64) float64 {
 	return 1
 }
 
-func multiply(a, b float64) float64 {
+func xa8b32499_multiply(a, b float64) float64 {
 	return a * b
 }
-func dmultiply(i int, a, b float64) float64 {
+func d_xa8b32499_multiply(i int, a, b float64) float64 {
 	switch i {
 	case 0:
 		return b
@@ -76,10 +62,10 @@ func dmultiply(i int, a, b float64) float64 {
 	}
 }
 
-func subtract(a, b float64) float64 {
+func xa8b32499_subtract(a, b float64) float64 {
 	return a - b
 }
-func dsubtract(i int, a, b float64) float64 {
+func d_xa8b32499_subtract(i int, a, b float64) float64 {
 	switch i {
 	case 0:
 		return 1
@@ -90,10 +76,10 @@ func dsubtract(i int, a, b float64) float64 {
 	}
 }
 
-func divide(a, b float64) float64 {
+func xa8b32499_divide(a, b float64) float64 {
 	return a / b
 }
-func ddivide(i int, a, b float64) float64 {
+func d_xa8b32499_divide(i int, a, b float64) float64 {
 	switch i {
 	case 0:
 		return 1 / b
@@ -104,31 +90,31 @@ func ddivide(i int, a, b float64) float64 {
 	}
 }
 
-func sqrt(a float64) float64 {
+func xa8b32499_sqrt(a float64) float64 {
 	return math.Sqrt(a)
 }
-func dsqrt(_int, a float64) float64 {
+func d_xa8b32499_sqrt(_int, a float64) float64 {
 	return 0.5 * math.Pow(a, -1.5)
 }
 
-func exp(a float64) float64 {
+func xa8b32499_exp(a float64) float64 {
 	return math.Exp(a)
 }
-func dexp(_ int, a float64) float64 {
-	return exp(a)
+func d_xa8b32499_exp(_ int, a float64) float64 {
+	return math.Exp(a)
 }
 
-func log(a float64) float64 {
+func xa8b32499_log(a float64) float64 {
 	return math.Log(a)
 }
-func dlog(_ int, a float64) float64 {
+func d_xa8b32499_log(_ int, a float64) float64 {
 	return 1 / a
 }
 
-func pow(a, b float64) float64 {
+func xa8b32499_pow(a, b float64) float64 {
 	return math.Pow(a, b)
 }
-func dpow(i int, a, b float64) float64 {
+func d_xa8b32499_pow(i int, a, b float64) float64 {
 	switch i {
 	case 0:
 		return b * math.Pow(a, b-1)
@@ -139,212 +125,107 @@ func dpow(i int, a, b float64) float64 {
 	}
 }
 
-func ComputeAD(dx, x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y float64) (float64, map[string]float64) {
-	grad := make(map[string]float64)
-	v0 := dx
-	v1 := y
-	v2 := x0
-	v3 := x1
-	v4 := x2
-	v5 := x3
-	v6 := x4
-	v7 := x5
-	v8 := x6
-	v9 := x7
-	v10 := x8
-	v11 := x9
-	s0 := multiply(-1.000000, v1)
-	s1 := multiply(0.604660, v2)
-	s2 := multiply(0.940509, v3)
-	s3 := add(s1, s2)
-	s4 := multiply(0.664560, v4)
-	s5 := add(s3, s4)
-	s6 := multiply(0.437714, v5)
-	s7 := add(s5, s6)
-	s8 := multiply(0.424637, v6)
-	s9 := add(s7, s8)
-	s10 := multiply(0.686823, v7)
-	s11 := add(s9, s10)
-	s12 := multiply(0.065637, v8)
-	s13 := add(s11, s12)
-	s14 := multiply(0.156519, v9)
-	s15 := add(s13, s14)
-	s16 := multiply(0.096970, v10)
-	s17 := add(s15, s16)
-	s18 := multiply(0.300912, v11)
-	s19 := add(s17, s18)
-	s20 := multiply(s0, s19)
-	s21 := exp(s20)
-	s22 := add(1.000000, s21)
-	s23 := log(s22)
-	s24 := add(v0, s23)
-	bs24 := 1.000000
-	bs23 := 0.000000
-	bs23 += bs24 * dadd(1, v0, s23)
-	bs22 := 0.000000
-	bs22 += bs23 * dlog(0, s22)
-	bs21 := 0.000000
-	bs21 += bs22 * dadd(1, 1.000000, s21)
-	bs20 := 0.000000
-	bs20 += bs21 * dexp(0, s20)
-	bs19 := 0.000000
-	bs19 += bs20 * dmultiply(1, s0, s19)
-	bs18 := 0.000000
-	bs18 += bs19 * dadd(1, s17, s18)
-	bs17 := 0.000000
-	bs17 += bs19 * dadd(0, s17, s18)
-	bs16 := 0.000000
-	bs16 += bs17 * dadd(1, s15, s16)
-	bs15 := 0.000000
-	bs15 += bs17 * dadd(0, s15, s16)
-	bs14 := 0.000000
-	bs14 += bs15 * dadd(1, s13, s14)
-	bs13 := 0.000000
-	bs13 += bs15 * dadd(0, s13, s14)
-	bs12 := 0.000000
-	bs12 += bs13 * dadd(1, s11, s12)
-	bs11 := 0.000000
-	bs11 += bs13 * dadd(0, s11, s12)
-	bs10 := 0.000000
-	bs10 += bs11 * dadd(1, s9, s10)
-	bs9 := 0.000000
-	bs9 += bs11 * dadd(0, s9, s10)
-	bs8 := 0.000000
-	bs8 += bs9 * dadd(1, s7, s8)
-	bs7 := 0.000000
-	bs7 += bs9 * dadd(0, s7, s8)
-	bs6 := 0.000000
-	bs6 += bs7 * dadd(1, s5, s6)
-	bs5 := 0.000000
-	bs5 += bs7 * dadd(0, s5, s6)
-	bs4 := 0.000000
-	bs4 += bs5 * dadd(1, s3, s4)
-	bs3 := 0.000000
-	bs3 += bs5 * dadd(0, s3, s4)
-	bs2 := 0.000000
-	bs2 += bs3 * dadd(1, s1, s2)
-	bs1 := 0.000000
-	bs1 += bs3 * dadd(0, s1, s2)
-	bs0 := 0.000000
-	bs0 += bs20 * dmultiply(0, s0, s19)
-	bv11 := 0.000000
-	bv11 += bs18 * dmultiply(1, 0.300912, v11)
-	grad["x9"] = bv11
-	bv10 := 0.000000
-	bv10 += bs16 * dmultiply(1, 0.096970, v10)
-	grad["x8"] = bv10
-	bv9 := 0.000000
-	bv9 += bs14 * dmultiply(1, 0.156519, v9)
-	grad["x7"] = bv9
-	bv8 := 0.000000
-	bv8 += bs12 * dmultiply(1, 0.065637, v8)
-	grad["x6"] = bv8
-	bv7 := 0.000000
-	bv7 += bs10 * dmultiply(1, 0.686823, v7)
-	grad["x5"] = bv7
-	bv6 := 0.000000
-	bv6 += bs8 * dmultiply(1, 0.424637, v6)
-	grad["x4"] = bv6
-	bv5 := 0.000000
-	bv5 += bs6 * dmultiply(1, 0.437714, v5)
-	grad["x3"] = bv5
-	bv4 := 0.000000
-	bv4 += bs4 * dmultiply(1, 0.664560, v4)
-	grad["x2"] = bv4
-	bv3 := 0.000000
-	bv3 += bs2 * dmultiply(1, 0.940509, v3)
-	grad["x1"] = bv3
-	bv2 := 0.000000
-	bv2 += bs1 * dmultiply(1, 0.604660, v2)
-	grad["x0"] = bv2
-	bv1 := 0.000000
-	bv1 += bs0 * dmultiply(1, -1.000000, v1)
-	grad["y"] = bv1
-	bv0 := 0.000000
-	bv0 += bs24 * dadd(0, v0, s23)
-	grad["dx"] = bv0
-	return s24, grad
+func log(a float64) float64 {
+	return math.Log(a)
+}
+func exp(a float64) float64 {
+	return math.Exp(a)
 }
 
-func ComputeNum(dx, x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y float64) (float64, map[string]float64) {
-	grad := make(map[string]float64)
+func ComputeAD(s2, x0, x1, x2, y float64) (float64, map[string]float64) {
+	grad_xa8b32499 := make(map[string]float64)
+	v_0_xa8b32499 := s2
+	v_1_xa8b32499 := y
+	v_2_xa8b32499 := x0
+	v_3_xa8b32499 := x1
+	v_4_xa8b32499 := x2
+	s_0_xa8b32499 := xa8b32499_multiply(-1.000000, v_1_xa8b32499)
+	s_1_xa8b32499 := xa8b32499_multiply(0.604660, v_2_xa8b32499)
+	s_2_xa8b32499 := xa8b32499_multiply(0.940509, v_3_xa8b32499)
+	s_3_xa8b32499 := xa8b32499_add(s_1_xa8b32499, s_2_xa8b32499)
+	s_4_xa8b32499 := xa8b32499_multiply(0.664560, v_4_xa8b32499)
+	s_5_xa8b32499 := xa8b32499_add(s_3_xa8b32499, s_4_xa8b32499)
+	s_6_xa8b32499 := xa8b32499_multiply(s_0_xa8b32499, s_5_xa8b32499)
+	s_7_xa8b32499 := xa8b32499_exp(s_6_xa8b32499)
+	s_8_xa8b32499 := xa8b32499_add(1.000000, s_7_xa8b32499)
+	s_9_xa8b32499 := xa8b32499_log(s_8_xa8b32499)
+	s_10_xa8b32499 := xa8b32499_add(v_0_xa8b32499, s_9_xa8b32499)
+	bs_10_xa8b32499 := 1.000000
+	bs_9_xa8b32499 := 0.000000
+	bs_9_xa8b32499 += bs_10_xa8b32499 * d_xa8b32499_add(1, v_0_xa8b32499, s_9_xa8b32499)
+	bs_8_xa8b32499 := 0.000000
+	bs_8_xa8b32499 += bs_9_xa8b32499 * d_xa8b32499_log(0, s_8_xa8b32499)
+	bs_7_xa8b32499 := 0.000000
+	bs_7_xa8b32499 += bs_8_xa8b32499 * d_xa8b32499_add(1, 1.000000, s_7_xa8b32499)
+	bs_6_xa8b32499 := 0.000000
+	bs_6_xa8b32499 += bs_7_xa8b32499 * d_xa8b32499_exp(0, s_6_xa8b32499)
+	bs_5_xa8b32499 := 0.000000
+	bs_5_xa8b32499 += bs_6_xa8b32499 * d_xa8b32499_multiply(1, s_0_xa8b32499, s_5_xa8b32499)
+	bs_4_xa8b32499 := 0.000000
+	bs_4_xa8b32499 += bs_5_xa8b32499 * d_xa8b32499_add(1, s_3_xa8b32499, s_4_xa8b32499)
+	bs_3_xa8b32499 := 0.000000
+	bs_3_xa8b32499 += bs_5_xa8b32499 * d_xa8b32499_add(0, s_3_xa8b32499, s_4_xa8b32499)
+	bs_2_xa8b32499 := 0.000000
+	bs_2_xa8b32499 += bs_3_xa8b32499 * d_xa8b32499_add(1, s_1_xa8b32499, s_2_xa8b32499)
+	bs_1_xa8b32499 := 0.000000
+	bs_1_xa8b32499 += bs_3_xa8b32499 * d_xa8b32499_add(0, s_1_xa8b32499, s_2_xa8b32499)
+	bs_0_xa8b32499 := 0.000000
+	bs_0_xa8b32499 += bs_6_xa8b32499 * d_xa8b32499_multiply(0, s_0_xa8b32499, s_5_xa8b32499)
+	bv_4_xa8b32499 := 0.000000
+	bv_4_xa8b32499 += bs_4_xa8b32499 * d_xa8b32499_multiply(1, 0.664560, v_4_xa8b32499)
+	grad_xa8b32499["x2"] = bv_4_xa8b32499
+	bv_3_xa8b32499 := 0.000000
+	bv_3_xa8b32499 += bs_2_xa8b32499 * d_xa8b32499_multiply(1, 0.940509, v_3_xa8b32499)
+	grad_xa8b32499["x1"] = bv_3_xa8b32499
+	bv_2_xa8b32499 := 0.000000
+	bv_2_xa8b32499 += bs_1_xa8b32499 * d_xa8b32499_multiply(1, 0.604660, v_2_xa8b32499)
+	grad_xa8b32499["x0"] = bv_2_xa8b32499
+	bv_1_xa8b32499 := 0.000000
+	bv_1_xa8b32499 += bs_0_xa8b32499 * d_xa8b32499_multiply(1, -1.000000, v_1_xa8b32499)
+	grad_xa8b32499["y"] = bv_1_xa8b32499
+	bv_0_xa8b32499 := 0.000000
+	bv_0_xa8b32499 += bs_10_xa8b32499 * d_xa8b32499_add(0, v_0_xa8b32499, s_9_xa8b32499)
+	grad_xa8b32499["s2"] = bv_0_xa8b32499
+	return s_10_xa8b32499, grad_xa8b32499
+}
+
+func ComputeNum(s2, x0, x1, x2, y float64) (float64, map[string]float64) {
+	grad_xa8b32499 := make(map[string]float64)
 	delta := 0.000010
 	calc := func() float64 {
-		f := dx + log(1+exp(-y*(0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9)))
+		f := s2 + log(1+exp(-y*(0.604660*x0+0.940509*x1+0.664560*x2)))
 		return f
 	}
 	tmp1 := calc()
 	{
-		x4 += delta
+		x0 += delta
 		tmp2 := calc()
-		x4 -= delta
-		grad["x4"] = (tmp2 - tmp1) / delta
-	}
-	{
-		x5 += delta
-		tmp2 := calc()
-		x5 -= delta
-		grad["x5"] = (tmp2 - tmp1) / delta
-	}
-	{
-		x6 += delta
-		tmp2 := calc()
-		x6 -= delta
-		grad["x6"] = (tmp2 - tmp1) / delta
-	}
-	{
-		dx += delta
-		tmp2 := calc()
-		dx -= delta
-		grad["dx"] = (tmp2 - tmp1) / delta
-	}
-	{
-		y += delta
-		tmp2 := calc()
-		y -= delta
-		grad["y"] = (tmp2 - tmp1) / delta
+		x0 -= delta
+		grad_xa8b32499["x0"] = (tmp2 - tmp1) / delta
 	}
 	{
 		x1 += delta
 		tmp2 := calc()
 		x1 -= delta
-		grad["x1"] = (tmp2 - tmp1) / delta
-	}
-	{
-		x3 += delta
-		tmp2 := calc()
-		x3 -= delta
-		grad["x3"] = (tmp2 - tmp1) / delta
-	}
-	{
-		x9 += delta
-		tmp2 := calc()
-		x9 -= delta
-		grad["x9"] = (tmp2 - tmp1) / delta
-	}
-	{
-		x0 += delta
-		tmp2 := calc()
-		x0 -= delta
-		grad["x0"] = (tmp2 - tmp1) / delta
+		grad_xa8b32499["x1"] = (tmp2 - tmp1) / delta
 	}
 	{
 		x2 += delta
 		tmp2 := calc()
 		x2 -= delta
-		grad["x2"] = (tmp2 - tmp1) / delta
+		grad_xa8b32499["x2"] = (tmp2 - tmp1) / delta
 	}
 	{
-		x7 += delta
+		s2 += delta
 		tmp2 := calc()
-		x7 -= delta
-		grad["x7"] = (tmp2 - tmp1) / delta
+		s2 -= delta
+		grad_xa8b32499["s2"] = (tmp2 - tmp1) / delta
 	}
 	{
-		x8 += delta
+		y += delta
 		tmp2 := calc()
-		x8 -= delta
-		grad["x8"] = (tmp2 - tmp1) / delta
+		y -= delta
+		grad_xa8b32499["y"] = (tmp2 - tmp1) / delta
 	}
-	return tmp1, grad
+	return tmp1, grad_xa8b32499
 }
