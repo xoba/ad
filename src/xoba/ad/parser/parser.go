@@ -17,6 +17,8 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+
+	"code.google.com/p/go-uuid/uuid"
 )
 
 const (
@@ -31,7 +33,7 @@ func Formula(n int) string {
 		term := fmt.Sprintf("%f * x%d", rand.Float64(), i)
 		terms = append(terms, term)
 	}
-	return fmt.Sprintf("f := log(1 + exp(-y * %s))", strings.Join(terms, "+"))
+	return fmt.Sprintf("f := log(1 + exp(-y * (%s)))", strings.Join(terms, "+"))
 }
 
 func computeDerivatives(w io.Writer, steps []Step) {
@@ -118,14 +120,18 @@ func Run(args []string) {
 	if true {
 		dx := 0.00001
 		fmt.Fprintf(checker, "delta := %f\n", dx)
-		fmt.Fprintf(checker, "%s\n", formula)
-		fmt.Fprintf(checker, "tmp := %s\n", lex.lhs.S)
+		fmt.Fprintf(checker, `calc := func() float64 {
+%s
+return %s
+}
+`, formula, lex.lhs.S)
+		fmt.Fprintln(checker, "tmp1 := calc()")
 		for k := range vars {
 			fmt.Fprintln(checker, "{")
 			fmt.Fprintf(checker, "%s += delta\n", k)
-			fmt.Fprintln(checker, formula)
+			fmt.Fprintln(checker, "tmp2 := calc()")
 			fmt.Fprintf(checker, "%s -= delta\n", k)
-			fmt.Fprintf(checker, "grad[%q] = (%s - tmp)/delta\n", k, lex.lhs.S)
+			fmt.Fprintf(checker, "grad[%q] = (tmp2 - tmp1)/delta\n", k)
 			fmt.Fprintln(checker, "}")
 		}
 	}
@@ -190,7 +196,7 @@ grad := make(map[string]float64)
 
 func ComputeNum({{.vars}} float64) (float64,map[string]float64) {
 grad := make(map[string]float64)
-{{.checker}} return {{.lhs}},grad;
+{{.checker}} return tmp1,grad;
 }
 
 `))
@@ -213,6 +219,17 @@ grad := make(map[string]float64)
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("oops: %v\n", err)
 	}
+}
+
+var varMap map[string]string = make(map[string]string)
+
+func varName(n string) string {
+	out, ok := varMap[n]
+	if !ok {
+		out = fmt.Sprintf("V_%s_%s", n, uuid.New()[:8])
+		varMap[n] = out
+	}
+	return out
 }
 
 type VarParser struct {

@@ -151,26 +151,26 @@ func ComputeAD(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y float64) (float64, map[
 	v9 := x8
 	v10 := x9
 	s0 := multiply(-1.000000, v0)
-	s1 := multiply(s0, 0.604660)
-	s2 := multiply(s1, v1)
-	s3 := multiply(0.940509, v2)
-	s4 := add(s2, s3)
-	s5 := multiply(0.664560, v3)
-	s6 := add(s4, s5)
-	s7 := multiply(0.437714, v4)
-	s8 := add(s6, s7)
-	s9 := multiply(0.424637, v5)
-	s10 := add(s8, s9)
-	s11 := multiply(0.686823, v6)
-	s12 := add(s10, s11)
-	s13 := multiply(0.065637, v7)
-	s14 := add(s12, s13)
-	s15 := multiply(0.156519, v8)
-	s16 := add(s14, s15)
-	s17 := multiply(0.096970, v9)
-	s18 := add(s16, s17)
-	s19 := multiply(0.300912, v10)
-	s20 := add(s18, s19)
+	s1 := multiply(0.604660, v1)
+	s2 := multiply(0.940509, v2)
+	s3 := add(s1, s2)
+	s4 := multiply(0.664560, v3)
+	s5 := add(s3, s4)
+	s6 := multiply(0.437714, v4)
+	s7 := add(s5, s6)
+	s8 := multiply(0.424637, v5)
+	s9 := add(s7, s8)
+	s10 := multiply(0.686823, v6)
+	s11 := add(s9, s10)
+	s12 := multiply(0.065637, v7)
+	s13 := add(s11, s12)
+	s14 := multiply(0.156519, v8)
+	s15 := add(s13, s14)
+	s16 := multiply(0.096970, v9)
+	s17 := add(s15, s16)
+	s18 := multiply(0.300912, v10)
+	s19 := add(s17, s18)
+	s20 := multiply(s0, s19)
 	s21 := exp(s20)
 	s22 := add(1.000000, s21)
 	s23 := log(s22)
@@ -182,74 +182,74 @@ func ComputeAD(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y float64) (float64, map[
 	bs20 := 0.000000
 	bs20 += bs21 * dexp(0, s20)
 	bs19 := 0.000000
-	bs19 += bs20 * dadd(1, s18, s19)
+	bs19 += bs20 * dmultiply(1, s0, s19)
 	bs18 := 0.000000
-	bs18 += bs20 * dadd(0, s18, s19)
+	bs18 += bs19 * dadd(1, s17, s18)
 	bs17 := 0.000000
-	bs17 += bs18 * dadd(1, s16, s17)
+	bs17 += bs19 * dadd(0, s17, s18)
 	bs16 := 0.000000
-	bs16 += bs18 * dadd(0, s16, s17)
+	bs16 += bs17 * dadd(1, s15, s16)
 	bs15 := 0.000000
-	bs15 += bs16 * dadd(1, s14, s15)
+	bs15 += bs17 * dadd(0, s15, s16)
 	bs14 := 0.000000
-	bs14 += bs16 * dadd(0, s14, s15)
+	bs14 += bs15 * dadd(1, s13, s14)
 	bs13 := 0.000000
-	bs13 += bs14 * dadd(1, s12, s13)
+	bs13 += bs15 * dadd(0, s13, s14)
 	bs12 := 0.000000
-	bs12 += bs14 * dadd(0, s12, s13)
+	bs12 += bs13 * dadd(1, s11, s12)
 	bs11 := 0.000000
-	bs11 += bs12 * dadd(1, s10, s11)
+	bs11 += bs13 * dadd(0, s11, s12)
 	bs10 := 0.000000
-	bs10 += bs12 * dadd(0, s10, s11)
+	bs10 += bs11 * dadd(1, s9, s10)
 	bs9 := 0.000000
-	bs9 += bs10 * dadd(1, s8, s9)
+	bs9 += bs11 * dadd(0, s9, s10)
 	bs8 := 0.000000
-	bs8 += bs10 * dadd(0, s8, s9)
+	bs8 += bs9 * dadd(1, s7, s8)
 	bs7 := 0.000000
-	bs7 += bs8 * dadd(1, s6, s7)
+	bs7 += bs9 * dadd(0, s7, s8)
 	bs6 := 0.000000
-	bs6 += bs8 * dadd(0, s6, s7)
+	bs6 += bs7 * dadd(1, s5, s6)
 	bs5 := 0.000000
-	bs5 += bs6 * dadd(1, s4, s5)
+	bs5 += bs7 * dadd(0, s5, s6)
 	bs4 := 0.000000
-	bs4 += bs6 * dadd(0, s4, s5)
+	bs4 += bs5 * dadd(1, s3, s4)
 	bs3 := 0.000000
-	bs3 += bs4 * dadd(1, s2, s3)
+	bs3 += bs5 * dadd(0, s3, s4)
 	bs2 := 0.000000
-	bs2 += bs4 * dadd(0, s2, s3)
+	bs2 += bs3 * dadd(1, s1, s2)
 	bs1 := 0.000000
-	bs1 += bs2 * dmultiply(0, s1, v1)
+	bs1 += bs3 * dadd(0, s1, s2)
 	bs0 := 0.000000
-	bs0 += bs1 * dmultiply(0, s0, 0.604660)
+	bs0 += bs20 * dmultiply(0, s0, s19)
 	bv10 := 0.000000
-	bv10 += bs19 * dmultiply(1, 0.300912, v10)
+	bv10 += bs18 * dmultiply(1, 0.300912, v10)
 	grad["x9"] = bv10
 	bv9 := 0.000000
-	bv9 += bs17 * dmultiply(1, 0.096970, v9)
+	bv9 += bs16 * dmultiply(1, 0.096970, v9)
 	grad["x8"] = bv9
 	bv8 := 0.000000
-	bv8 += bs15 * dmultiply(1, 0.156519, v8)
+	bv8 += bs14 * dmultiply(1, 0.156519, v8)
 	grad["x7"] = bv8
 	bv7 := 0.000000
-	bv7 += bs13 * dmultiply(1, 0.065637, v7)
+	bv7 += bs12 * dmultiply(1, 0.065637, v7)
 	grad["x6"] = bv7
 	bv6 := 0.000000
-	bv6 += bs11 * dmultiply(1, 0.686823, v6)
+	bv6 += bs10 * dmultiply(1, 0.686823, v6)
 	grad["x5"] = bv6
 	bv5 := 0.000000
-	bv5 += bs9 * dmultiply(1, 0.424637, v5)
+	bv5 += bs8 * dmultiply(1, 0.424637, v5)
 	grad["x4"] = bv5
 	bv4 := 0.000000
-	bv4 += bs7 * dmultiply(1, 0.437714, v4)
+	bv4 += bs6 * dmultiply(1, 0.437714, v4)
 	grad["x3"] = bv4
 	bv3 := 0.000000
-	bv3 += bs5 * dmultiply(1, 0.664560, v3)
+	bv3 += bs4 * dmultiply(1, 0.664560, v3)
 	grad["x2"] = bv3
 	bv2 := 0.000000
-	bv2 += bs3 * dmultiply(1, 0.940509, v2)
+	bv2 += bs2 * dmultiply(1, 0.940509, v2)
 	grad["x1"] = bv2
 	bv1 := 0.000000
-	bv1 += bs2 * dmultiply(1, s1, v1)
+	bv1 += bs1 * dmultiply(1, 0.604660, v1)
 	grad["x0"] = bv1
 	bv0 := 0.000000
 	bv0 += bs0 * dmultiply(1, -1.000000, v0)
@@ -260,73 +260,76 @@ func ComputeAD(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y float64) (float64, map[
 func ComputeNum(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y float64) (float64, map[string]float64) {
 	grad := make(map[string]float64)
 	delta := 0.000010
-	f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
-	tmp := f
+	calc := func() float64 {
+		f := log(1 + exp(-y*(0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9)))
+		return f
+	}
+	tmp1 := calc()
+	{
+		x7 += delta
+		tmp2 := calc()
+		x7 -= delta
+		grad["x7"] = (tmp2 - tmp1) / delta
+	}
 	{
 		x9 += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
+		tmp2 := calc()
 		x9 -= delta
-		grad["x9"] = (f - tmp) / delta
+		grad["x9"] = (tmp2 - tmp1) / delta
 	}
 	{
 		y += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
+		tmp2 := calc()
 		y -= delta
-		grad["y"] = (f - tmp) / delta
-	}
-	{
-		x2 += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
-		x2 -= delta
-		grad["x2"] = (f - tmp) / delta
-	}
-	{
-		x3 += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
-		x3 -= delta
-		grad["x3"] = (f - tmp) / delta
-	}
-	{
-		x5 += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
-		x5 -= delta
-		grad["x5"] = (f - tmp) / delta
-	}
-	{
-		x6 += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
-		x6 -= delta
-		grad["x6"] = (f - tmp) / delta
-	}
-	{
-		x7 += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
-		x7 -= delta
-		grad["x7"] = (f - tmp) / delta
-	}
-	{
-		x8 += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
-		x8 -= delta
-		grad["x8"] = (f - tmp) / delta
+		grad["y"] = (tmp2 - tmp1) / delta
 	}
 	{
 		x0 += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
+		tmp2 := calc()
 		x0 -= delta
-		grad["x0"] = (f - tmp) / delta
+		grad["x0"] = (tmp2 - tmp1) / delta
 	}
 	{
 		x1 += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
+		tmp2 := calc()
 		x1 -= delta
-		grad["x1"] = (f - tmp) / delta
+		grad["x1"] = (tmp2 - tmp1) / delta
+	}
+	{
+		x2 += delta
+		tmp2 := calc()
+		x2 -= delta
+		grad["x2"] = (tmp2 - tmp1) / delta
+	}
+	{
+		x3 += delta
+		tmp2 := calc()
+		x3 -= delta
+		grad["x3"] = (tmp2 - tmp1) / delta
 	}
 	{
 		x4 += delta
-		f := log(1 + exp(-y*0.604660*x0+0.940509*x1+0.664560*x2+0.437714*x3+0.424637*x4+0.686823*x5+0.065637*x6+0.156519*x7+0.096970*x8+0.300912*x9))
+		tmp2 := calc()
 		x4 -= delta
-		grad["x4"] = (f - tmp) / delta
+		grad["x4"] = (tmp2 - tmp1) / delta
 	}
-	return f, grad
+	{
+		x5 += delta
+		tmp2 := calc()
+		x5 -= delta
+		grad["x5"] = (tmp2 - tmp1) / delta
+	}
+	{
+		x6 += delta
+		tmp2 := calc()
+		x6 -= delta
+		grad["x6"] = (tmp2 - tmp1) / delta
+	}
+	{
+		x8 += delta
+		tmp2 := calc()
+		x8 -= delta
+		grad["x8"] = (tmp2 - tmp1) / delta
+	}
+	return tmp1, grad
 }
