@@ -33,7 +33,7 @@ func Formula(n int) string {
 		term := fmt.Sprintf("%f * x%d", rand.Float64(), i)
 		terms = append(terms, term)
 	}
-	return fmt.Sprintf("f := log(1 + exp(-y * (%s)))", strings.Join(terms, "+"))
+	return fmt.Sprintf("f := dx + log(1 + exp(-y * (%s)))", strings.Join(terms, "+"))
 }
 
 func computeDerivatives(w io.Writer, steps []Step) {
@@ -146,6 +146,7 @@ return %s
 		list = append(list, v)
 	}
 	sort.Strings(list)
+
 	f, err := os.Create("compute.go")
 	check(err)
 
@@ -167,11 +168,11 @@ fmt.Println("running compute.go");
 rand.Seed(time.Now().UTC().UnixNano())
 {{.decls}} 
 
-	c1, grad1 := ComputeAD(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y)
+	c1, grad1 := ComputeAD({{.vars}})
 	fmt.Printf("ad value: %f\n", c1)
 	fmt.Printf("ad grad : %v\n", grad1)
 
-	c2, grad2 := ComputeNum(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y)
+	c2, grad2 := ComputeNum({{.vars}})
 	fmt.Printf("num value: %f\n", c2)
 	fmt.Printf("num grad : %v\n", grad2)
 
