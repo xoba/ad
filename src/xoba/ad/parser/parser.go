@@ -14,12 +14,13 @@ import (
 	"text/template"
 )
 
+const formula = `a := x+sqrt(pow(z,3)) + 99*(-5*x + 55)/6 + y`
+
 //go:generate nex lexer.nex
 //go:generate go tool yacc -o parser.y.go parser.y
 const (
 	numberNT     NodeType = "NUM"
 	identifierNT NodeType = "IDENT"
-	binaryNT     NodeType = "BIN"
 	functionNT   NodeType = "FUNC"
 )
 
@@ -129,8 +130,6 @@ return math.Pow(a,b)
 	}
 }
 
-const formula = `a := x+sqrt(pow(z,3)) + 99*(5*x + 55)/6 + y`
-
 type VarParser struct {
 	i    int
 	vars map[string]string
@@ -145,14 +144,15 @@ func (v *VarParser) getVars(rhs *Node) (out []Step) {
 			v.vars[rhs.S] = rhs.name
 			v.i++
 			step := Step{
-				lhs: rhs.name,
-				rhs: rhs.S,
+				decl: true,
+				lhs:  rhs.name,
+				rhs:  rhs.S,
 			}
 			out = append(out, step)
 		} else {
 			rhs.name = v.vars[rhs.S]
 		}
-	case functionNT, binaryNT:
+	case functionNT:
 		for _, n := range rhs.N {
 			out = append(out, v.getVars(n)...)
 		}
@@ -166,12 +166,19 @@ type StepParser struct {
 }
 
 type Step struct {
-	lhs string
-	rhs string
+	decl bool
+	lhs  string
+	rhs  string
+	f    string
+	args []string
 }
 
 func (s Step) String() string {
-	return fmt.Sprintf("%s := %s;", s.lhs, s.rhs)
+	if s.decl {
+		return fmt.Sprintf("%s := %s;", s.lhs, s.rhs)
+	} else {
+		return fmt.Sprintf("%s := %s; // f = %q; args = %q", s.lhs, s.rhs, s.f, s.args)
+	}
 }
 
 func (s *StepParser) program(rhs *Node) (out []Step) {
@@ -186,20 +193,10 @@ func (s *StepParser) program(rhs *Node) (out []Step) {
 			args = append(args, n.name)
 		}
 		step := Step{
-			lhs: fmt.Sprintf("s%d", s.i),
-			rhs: fmt.Sprintf("%s(%s)", rhs.S, strings.Join(args, ",")),
-		}
-		out = append(out, step)
-		rhs.name = step.lhs
-		s.i++
-	case binaryNT:
-		for _, n := range rhs.N {
-			steps := s.program(n)
-			out = append(out, steps...)
-		}
-		step := Step{
-			lhs: fmt.Sprintf("s%d", s.i),
-			rhs: fmt.Sprintf("%s %s %s", rhs.N[0].name, rhs.S, rhs.N[1].name),
+			lhs:  fmt.Sprintf("s%d", s.i),
+			rhs:  fmt.Sprintf("%s(%s)", rhs.S, strings.Join(args, ",")),
+			f:    rhs.S,
+			args: args,
 		}
 		out = append(out, step)
 		rhs.name = step.lhs
@@ -236,16 +233,8 @@ func LexNumber(s string) *Node {
 	return Number(n)
 }
 
-func Binary(op rune, a, b *Node) *Node {
-	return &Node{
-		Type: binaryNT,
-		S:    fmt.Sprintf("%c", op),
-		N:    []*Node{a, b},
-	}
-}
-
 func Negate(a *Node) *Node {
-	return Binary('*', Number(-1), a)
+	return Function("multiply", Number(-1), a)
 }
 
 type context struct {
