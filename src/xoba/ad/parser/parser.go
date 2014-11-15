@@ -123,7 +123,7 @@ func Run(args []string) {
 	pgm := new(bytes.Buffer)
 	for _, s := range steps {
 		fmt.Fprintln(pgm, s)
-		fmt.Fprintf(pgm, "fmt.Printf(\"%s = %%f\\n\",%s);\n", s.lhs, s.lhs)
+		//	fmt.Fprintf(pgm, "fmt.Printf(\"%s = %%f\\n\",%s);\n", s.lhs, s.lhs)
 	}
 	computeDerivatives(pgm, steps)
 	var list []string
@@ -169,7 +169,27 @@ grad := make(map[string]float64)
 
 `))
 
-	const funcs = `func add(a, b float64) float64 {
+	t.Execute(f, map[string]interface{}{
+		"decls":            decls.String(),
+		"formula":          formula,
+		"lhs":              lex.lhs.S,
+		"vars":             strings.Join(list, ", "),
+		"program":          pgm.String(),
+		"y":                y,
+		"funcs":            funcs,
+		"computeGradients": cg.String(),
+	})
+
+	f.Close()
+	cmd := exec.Command("gofmt", "-w", "compute.go")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("oops: %v\n", err)
+	}
+}
+
+const funcs = `func add(a, b float64) float64 {
 	return a + b
 }
 func dadd(i int, a, b float64) float64 {
@@ -216,7 +236,6 @@ func ddivide(i int, a, b float64) float64 {
 	default:
 		panic("illegal index")
 	}
-	panic("unimplemented")
 }
 
 func sqrt(a float64) float64 {
@@ -244,29 +263,16 @@ func pow(a, b float64) float64 {
 	return math.Pow(a, b)
 }
 func dpow(i int, a, b float64) float64 {
-	panic("unimplemented")
-}
-`
-
-	t.Execute(f, map[string]interface{}{
-		"decls":            decls.String(),
-		"formula":          formula,
-		"lhs":              lex.lhs.S,
-		"vars":             strings.Join(list, ", "),
-		"program":          pgm.String(),
-		"y":                y,
-		"funcs":            funcs,
-		"computeGradients": cg.String(),
-	})
-
-	f.Close()
-	cmd := exec.Command("gofmt", "-w", "compute.go")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Fatalf("oops: %v\n", err)
+	switch i {
+	case 0:
+		panic("")
+	case 1:
+		panic("")
+	default:
+		panic("illegal index")
 	}
 }
+`
 
 type VarParser struct {
 	i    int

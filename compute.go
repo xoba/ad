@@ -92,7 +92,6 @@ func ddivide(i int, a, b float64) float64 {
 	default:
 		panic("illegal index")
 	}
-	panic("unimplemented")
 }
 
 func sqrt(a float64) float64 {
@@ -120,35 +119,30 @@ func pow(a, b float64) float64 {
 	return math.Pow(a, b)
 }
 func dpow(i int, a, b float64) float64 {
-	panic("unimplemented")
+	switch i {
+	case 0:
+		panic("")
+	case 1:
+		panic("")
+	default:
+		panic("illegal index")
+	}
 }
 
 func Compute(x, y, z float64) (float64, map[string]float64) {
 	grad := make(map[string]float64)
 	v0 := z
-	fmt.Printf("v0 = %f\n", v0)
 	v1 := y
-	fmt.Printf("v1 = %f\n", v1)
 	v2 := x
-	fmt.Printf("v2 = %f\n", v2)
 	s0 := multiply(v1, v2)
-	fmt.Printf("s0 = %f\n", s0)
 	s1 := exp(v2)
-	fmt.Printf("s1 = %f\n", s1)
 	s2 := multiply(v2, v1)
-	fmt.Printf("s2 = %f\n", s2)
 	s3 := add(s1, s2)
-	fmt.Printf("s3 = %f\n", s3)
 	s4 := divide(v2, v1)
-	fmt.Printf("s4 = %f\n", s4)
 	s5 := add(s3, s4)
-	fmt.Printf("s5 = %f\n", s5)
 	s6 := multiply(s0, s5)
-	fmt.Printf("s6 = %f\n", s6)
 	s7 := add(v0, s6)
-	fmt.Printf("s7 = %f\n", s7)
 	s8 := log(s7)
-	fmt.Printf("s8 = %f\n", s8)
 	bs8 := 1.000000
 	bs7 := 0.000000
 	bs7 += bs8 * dlog(0, s7)
