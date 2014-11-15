@@ -9,9 +9,26 @@ import "fmt"
 } 
  
 %token NUM
+%token IDENT
+
+%right '='
+%left '+' '-'
+%left '*' '/' '^'
 
 %% 
 
-program: {}
-| program NUM { fmt.Println("parsed"); }
+statement: IDENT '=' exp { fmt.Println($1.node,"=",$3.node); }
+;
+
+exp: NUM { $$ = $1; } 
+| IDENT { $$ = $1; } 
+| '(' exp ')' { $$ = $2; }
+| IDENT '(' exp ')' { $$.node = Function($1.node.S,$3.node); }
+| IDENT '(' exp ',' exp ')' { }
+|  '-' exp %prec '*' { $$.node = Negate($2.node);  }
+|  exp '+' exp  {  $$.node = Binary('+',$1.node,$3.node);  }
+|  exp '-' exp  {  $$.node = Binary('-',$1.node,$3.node);  }
+|  exp '*' exp  {  $$.node = Binary('*',$1.node,$3.node);  }
+|  exp '/' exp  {  $$.node = Binary('/',$1.node,$3.node);  }
+|  exp '^' exp  {  $$.node = Binary('^',$1.node,$3.node);  }
 ;

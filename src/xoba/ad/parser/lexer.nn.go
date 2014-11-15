@@ -1,9 +1,4 @@
 package parser
-
-import (
-	"fmt"
-	"strconv"
-)
 import ("bufio";"io";"strings")
 type frame struct {
   i int
@@ -151,21 +146,23 @@ dollar:  // Handle $.
     ch <- frame{-1, "", line, column}
   }
   go scan(bufio.NewReader(in), yylex.ch, []dfa{
-// [ \t\n]
+// [ \t\r\n]
 {[]bool{false, true}, []func(rune) int{  // Transitions
 func(r rune) int {
 	switch(r) {
-		case 9: return 1
-		case 10: return 1
 		case 32: return 1
+		case 9: return 1
+		case 13: return 1
+		case 10: return 1
 	}
 	return -1
 },
 func(r rune) int {
 	switch(r) {
-		case 10: return -1
 		case 32: return -1
 		case 9: return -1
+		case 13: return -1
+		case 10: return -1
 	}
 	return -1
 },
@@ -219,6 +216,64 @@ func(r rune) int {
 	return -1
 },
 }, []int{  /* Start-of-input transitions */  -1, -1, -1, -1, -1,}, []int{  /* End-of-input transitions */  -1, -1, -1, -1, -1,},nil},
+
+// [A-Za-z_]+[A-Za-z0-9_]*
+{[]bool{false, true, true, true}, []func(rune) int{  // Transitions
+func(r rune) int {
+	switch(r) {
+		case 95: return 1
+	}
+	switch {
+		case 48 <= r && r <= 57: return -1
+		case 65 <= r && r <= 90: return 1
+		case 97 <= r && r <= 122: return 1
+	}
+	return -1
+},
+func(r rune) int {
+	switch(r) {
+		case 95: return 2
+	}
+	switch {
+		case 48 <= r && r <= 57: return 3
+		case 65 <= r && r <= 90: return 2
+		case 97 <= r && r <= 122: return 2
+	}
+	return -1
+},
+func(r rune) int {
+	switch(r) {
+		case 95: return 2
+	}
+	switch {
+		case 48 <= r && r <= 57: return 3
+		case 65 <= r && r <= 90: return 2
+		case 97 <= r && r <= 122: return 2
+	}
+	return -1
+},
+func(r rune) int {
+	switch(r) {
+		case 95: return 3
+	}
+	switch {
+		case 48 <= r && r <= 57: return 3
+		case 65 <= r && r <= 90: return 3
+		case 97 <= r && r <= 122: return 3
+	}
+	return -1
+},
+}, []int{  /* Start-of-input transitions */  -1, -1, -1, -1,}, []int{  /* End-of-input transitions */  -1, -1, -1, -1,},nil},
+
+// .
+{[]bool{false, true}, []func(rune) int{  // Transitions
+func(r rune) int {
+	return 1
+},
+func(r rune) int {
+	return -1
+},
+}, []int{  /* Start-of-input transitions */  -1, -1,}, []int{  /* End-of-input transitions */  -1, -1,},nil},
 }, 0, 0)
   return yylex
 }
@@ -276,7 +331,18 @@ func (yylex *Lexer) Lex(lval *yySymType) int {
 			{ /* Skip whitespace */ }
 			continue
 		case 1:
-			{ n,_ := strconv.ParseFloat(yylex.Text(),64); lval.node = Num(n); fmt.Println(lval.node); return NUM; }
+			{ 
+  lval.node = LexNumber(yylex.Text()); return NUM; 
+ }
+			continue
+		case 2:
+			{ 
+  lval.node = LexIdentifier(yylex.Text()); 
+  return IDENT; 
+ }
+			continue
+		case 3:
+			{ return int(yylex.Text()[0]); }
 			continue
 		}
 		break

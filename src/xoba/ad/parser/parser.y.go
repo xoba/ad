@@ -13,9 +13,17 @@ type yySymType struct {
 }
 
 const NUM = 57346
+const IDENT = 57347
 
 var yyToknames = []string{
 	"NUM",
+	"IDENT",
+	"'='",
+	"'+'",
+	"'-'",
+	"'*'",
+	"'/'",
+	"'^'",
 }
 var yyStatenames = []string{}
 
@@ -30,49 +38,71 @@ var yyExca = []int{
 	-2, 0,
 }
 
-const yyNprod = 3
+const yyNprod = 13
 const yyPrivate = 57344
 
 var yyTokenNames []string
 var yyStates []string
 
-const yyLast = 2
+const yyLast = 51
 
 var yyAct = []int{
 
-	2, 1,
+	4, 9, 10, 11, 12, 13, 3, 27, 15, 16,
+	17, 18, 19, 20, 21, 22, 9, 10, 11, 12,
+	13, 2, 24, 25, 14, 1, 26, 9, 10, 11,
+	12, 13, 0, 23, 5, 6, 0, 0, 8, 0,
+	0, 0, 7, 9, 10, 11, 12, 13, 11, 12,
+	13,
 }
 var yyPact = []int{
 
-	-1000, -4, -1000,
+	16, -1000, 0, 30, 36, -1000, 12, 30, 30, 30,
+	30, 30, 30, 30, 30, 20, -1000, 39, 39, -1000,
+	-1000, -1000, 9, -1000, -1000, 30, -6, -1000,
 }
 var yyPgo = []int{
 
-	0, 1,
+	0, 25, 0,
 }
 var yyR1 = []int{
 
-	0, 1, 1,
+	0, 1, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2,
 }
 var yyR2 = []int{
 
-	0, 0, 2,
+	0, 3, 1, 1, 3, 4, 6, 2, 3, 3,
+	3, 3, 3,
 }
 var yyChk = []int{
 
-	-1000, -1, 4,
+	-1000, -1, 5, 6, -2, 4, 5, 12, 8, 7,
+	8, 9, 10, 11, 12, -2, -2, -2, -2, -2,
+	-2, -2, -2, 13, 13, 14, -2, 13,
 }
 var yyDef = []int{
 
-	1, -2, 2,
+	0, -2, 0, 0, 1, 2, 3, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 7, 8, 9, 10,
+	11, 12, 0, 4, 5, 0, 0, 6,
 }
 var yyTok1 = []int{
 
-	1,
+	1, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	12, 13, 9, 7, 14, 8, 3, 10, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 6, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 11,
 }
 var yyTok2 = []int{
 
-	2, 3, 4,
+	2, 3, 4, 5,
 }
 var yyTok3 = []int{
 	0,
@@ -304,13 +334,63 @@ yydefault:
 	switch yynt {
 
 	case 1:
-		//line parser.y:15
+		//line parser.y:20
 		{
+			fmt.Println(yyS[yypt-2].node, "=", yyS[yypt-0].node)
 		}
 	case 2:
-		//line parser.y:16
+		//line parser.y:23
 		{
-			fmt.Println("parsed")
+			yyVAL = yyS[yypt-0]
+		}
+	case 3:
+		//line parser.y:24
+		{
+			yyVAL = yyS[yypt-0]
+		}
+	case 4:
+		//line parser.y:25
+		{
+			yyVAL = yyS[yypt-1]
+		}
+	case 5:
+		//line parser.y:26
+		{
+			yyVAL.node = Function(yyS[yypt-3].node.S, yyS[yypt-1].node)
+		}
+	case 6:
+		//line parser.y:27
+		{
+		}
+	case 7:
+		//line parser.y:28
+		{
+			yyVAL.node = Negate(yyS[yypt-0].node)
+		}
+	case 8:
+		//line parser.y:29
+		{
+			yyVAL.node = Binary('+', yyS[yypt-2].node, yyS[yypt-0].node)
+		}
+	case 9:
+		//line parser.y:30
+		{
+			yyVAL.node = Binary('-', yyS[yypt-2].node, yyS[yypt-0].node)
+		}
+	case 10:
+		//line parser.y:31
+		{
+			yyVAL.node = Binary('*', yyS[yypt-2].node, yyS[yypt-0].node)
+		}
+	case 11:
+		//line parser.y:32
+		{
+			yyVAL.node = Binary('/', yyS[yypt-2].node, yyS[yypt-0].node)
+		}
+	case 12:
+		//line parser.y:33
+		{
+			yyVAL.node = Binary('^', yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	}
 	goto yystack /* stack new state and value */
