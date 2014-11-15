@@ -19,8 +19,7 @@ import (
 )
 
 const (
-	formula  = `a := log(z+y*x*(exp(x) + x*y+x/y))`
-	formula2 = `a := x+sqrt(pow(z,3)) + 99*(-5*x + 55)/6 + y`
+	formula = `a := pow(z,y) + pow(x,2) + log(z+y*x*(exp(x) + x*y+x/y))`
 )
 
 func computeDerivatives(w io.Writer, steps []Step) {
@@ -265,9 +264,9 @@ func pow(a, b float64) float64 {
 func dpow(i int, a, b float64) float64 {
 	switch i {
 	case 0:
-		panic("")
+		return b* math.Pow(a,b-1)
 	case 1:
-		panic("")
+		return math.Pow(a,b) * math.Log(a)
 	default:
 		panic("illegal index")
 	}
