@@ -19,6 +19,13 @@ import (
 
 const formula = `a := x+sqrt(pow(z,3)) + 99*(-5*x + 55)/6 + y`
 
+func computeDerivatives(steps []Step) {
+	for i := 0; i < len(steps); i++ {
+		j := len(steps) - i - 1
+		fmt.Println(steps[j])
+	}
+}
+
 type NodeType string
 
 const (
@@ -52,6 +59,23 @@ func Run(args []string) {
 	steps = append(steps, vp.getVars(lex.rhs)...)
 	steps = append(steps, sp.program(lex.rhs)...)
 	y := steps[len(steps)-1].lhs
+
+	cg := new(bytes.Buffer)
+	if true {
+		dx := 0.00001
+		fmt.Fprintf(cg, "delta := %f\n", dx)
+		fmt.Fprintf(cg, "tmp := %s\n", lex.lhs.S)
+		for k := range vars {
+			fmt.Fprintln(cg, "{")
+			fmt.Fprintf(cg, "%s += delta\n", k)
+			fmt.Fprintln(cg, formula)
+			fmt.Fprintf(cg, "%s -= delta\n", k)
+			fmt.Fprintf(cg, "fmt.Printf(\"df/d%s = %%f\\n\",(a-tmp)/delta)\n", k)
+			fmt.Fprintln(cg, "}")
+		}
+	}
+
+	computeDerivatives(steps)
 	for _, s := range steps {
 		fmt.Fprintln(pgm, s)
 	}
@@ -81,6 +105,9 @@ rand.Seed(time.Now().UTC().UnixNano())
 fmt.Printf("formula: %f\n",{{.lhs}});
 fmt.Printf("parsed : %f\n",Compute({{.vars}}))
 fmt.Printf("diff   : %f\n",{{.lhs}}-Compute({{.vars}}))
+
+{{.computeGradients}}
+
 }
 
 func Compute({{.vars}} float64) float64 {
@@ -121,12 +148,13 @@ func pow(a, b float64) float64 {
 `))
 
 	t.Execute(f, map[string]interface{}{
-		"decls":   decls.String(),
-		"formula": formula,
-		"lhs":     lex.lhs.S,
-		"vars":    strings.Join(list, ", "),
-		"program": pgm.String(),
-		"y":       y,
+		"decls":            decls.String(),
+		"formula":          formula,
+		"lhs":              lex.lhs.S,
+		"vars":             strings.Join(list, ", "),
+		"program":          pgm.String(),
+		"y":                y,
+		"computeGradients": cg.String(),
 	})
 
 	f.Close()
@@ -187,10 +215,6 @@ func (s Step) String() string {
 	} else {
 		return fmt.Sprintf("%s := %s; // f = %q; args = %q", s.lhs, s.rhs, s.f, s.args)
 	}
-}
-
-func computeDerivatives(steps []Step) {
-
 }
 
 func (s *StepParser) program(rhs *Node) (out []Step) {

@@ -16,6 +16,28 @@ func main() {
 	fmt.Printf("formula: %f\n", a)
 	fmt.Printf("parsed : %f\n", Compute(x, y, z))
 	fmt.Printf("diff   : %f\n", a-Compute(x, y, z))
+
+	delta := 0.000010
+	tmp := a
+	{
+		z += delta
+		a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
+		z -= delta
+		fmt.Printf("d/dz = %f\n", (a-tmp)/delta)
+	}
+	{
+		y += delta
+		a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
+		y -= delta
+		fmt.Printf("d/dy = %f\n", (a-tmp)/delta)
+	}
+	{
+		x += delta
+		a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
+		x -= delta
+		fmt.Printf("d/dx = %f\n", (a-tmp)/delta)
+	}
+
 }
 
 func Compute(x, y, z float64) float64 {
