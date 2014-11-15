@@ -10,8 +10,11 @@ import (
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	x := rand.Float64()
+	fmt.Printf("x = %f\n", x)
 	y := rand.Float64()
+	fmt.Printf("y = %f\n", y)
 	z := rand.Float64()
+	fmt.Printf("z = %f\n", z)
 	a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
 	fmt.Printf("formula: %f\n", a)
 	fmt.Printf("parsed : %f\n", Compute(x, y, z))
@@ -20,22 +23,22 @@ func main() {
 	delta := 0.000010
 	tmp := a
 	{
+		x += delta
+		a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
+		x -= delta
+		fmt.Printf("df/dx = %f\n", (a-tmp)/delta)
+	}
+	{
 		z += delta
 		a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
 		z -= delta
-		fmt.Printf("d/dz = %f\n", (a-tmp)/delta)
+		fmt.Printf("df/dz = %f\n", (a-tmp)/delta)
 	}
 	{
 		y += delta
 		a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
 		y -= delta
-		fmt.Printf("d/dy = %f\n", (a-tmp)/delta)
-	}
-	{
-		x += delta
-		a := x + sqrt(pow(z, 3)) + 99*(-5*x+55)/6 + y
-		x -= delta
-		fmt.Printf("d/dx = %f\n", (a-tmp)/delta)
+		fmt.Printf("df/dy = %f\n", (a-tmp)/delta)
 	}
 
 }

@@ -90,6 +90,7 @@ func Run(args []string) {
 	decls := new(bytes.Buffer)
 	for _, v := range list {
 		fmt.Fprintf(decls, "%s := rand.Float64();\n", v)
+		fmt.Fprintf(decls, "fmt.Printf(\"%s = %%f\\n\",%s)\n", v, v)
 	}
 
 	t := template.Must(template.New("compute.go").Parse(`package main
