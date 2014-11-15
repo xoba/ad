@@ -39,10 +39,10 @@ func main() {
 	delta := 0.000010
 	tmp := y
 	{
-		x0 += delta
+		x3 += delta
 		y := 0.604660*x0 + 0.940509*x1 + 0.664560*x2 + 0.437714*x3 + 0.424637*x4 + 0.686823*x5 + 0.065637*x6 + 0.156519*x7 + 0.096970*x8 + 0.300912*x9
-		x0 -= delta
-		fmt.Printf("df/dx0 = %f\n", (y-tmp)/delta)
+		x3 -= delta
+		fmt.Printf("df/dx3 = %f\n", (y-tmp)/delta)
 	}
 	{
 		x4 += delta
@@ -51,16 +51,28 @@ func main() {
 		fmt.Printf("df/dx4 = %f\n", (y-tmp)/delta)
 	}
 	{
-		x6 += delta
+		x7 += delta
 		y := 0.604660*x0 + 0.940509*x1 + 0.664560*x2 + 0.437714*x3 + 0.424637*x4 + 0.686823*x5 + 0.065637*x6 + 0.156519*x7 + 0.096970*x8 + 0.300912*x9
-		x6 -= delta
-		fmt.Printf("df/dx6 = %f\n", (y-tmp)/delta)
+		x7 -= delta
+		fmt.Printf("df/dx7 = %f\n", (y-tmp)/delta)
+	}
+	{
+		x8 += delta
+		y := 0.604660*x0 + 0.940509*x1 + 0.664560*x2 + 0.437714*x3 + 0.424637*x4 + 0.686823*x5 + 0.065637*x6 + 0.156519*x7 + 0.096970*x8 + 0.300912*x9
+		x8 -= delta
+		fmt.Printf("df/dx8 = %f\n", (y-tmp)/delta)
 	}
 	{
 		x9 += delta
 		y := 0.604660*x0 + 0.940509*x1 + 0.664560*x2 + 0.437714*x3 + 0.424637*x4 + 0.686823*x5 + 0.065637*x6 + 0.156519*x7 + 0.096970*x8 + 0.300912*x9
 		x9 -= delta
 		fmt.Printf("df/dx9 = %f\n", (y-tmp)/delta)
+	}
+	{
+		x0 += delta
+		y := 0.604660*x0 + 0.940509*x1 + 0.664560*x2 + 0.437714*x3 + 0.424637*x4 + 0.686823*x5 + 0.065637*x6 + 0.156519*x7 + 0.096970*x8 + 0.300912*x9
+		x0 -= delta
+		fmt.Printf("df/dx0 = %f\n", (y-tmp)/delta)
 	}
 	{
 		x1 += delta
@@ -75,28 +87,16 @@ func main() {
 		fmt.Printf("df/dx2 = %f\n", (y-tmp)/delta)
 	}
 	{
-		x3 += delta
-		y := 0.604660*x0 + 0.940509*x1 + 0.664560*x2 + 0.437714*x3 + 0.424637*x4 + 0.686823*x5 + 0.065637*x6 + 0.156519*x7 + 0.096970*x8 + 0.300912*x9
-		x3 -= delta
-		fmt.Printf("df/dx3 = %f\n", (y-tmp)/delta)
-	}
-	{
 		x5 += delta
 		y := 0.604660*x0 + 0.940509*x1 + 0.664560*x2 + 0.437714*x3 + 0.424637*x4 + 0.686823*x5 + 0.065637*x6 + 0.156519*x7 + 0.096970*x8 + 0.300912*x9
 		x5 -= delta
 		fmt.Printf("df/dx5 = %f\n", (y-tmp)/delta)
 	}
 	{
-		x7 += delta
+		x6 += delta
 		y := 0.604660*x0 + 0.940509*x1 + 0.664560*x2 + 0.437714*x3 + 0.424637*x4 + 0.686823*x5 + 0.065637*x6 + 0.156519*x7 + 0.096970*x8 + 0.300912*x9
-		x7 -= delta
-		fmt.Printf("df/dx7 = %f\n", (y-tmp)/delta)
-	}
-	{
-		x8 += delta
-		y := 0.604660*x0 + 0.940509*x1 + 0.664560*x2 + 0.437714*x3 + 0.424637*x4 + 0.686823*x5 + 0.065637*x6 + 0.156519*x7 + 0.096970*x8 + 0.300912*x9
-		x8 -= delta
-		fmt.Printf("df/dx8 = %f\n", (y-tmp)/delta)
+		x6 -= delta
+		fmt.Printf("df/dx6 = %f\n", (y-tmp)/delta)
 	}
 
 }
