@@ -266,18 +266,6 @@ func ComputeNum(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y float64) (float64, map
 	}
 	tmp1 := calc()
 	{
-		x7 += delta
-		tmp2 := calc()
-		x7 -= delta
-		grad["x7"] = (tmp2 - tmp1) / delta
-	}
-	{
-		x9 += delta
-		tmp2 := calc()
-		x9 -= delta
-		grad["x9"] = (tmp2 - tmp1) / delta
-	}
-	{
 		y += delta
 		tmp2 := calc()
 		y -= delta
@@ -302,6 +290,24 @@ func ComputeNum(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y float64) (float64, map
 		grad["x2"] = (tmp2 - tmp1) / delta
 	}
 	{
+		x6 += delta
+		tmp2 := calc()
+		x6 -= delta
+		grad["x6"] = (tmp2 - tmp1) / delta
+	}
+	{
+		x8 += delta
+		tmp2 := calc()
+		x8 -= delta
+		grad["x8"] = (tmp2 - tmp1) / delta
+	}
+	{
+		x9 += delta
+		tmp2 := calc()
+		x9 -= delta
+		grad["x9"] = (tmp2 - tmp1) / delta
+	}
+	{
 		x3 += delta
 		tmp2 := calc()
 		x3 -= delta
@@ -320,16 +326,10 @@ func ComputeNum(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y float64) (float64, map
 		grad["x5"] = (tmp2 - tmp1) / delta
 	}
 	{
-		x6 += delta
+		x7 += delta
 		tmp2 := calc()
-		x6 -= delta
-		grad["x6"] = (tmp2 - tmp1) / delta
-	}
-	{
-		x8 += delta
-		tmp2 := calc()
-		x8 -= delta
-		grad["x8"] = (tmp2 - tmp1) / delta
+		x7 -= delta
+		grad["x7"] = (tmp2 - tmp1) / delta
 	}
 	return tmp1, grad
 }
