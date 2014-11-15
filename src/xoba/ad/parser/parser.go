@@ -31,7 +31,7 @@ func Formula(n int) string {
 		term := fmt.Sprintf("%f * x%d", rand.Float64(), i)
 		terms = append(terms, term)
 	}
-	return "y:= " + strings.Join(terms, "+")
+	return fmt.Sprintf("f := log(1 + exp(-y * %s))", strings.Join(terms, "+"))
 }
 
 func computeDerivatives(w io.Writer, steps []Step) {
@@ -114,18 +114,19 @@ func Run(args []string) {
 	steps = append(steps, sp.program(lex.rhs)...)
 	y := steps[len(steps)-1].lhs
 
-	cg := new(bytes.Buffer)
+	checker := new(bytes.Buffer)
 	if true {
 		dx := 0.00001
-		fmt.Fprintf(cg, "delta := %f\n", dx)
-		fmt.Fprintf(cg, "tmp := %s\n", lex.lhs.S)
+		fmt.Fprintf(checker, "delta := %f\n", dx)
+		fmt.Fprintf(checker, "%s\n", formula)
+		fmt.Fprintf(checker, "tmp := %s\n", lex.lhs.S)
 		for k := range vars {
-			fmt.Fprintln(cg, "{")
-			fmt.Fprintf(cg, "%s += delta\n", k)
-			fmt.Fprintln(cg, formula)
-			fmt.Fprintf(cg, "%s -= delta\n", k)
-			fmt.Fprintf(cg, "fmt.Printf(\"df/d%s = %%f\\n\",(%s-tmp)/delta)\n", k, lex.lhs.S)
-			fmt.Fprintln(cg, "}")
+			fmt.Fprintln(checker, "{")
+			fmt.Fprintf(checker, "%s += delta\n", k)
+			fmt.Fprintln(checker, formula)
+			fmt.Fprintf(checker, "%s -= delta\n", k)
+			fmt.Fprintf(checker, "grad[%q] = (%s - tmp)/delta\n", k, lex.lhs.S)
+			fmt.Fprintln(checker, "}")
 		}
 	}
 
@@ -158,34 +159,51 @@ import (
 func main() {
 fmt.Println("running compute.go");
 rand.Seed(time.Now().UTC().UnixNano())
-{{.decls}} {{.formula}} 
-fmt.Printf("formula: %f\n",{{.lhs}});
-c, grad:= Compute({{.vars}})
-fmt.Printf("parsed : %f\n",c)
-fmt.Printf("diff   : %f\n",{{.lhs}}-c)
-fmt.Printf("grad = %v\n",grad);
-{{.computeGradients}}
+{{.decls}} 
 
+	c1, grad1 := ComputeAD(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y)
+	fmt.Printf("ad value: %f\n", c1)
+	fmt.Printf("ad grad : %v\n", grad1)
+
+	c2, grad2 := ComputeNum(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, y)
+	fmt.Printf("num value: %f\n", c2)
+	fmt.Printf("num grad : %v\n", grad2)
+
+	var total float64
+	add := func(n string, x float64) {
+		fmt.Printf("diff %s: %f\n", n, x)
+		total += math.Abs(x)
+	}
+	add("value", c1-c2)
+	for k, v := range grad2 {
+		add(fmt.Sprintf("grad[%3s]", k), grad1[k]-v)
+	}
+fmt.Printf("*** total diffs: %f\n",total);
 }
 
 {{.funcs}}
 
-func Compute({{.vars}} float64) (float64,map[string]float64) {
+func ComputeAD({{.vars}} float64) (float64,map[string]float64) {
 grad := make(map[string]float64)
 {{.program}} return {{.y}},grad;
+}
+
+func ComputeNum({{.vars}} float64) (float64,map[string]float64) {
+grad := make(map[string]float64)
+{{.checker}} return {{.lhs}},grad;
 }
 
 `))
 
 	t.Execute(f, map[string]interface{}{
-		"decls":            decls.String(),
-		"formula":          formula,
-		"lhs":              lex.lhs.S,
-		"vars":             strings.Join(list, ", "),
-		"program":          pgm.String(),
-		"y":                y,
-		"funcs":            funcs,
-		"computeGradients": cg.String(),
+		"decls":   decls.String(),
+		"formula": formula,
+		"lhs":     lex.lhs.S,
+		"vars":    strings.Join(list, ", "),
+		"program": pgm.String(),
+		"checker": checker.String(),
+		"y":       y,
+		"funcs":   funcs,
 	})
 
 	f.Close()
