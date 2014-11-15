@@ -15,7 +15,7 @@
 
 %% 
 
-statement: IDENT '=' exp { c := yylex.(*context); c.lhs,c.rhs = $1.node, $3.node; }
+statement: IDENT ':' '=' exp { c := yylex.(*context); c.lhs,c.rhs = $1.node, $4.node; }
 ;
 
 exp: NUM { $$ = $1; } 
