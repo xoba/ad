@@ -1,7 +1,7 @@
 automatic or algorithmic differentiation
 ----------------------------------------
 
-see http://autodiff.info for live demo
+see https://autodiff.info for live demo
 
 strategy: a simple mathematical formula language, which is
 auto-differentiated and compiled to go for high performance.
