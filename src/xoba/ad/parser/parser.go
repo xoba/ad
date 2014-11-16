@@ -110,9 +110,9 @@ func Run(args []string) {
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.StringVar(&formula, "formula", Formula(10), "the formula to parse")
 	flags.StringVar(&private, "private", defaultPrivateString, "the private variable string")
-	flags.StringVar(&templates, "templates", "src/xoba/ad/parser/templates", "directory of go template functions")
+	flags.StringVar(&templates, "templates", defaultTemplates, "directory of go template functions")
 	flags.StringVar(&output, "output", "compute.go", "name of go program to output")
-	flags.Float64Var(&dx, "dx", 0.00001, "infinitesimal for numerical differentiation")
+	flags.Float64Var(&dx, "dx", defaultDx, "infinitesimal for numerical differentiation")
 	flags.Parse(args)
 
 	code, err := Parse(private, templates, formula, 0.00001)
@@ -127,9 +127,21 @@ func Run(args []string) {
 	f.Close()
 }
 
+const (
+	defaultPrivateString = "pvt"
+	defaultDx            = 0.00001
+	defaultTemplates     = "src/xoba/ad/parser/templates"
+)
+
 func Parse(private, templates, formula string, dx float64) ([]byte, error) {
 	if len(private) == 0 {
 		private = defaultPrivateString
+	}
+	if dx == 0 {
+		dx = defaultDx
+	}
+	if len(templates) == 0 {
+		templates = defaultTemplates
 	}
 	lex := NewContext(NewLexer(strings.NewReader(formula)))
 	yyParse(lex)

@@ -12,8 +12,6 @@ import (
 	"strings"
 )
 
-const defaultPrivateString = "pvt"
-
 func RunTemplates(args []string) {
 	var private, templates string
 	flags := flag.NewFlagSet("templates", flag.ExitOnError)
