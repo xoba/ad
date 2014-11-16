@@ -106,13 +106,27 @@ func (n Node) String() string {
 }
 
 func Run(args []string) {
-	var private, templates, formula string
+	var private, templates, formula, output string
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.StringVar(&formula, "formula", Formula(10), "the formula to parse")
 	flags.StringVar(&private, "private", "x", "the private variable string")
 	flags.StringVar(&templates, "templates", "src/xoba/ad/parser/templates", "directory of go template functions")
+	flags.StringVar(&output, "output", "compute.go", "name of go program to output")
 	flags.Parse(args)
 
+	code := Parse(private, templates, formula)
+
+	f, err := os.Create(output)
+	check(err)
+	f.Write(code)
+	f.Close()
+	if err := Gofmt(output); err != nil {
+		log.Fatalf("oops: %v\n", err)
+	}
+
+}
+
+func Parse(private, templates, formula string) []byte {
 	lex := NewContext(NewLexer(strings.NewReader(formula)))
 	yyParse(lex)
 	vars := make(map[string]string)
@@ -124,7 +138,7 @@ func Run(args []string) {
 	y := steps[len(steps)-1].lhs
 
 	checker := new(bytes.Buffer)
-	if true {
+	{
 		dx := 0.00001
 		fmt.Fprintf(checker, "delta_%s := %f\n", private, dx)
 		fmt.Fprintf(checker, `calc_%s := func() float64 {
@@ -146,7 +160,6 @@ return %s
 	pgm := new(bytes.Buffer)
 	for _, s := range steps {
 		fmt.Fprintln(pgm, s)
-		//	fmt.Fprintf(pgm, "fmt.Printf(\"%s = %%f\\n\",%s)\n", s.lhs, s.lhs)
 	}
 	computeDerivatives(pgm, steps, private)
 	var list []string
@@ -155,14 +168,14 @@ return %s
 	}
 	sort.Strings(list)
 
-	f, err := os.Create("compute.go")
-	check(err)
+	f := new(bytes.Buffer)
 
 	decls := new(bytes.Buffer)
 	for _, v := range list {
 		fmt.Fprintf(decls, "%s := rand.Float64();\n", v)
-		fmt.Fprintf(decls, "fmt.Printf(\"%s = %%f\\n\",%s)\n", v, v)
+		fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%f\\n\",%s)\n", v, v)
 	}
+	fmt.Fprintln(decls, `fmt.Println();`)
 
 	var imports Imports
 	imports.Add("fmt")
@@ -170,31 +183,31 @@ return %s
 	imports.Add("time")
 	imports.Add("math/rand")
 
-	t := template.Must(template.New("compute.go").Parse(`package main
+	t := template.Must(template.New("output.go").Parse(`package main
 {{.imports}}
 func main() {
-fmt.Println("running compute.go");
+fmt.Println("running autodiff code on {{.formula}}\n");
 rand.Seed(time.Now().UTC().UnixNano())
 {{.decls}} 
 
 	c1, grad1 := ComputeAD({{.vars}})
-	fmt.Printf("ad value: %f\n", c1)
-	fmt.Printf("ad grad : %v\n", grad1)
+	fmt.Printf("autodiff value   : %f\n", c1)
+	fmt.Printf("autodiff gradient: %v\n\n", grad1)
 
 	c2, grad2 := ComputeNumerical({{.vars}})
-	fmt.Printf("num value: %f\n", c2)
-	fmt.Printf("num grad : %v\n", grad2)
+	fmt.Printf("numeric value   : %f\n", c2)
+	fmt.Printf("numeric gradient: %v\n\n", grad2)
 
 	var total float64
 	add := func(n string, x float64) {
-		fmt.Printf("diff %s: %f\n", n, x)
+		fmt.Printf("%s difference: %f\n", n, x)
 		total += math.Abs(x)
 	}
 	add("value", c1-c2)
 	for k, v := range grad2 {
 		add(fmt.Sprintf("grad[%3s]", k), grad1[k]-v)
 	}
-fmt.Printf("*** total diffs: %f\n",total);
+fmt.Printf("\nsum of absolute differences: %f\n",total);
 }
 
 {{.funcs}}
@@ -227,10 +240,7 @@ grad_{{.private}} := make(map[string]float64)
 		"imports": imports.String(),
 	})
 
-	f.Close()
-	if err := Gofmt("compute.go"); err != nil {
-		log.Fatalf("oops: %v\n", err)
-	}
+	return f.Bytes()
 }
 
 type Imports struct {
