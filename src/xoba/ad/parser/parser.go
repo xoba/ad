@@ -41,11 +41,11 @@ func computeDerivatives(w io.Writer, steps []Step, private string) {
 	for i := 0; i < n; i++ {
 		j := n - i - 1
 		step := steps[j]
-		x0 := 0.0
 		if i == 0 {
-			x0 = 1.0
+			fmt.Fprintf(w, "const b_%s = 1.0\n", step.lhs)
+		} else {
+			fmt.Fprintf(w, "b_%s := 0.0\n", step.lhs)
 		}
-		fmt.Fprintf(w, "b_%s := %f\n", step.lhs, x0)
 		for k := j + 1; k < n; k++ {
 			s3 := steps[k]
 			if d := derivative(s3, step, private); len(d) > 0 {
@@ -161,7 +161,7 @@ func Parse(private, templates, formula string, dx float64) ([]byte, error) {
 
 	checker := new(bytes.Buffer)
 	{
-		fmt.Fprintf(checker, "delta_%s := %f\n", private, dx)
+		fmt.Fprintf(checker, "const delta_%s = %f\n", private, dx)
 		fmt.Fprintf(checker, `calc_%s := func() float64 {
 %s
 return %s
