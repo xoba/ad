@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"sort"
@@ -190,7 +191,7 @@ return %s
 
 	decls := new(bytes.Buffer)
 	for _, v := range list {
-		fmt.Fprintf(decls, "%s := rand.Float64();\n", v)
+		fmt.Fprintf(decls, "%s := %.20f;\n", v, rand.NormFloat64())
 		fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%.20f\\n\",%s)\n", v, v)
 	}
 	fmt.Fprintln(decls, `fmt.Println();`)
@@ -198,8 +199,6 @@ return %s
 	var imports Imports
 	imports.Add("fmt")
 	imports.Add("math")
-	imports.Add("time")
-	imports.Add("math/rand")
 
 	t := template.Must(template.New("output.go").Parse(`// created {{.time}}
 // see https://github.com/xoba/ad
@@ -215,27 +214,26 @@ grad_{{.private}} := make(map[string]float64)
 
 func main() {
 fmt.Printf("running autodiff code of {{.time}} on %q\n\n", {{ printf "%q" .formula }});
-rand.Seed(time.Now().UTC().UnixNano())
 {{.decls}} 
 
 	c1, grad1 := ComputeAD({{.vars}})
-	fmt.Printf("autodiff value   : %f\n", c1)
+	fmt.Printf("autodiff value   : %.20f\n", c1)
 	fmt.Printf("autodiff gradient: %v\n\n", grad1)
 
 	c2, grad2 := ComputeNumerical({{.vars}})
-	fmt.Printf("numeric value   : %f\n", c2)
+	fmt.Printf("numeric value   : %.20f\n", c2)
 	fmt.Printf("numeric gradient: %v\n\n", grad2)
 
 	var total float64
 	add := func(n string, x float64) {
-		fmt.Printf("%s difference: %f\n", n, x)
+		fmt.Printf("%s difference: %.20f\n", n, x)
 		total += math.Abs(x)
 	}
 	add("value", c1-c2)
 	for k, v := range grad2 {
 		add(fmt.Sprintf("grad[%3s]", k), grad1[k]-v)
 	}
-fmt.Printf("\nsum of absolute differences: %f\n",total);
+fmt.Printf("\nsum of absolute differences: %.20f\n",total);
 }
 
 // numerically compute the value and gradient of {{.qformula}}
