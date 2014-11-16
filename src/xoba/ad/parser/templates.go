@@ -8,27 +8,35 @@ import (
 	"go/parser"
 	"go/token"
 	"io/ioutil"
+	"log"
 	"strings"
 )
+
+const defaultPrivateString = "pvt"
 
 func RunTemplates(args []string) {
 	var private, templates string
 	flags := flag.NewFlagSet("templates", flag.ExitOnError)
-	flags.StringVar(&private, "private", "x", "the private variable string")
+	flags.StringVar(&private, "private", defaultPrivateString, "the private variable string")
 	flags.StringVar(&templates, "dir", "src/xoba/ad/parser/templates", "directory of go template functions")
 	flags.Parse(args)
-	imports, code := GenTemplates(templates, private)
+	imports, code, err := GenTemplates(templates, private)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Printf("imports: %v\n", imports)
 	fmt.Printf("code:\n%s", code)
 }
 
 // generate function templates, output imports and actual code
-func GenTemplates(dir, private string) ([]string, string) {
+func GenTemplates(dir, private string) ([]string, string, error) {
 	imports := make(map[string]struct{})
 	body := new(bytes.Buffer)
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, dir, nil, parser.AllErrors)
-	check(err)
+	if err != nil {
+		return nil, "", err
+	}
 	for _, p := range pkgs {
 		for _, f := range p.Files {
 			for _, s := range f.Imports {
@@ -37,7 +45,7 @@ func GenTemplates(dir, private string) ([]string, string) {
 			for _, s := range f.Decls {
 				switch t := s.(type) {
 				case *ast.FuncDecl:
-					output := func(name string) {
+					output := func(name string) error {
 						fmt.Fprintf(body, "func %s(", name)
 						fmt.Fprint(body, fields(t.Type.Params.List))
 						fmt.Fprint(body, ")")
@@ -51,12 +59,19 @@ func GenTemplates(dir, private string) ([]string, string) {
 						file := fset.File(start)
 						end := t.Body.Rbrace
 						buf, err := ioutil.ReadFile(file.Name())
-						check(err)
+						if err != nil {
+							return err
+						}
 						fmt.Fprint(body, string(buf[start:end-1]))
 						fmt.Fprintln(body, "}\n")
+						return nil
 					}
-					output(t.Name.Name)
-					output(fmt.Sprintf("%s_%s", t.Name.Name, private))
+					if err := output(t.Name.Name); err != nil {
+						return nil, "", err
+					}
+					if err := output(fmt.Sprintf("%s_%s", t.Name.Name, private)); err != nil {
+						return nil, "", err
+					}
 				}
 			}
 		}
@@ -65,7 +80,7 @@ func GenTemplates(dir, private string) ([]string, string) {
 	for k := range imports {
 		out = append(out, k)
 	}
-	return out, body.String()
+	return out, body.String(), nil
 }
 
 func fields(fields []*ast.Field) string {

@@ -100,35 +100,45 @@ type Node struct {
 }
 
 func (n Node) String() string {
-	buf, err := json.Marshal(n)
-	check(err)
+	buf, _ := json.Marshal(n)
 	return string(buf)
 }
 
 func Run(args []string) {
 	var private, templates, formula, output string
+	var dx float64
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.StringVar(&formula, "formula", Formula(10), "the formula to parse")
-	flags.StringVar(&private, "private", "x", "the private variable string")
+	flags.StringVar(&private, "private", defaultPrivateString, "the private variable string")
 	flags.StringVar(&templates, "templates", "src/xoba/ad/parser/templates", "directory of go template functions")
 	flags.StringVar(&output, "output", "compute.go", "name of go program to output")
+	flags.Float64Var(&dx, "dx", 0.00001, "infinitesimal for numerical differentiation")
 	flags.Parse(args)
 
-	code := Parse(private, templates, formula)
-
+	code, err := Parse(private, templates, formula, 0.00001)
+	if err != nil {
+		log.Fatal(err)
+	}
 	f, err := os.Create(output)
-	check(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 	f.Write(code)
 	f.Close()
-	if err := Gofmt(output); err != nil {
-		log.Fatalf("oops: %v\n", err)
-	}
-
 }
 
-func Parse(private, templates, formula string) []byte {
+func Parse(private, templates, formula string, dx float64) ([]byte, error) {
+	if len(private) == 0 {
+		private = defaultPrivateString
+	}
 	lex := NewContext(NewLexer(strings.NewReader(formula)))
 	yyParse(lex)
+	if len(lex.errors) > 0 {
+		return nil, lex.errors[0]
+	}
+	if lex.lhs == nil || lex.rhs == nil {
+		return nil, fmt.Errorf("parse error: lhs or rhs is nil")
+	}
 	vars := make(map[string]string)
 	vp := &VarParser{vars: vars}
 	sp := &StepParser{vars: vars}
@@ -139,7 +149,6 @@ func Parse(private, templates, formula string) []byte {
 
 	checker := new(bytes.Buffer)
 	{
-		dx := 0.00001
 		fmt.Fprintf(checker, "delta_%s := %f\n", private, dx)
 		fmt.Fprintf(checker, `calc_%s := func() float64 {
 %s
@@ -185,6 +194,13 @@ return %s
 
 	t := template.Must(template.New("output.go").Parse(`package main
 {{.imports}}
+
+// automatically compute the value and gradient of {{.qformula}}
+func ComputeAD({{.vars}} float64) (float64,map[string]float64) {
+grad_{{.private}} := make(map[string]float64)
+{{.program}} return {{.y}},grad_{{.private}};
+}
+
 func main() {
 fmt.Println("running autodiff code on {{.formula}}\n");
 rand.Seed(time.Now().UTC().UnixNano())
@@ -210,37 +226,38 @@ rand.Seed(time.Now().UTC().UnixNano())
 fmt.Printf("\nsum of absolute differences: %f\n",total);
 }
 
-{{.funcs}}
-
-func ComputeAD({{.vars}} float64) (float64,map[string]float64) {
-grad_{{.private}} := make(map[string]float64)
-{{.program}} return {{.y}},grad_{{.private}};
-}
-
+// numerically compute the value and gradient of {{.qformula}}
 func ComputeNumerical({{.vars}} float64) (float64,map[string]float64) {
 grad_{{.private}} := make(map[string]float64)
 {{.checker}} return tmp1_{{.private}},grad_{{.private}};
 }
 
+{{.funcs}}
+
+
 `))
 
-	templateImports, code := GenTemplates(templates, private)
+	templateImports, code, err := GenTemplates(templates, private)
+	if err != nil {
+		return nil, err
+	}
 	imports.AddAll(templateImports)
 
 	t.Execute(f, map[string]interface{}{
-		"decls":   decls.String(),
-		"formula": formula,
-		"lhs":     lex.lhs.S,
-		"vars":    strings.Join(list, ", "),
-		"program": pgm.String(),
-		"checker": checker.String(),
-		"y":       y,
-		"funcs":   code,
-		"private": private,
-		"imports": imports.String(),
+		"decls":    decls.String(),
+		"formula":  formula,
+		"qformula": fmt.Sprintf("%q", formula),
+		"lhs":      lex.lhs.S,
+		"vars":     strings.Join(list, ", "),
+		"program":  pgm.String(),
+		"checker":  checker.String(),
+		"y":        y,
+		"funcs":    code,
+		"private":  private,
+		"imports":  imports.String(),
 	})
 
-	return f.Bytes()
+	return GofmtBuffer(f.Bytes())
 }
 
 type Imports struct {
@@ -289,6 +306,17 @@ func Gofmt(p string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
+}
+
+func GofmtBuffer(code []byte) ([]byte, error) {
+	out := new(bytes.Buffer)
+	cmd := exec.Command("gofmt")
+	cmd.Stdin = bytes.NewReader(code)
+	cmd.Stdout = out
+	if err := cmd.Run(); err != nil {
+		return nil, err
+	}
+	return out.Bytes(), nil
 }
 
 type VarParser struct {
@@ -377,8 +405,7 @@ func LexIdentifier(s string) *Node {
 }
 
 func LexNumber(s string) *Node {
-	n, err := strconv.ParseFloat(s, 64)
-	check(err)
+	n, _ := strconv.ParseFloat(s, 64)
 	return Number(n)
 }
 
@@ -390,19 +417,18 @@ type context struct {
 	lhs *Node
 	rhs *Node
 	yyLexer
+	errors []error
 }
 
 func NewContext(y yyLexer) *context {
 	return &context{yyLexer: y}
 }
 
-func (context) Error(e string) {
-	log.Printf("oops: %v\n", e)
-	os.Exit(1)
+func (c *context) Error(e string) {
+	c.Error2(fmt.Errorf("%s", e))
 }
 
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
+func (c *context) Error2(e error) {
+	log.Printf("oops: %v\n", e)
+	c.errors = append(c.errors, e)
 }
