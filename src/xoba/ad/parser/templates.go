@@ -15,7 +15,7 @@ func RunTemplates(args []string) {
 	var private, templates string
 	flags := flag.NewFlagSet("templates", flag.ExitOnError)
 	flags.StringVar(&private, "private", "x", "the private variable string")
-	flags.StringVar(&templates, "templates", "src/xoba/ad/parser/templates", "directory of go template functions")
+	flags.StringVar(&templates, "dir", "src/xoba/ad/parser/templates", "directory of go template functions")
 	flags.Parse(args)
 	imports, code := GenTemplates(templates, private)
 	fmt.Printf("imports: %v\n", imports)

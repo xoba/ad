@@ -23,4 +23,5 @@ for help, you can try:
 
     run
     run parse -help
+    run templates -help
 
