@@ -16,6 +16,20 @@ func d_tan(a float64) float64 {
 	return math.Pow(1/math.Cos(a), 2)
 }
 
+func abs(a float64) float64 {
+	return math.Abs(a)
+}
+func d_abs(a float64) float64 {
+	switch {
+	case a > 0:
+		return +1
+	case a < 0:
+		return -1
+	default:
+		panic("illegal derivative when abs(0)=0")
+	}
+}
+
 func atan(a float64) float64 {
 	return math.Atan(a)
 }

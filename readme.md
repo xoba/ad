@@ -16,7 +16,7 @@ then:
     cd ad
     source goinit.sh
     ./install.sh
-    run parse -formula "f := sqrt(a+b*b)"
+    run parse -formula "f := sqrt(abs(a+b*b))"
     go run compute.go
 
 for help, you can try:
