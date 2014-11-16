@@ -18,6 +18,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 )
 
 func Formula(n int) string {
@@ -204,7 +205,10 @@ return %s
 	imports.Add("time")
 	imports.Add("math/rand")
 
-	t := template.Must(template.New("output.go").Parse(`package main
+	t := template.Must(template.New("output.go").Parse(`// created {{.time}}
+// see https://github.com/xoba/ad
+
+package main
 {{.imports}}
 
 // automatically compute the value and gradient of {{.qformula}}
@@ -214,7 +218,7 @@ grad_{{.private}} := make(map[string]float64)
 }
 
 func main() {
-fmt.Println("running autodiff code on {{.formula}}\n");
+fmt.Printf("running autodiff code of {{.time}} on %q\n\n", {{ printf "%q" .formula }});
 rand.Seed(time.Now().UTC().UnixNano())
 {{.decls}} 
 
@@ -256,6 +260,7 @@ grad_{{.private}} := make(map[string]float64)
 	imports.AddAll(templateImports)
 
 	t.Execute(f, map[string]interface{}{
+		"time":     time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
 		"decls":    decls.String(),
 		"formula":  formula,
 		"qformula": fmt.Sprintf("%q", formula),
