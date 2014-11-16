@@ -194,7 +194,7 @@ return %s
 	decls := new(bytes.Buffer)
 	for _, v := range list {
 		fmt.Fprintf(decls, "%s := rand.Float64();\n", v)
-		fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%f\\n\",%s)\n", v, v)
+		fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%.20f\\n\",%s)\n", v, v)
 	}
 	fmt.Fprintln(decls, `fmt.Println();`)
 
