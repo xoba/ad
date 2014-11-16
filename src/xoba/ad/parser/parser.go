@@ -7,6 +7,7 @@ package parser
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -115,6 +116,10 @@ func (n Node) String() string {
 }
 
 func Run(args []string) {
+	flags := flag.NewFlagSet("parser", flag.ExitOnError)
+	flags.StringVar(&formula, "formula", formula, "the formula to parse")
+	flags.Parse(args)
+
 	lex := NewContext(NewLexer(strings.NewReader(formula)))
 	yyParse(lex)
 	vars := make(map[string]string)
