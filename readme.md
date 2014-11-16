@@ -1,8 +1,10 @@
 automatic or algorithmic differentiation
 ----------------------------------------
 
-strategy: mini-language (i.e., a dsl) for functions 
-and formulas, then compile it to go, for high performance.
+see http://autodiff.info for live demo
+
+strategy: a simple mathematical formula language, which is
+auto-differentiated and compiled to go for high performance.
 
 to get started: make sure you have latest golang.org installed; e.g. https://golang.org/dl/ --- or,
 build it yourself via https://github.com/xoba/goinit
