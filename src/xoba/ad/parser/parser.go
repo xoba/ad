@@ -20,16 +20,6 @@ import (
 	"text/template"
 )
 
-// don't name any varibles like this prefix in your expressions:
-const private = "x"
-
-func Functions(p string) string {
-	_, b := GenTemplates("src/xoba/ad/parser/templates", private)
-	return b
-}
-
-var formula string = Formula(10)
-
 func Formula(n int) string {
 	if true {
 		var terms []string
@@ -46,7 +36,7 @@ func Formula(n int) string {
 	return fmt.Sprintf("f := sqrt(a*x) + pow(a,b) + a-b+c/d + log(1 + exp(-y * (%s)))", strings.Join(terms, "+"))
 }
 
-func computeDerivatives(w io.Writer, steps []Step) {
+func computeDerivatives(w io.Writer, steps []Step, private string) {
 	n := len(steps)
 	for i := 0; i < n; i++ {
 		j := n - i - 1
@@ -58,7 +48,7 @@ func computeDerivatives(w io.Writer, steps []Step) {
 		fmt.Fprintf(w, "b_%s := %f\n", step.lhs, x0)
 		for k := j + 1; k < n; k++ {
 			s3 := steps[k]
-			if d := derivative(s3, step); len(d) > 0 {
+			if d := derivative(s3, step, private); len(d) > 0 {
 				fmt.Fprintf(w, "b_%s += b_%s * (%s)\n", step.lhs, s3.lhs, d)
 			}
 		}
@@ -76,7 +66,7 @@ type Step struct {
 	args []string
 }
 
-func derivative(num, denom Step) string {
+func derivative(num, denom Step, private string) string {
 	var args []int
 	for i, a := range num.args {
 		if a == denom.lhs {
@@ -116,8 +106,11 @@ func (n Node) String() string {
 }
 
 func Run(args []string) {
+	var private, templates, formula string
 	flags := flag.NewFlagSet("parser", flag.ExitOnError)
-	flags.StringVar(&formula, "formula", formula, "the formula to parse")
+	flags.StringVar(&formula, "formula", Formula(10), "the formula to parse")
+	flags.StringVar(&private, "private", "x", "the private variable string")
+	flags.StringVar(&templates, "templates", "src/xoba/ad/parser/templates", "directory of go template functions")
 	flags.Parse(args)
 
 	lex := NewContext(NewLexer(strings.NewReader(formula)))
@@ -126,8 +119,8 @@ func Run(args []string) {
 	vp := &VarParser{vars: vars}
 	sp := &StepParser{vars: vars}
 	var steps []Step
-	steps = append(steps, vp.getVars(lex.rhs)...)
-	steps = append(steps, sp.program(lex.rhs)...)
+	steps = append(steps, vp.getVars(lex.rhs, private)...)
+	steps = append(steps, sp.program(lex.rhs, private)...)
 	y := steps[len(steps)-1].lhs
 
 	checker := new(bytes.Buffer)
@@ -155,7 +148,7 @@ return %s
 		fmt.Fprintln(pgm, s)
 		//	fmt.Fprintf(pgm, "fmt.Printf(\"%s = %%f\\n\",%s)\n", s.lhs, s.lhs)
 	}
-	computeDerivatives(pgm, steps)
+	computeDerivatives(pgm, steps, private)
 	var list []string
 	for v := range vars {
 		list = append(list, v)
@@ -171,13 +164,14 @@ return %s
 		fmt.Fprintf(decls, "fmt.Printf(\"%s = %%f\\n\",%s)\n", v, v)
 	}
 
+	var imports Imports
+	imports.Add("fmt")
+	imports.Add("math")
+	imports.Add("time")
+	imports.Add("math/rand")
+
 	t := template.Must(template.New("compute.go").Parse(`package main
-import (
-"fmt"
-"math"
-"time"
-"math/rand"
-)
+{{.imports}}
 func main() {
 fmt.Println("running compute.go");
 rand.Seed(time.Now().UTC().UnixNano())
@@ -217,6 +211,9 @@ grad_{{.private}} := make(map[string]float64)
 
 `))
 
+	templateImports, code := GenTemplates(templates, private)
+	imports.AddAll(templateImports)
+
 	t.Execute(f, map[string]interface{}{
 		"decls":   decls.String(),
 		"formula": formula,
@@ -225,14 +222,56 @@ grad_{{.private}} := make(map[string]float64)
 		"program": pgm.String(),
 		"checker": checker.String(),
 		"y":       y,
-		"funcs":   Functions(private),
+		"funcs":   code,
 		"private": private,
+		"imports": imports.String(),
 	})
 
 	f.Close()
 	if err := Gofmt("compute.go"); err != nil {
 		log.Fatalf("oops: %v\n", err)
 	}
+}
+
+type Imports struct {
+	list []string
+}
+
+func (i Imports) String() string {
+	m := make(map[string]bool)
+	for _, x := range i.list {
+		x = strings.Replace(x, `"`, ``, -1)
+		m[x] = true
+	}
+	out := new(bytes.Buffer)
+	fmt.Fprintf(out, "import (\n")
+	for k := range m {
+		fmt.Fprintf(out, "%q\n", k)
+	}
+	fmt.Fprintf(out, ")\n")
+	return out.String()
+}
+
+func (i *Imports) Add(x string) {
+	i.list = append(i.list, x)
+}
+
+func (i *Imports) AddAll(list []string) {
+	for _, x := range list {
+		i.Add(x)
+	}
+}
+
+func formatImports(list []string) string {
+	var out []string
+	m := make(map[string]bool)
+	for _, x := range list {
+		m[x] = true
+	}
+	for k := range m {
+		out = append(out, k)
+	}
+	return strings.Join(out, "\n")
 }
 
 func Gofmt(p string) error {
@@ -247,8 +286,8 @@ type VarParser struct {
 	vars map[string]string
 }
 
-// gets all the vars and names them in tree
-func (v *VarParser) getVars(rhs *Node) (out []Step) {
+// gets all the vars and name them in-place
+func (v *VarParser) getVars(rhs *Node, private string) (out []Step) {
 	switch rhs.Type {
 	case identifierNT:
 		if _, ok := v.vars[rhs.S]; !ok {
@@ -266,7 +305,7 @@ func (v *VarParser) getVars(rhs *Node) (out []Step) {
 		}
 	case functionNT:
 		for _, n := range rhs.Children {
-			out = append(out, v.getVars(n)...)
+			out = append(out, v.getVars(n, private)...)
 		}
 	}
 	return
@@ -281,14 +320,14 @@ func (s Step) String() string {
 	return fmt.Sprintf("%s := %s;", s.lhs, s.rhs)
 }
 
-func (s *StepParser) program(rhs *Node) (out []Step) {
+func (s *StepParser) program(rhs *Node, private string) (out []Step) {
 	switch rhs.Type {
 	case numberNT:
 		rhs.Name = fmt.Sprintf("%f", rhs.F)
 	case functionNT:
 		var args []string
 		for _, n := range rhs.Children {
-			steps := s.program(n)
+			steps := s.program(n, private)
 			out = append(out, steps...)
 			args = append(args, n.Name)
 		}

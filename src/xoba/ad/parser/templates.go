@@ -11,11 +11,14 @@ import (
 )
 
 func RunTemplates(args []string) {
-	fmt.Println(GenTemplates("src/xoba/ad/parser/templates", "abc"))
+	imports, code := GenTemplates("src/xoba/ad/parser/templates", "abc")
+	fmt.Printf("imports: %v\n", imports)
+	fmt.Printf("code:\n%s", code)
 }
 
-func GenTemplates(dir, private string) (imports map[string]struct{}, code string) {
-	imports = make(map[string]struct{})
+// generate function templates, output imports and actual code
+func GenTemplates(dir, private string) ([]string, string) {
+	imports := make(map[string]struct{})
 	body := new(bytes.Buffer)
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, dir, nil, parser.AllErrors)
@@ -32,9 +35,12 @@ func GenTemplates(dir, private string) (imports map[string]struct{}, code string
 						fmt.Fprintf(body, "func %s(", name)
 						fmt.Fprint(body, fields(t.Type.Params.List))
 						fmt.Fprint(body, ")")
-						fmt.Fprint(body, "(")
-						fmt.Fprint(body, fields(t.Type.Results.List))
-						fmt.Fprint(body, ") {")
+						if t.Type.Results != nil {
+							fmt.Fprint(body, "(")
+							fmt.Fprint(body, fields(t.Type.Results.List))
+							fmt.Fprint(body, ")")
+						}
+						fmt.Fprint(body, "{")
 						start := t.Body.Lbrace
 						file := fset.File(start)
 						end := t.Body.Rbrace
@@ -49,7 +55,11 @@ func GenTemplates(dir, private string) (imports map[string]struct{}, code string
 			}
 		}
 	}
-	return imports, body.String()
+	var out []string
+	for k := range imports {
+		out = append(out, k)
+	}
+	return out, body.String()
 }
 
 func fields(fields []*ast.Field) string {
