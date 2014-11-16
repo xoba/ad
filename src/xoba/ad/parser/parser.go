@@ -107,7 +107,7 @@ func (n Node) String() string {
 
 func Run(args []string) {
 	var private, templates, formula string
-	flags := flag.NewFlagSet("parser", flag.ExitOnError)
+	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.StringVar(&formula, "formula", Formula(10), "the formula to parse")
 	flags.StringVar(&private, "private", "x", "the private variable string")
 	flags.StringVar(&templates, "templates", "src/xoba/ad/parser/templates", "directory of go template functions")
