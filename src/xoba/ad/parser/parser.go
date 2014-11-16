@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"os"
 	"os/exec"
 	"sort"
@@ -22,19 +21,11 @@ import (
 )
 
 func Formula(n int) string {
-	if true {
-		var terms []string
-		for i := 0; i < n; i++ {
-			terms = append(terms, fmt.Sprintf("x%d", i))
-		}
-		return "f:=" + strings.Join(terms, "*")
-	}
 	var terms []string
 	for i := 0; i < n; i++ {
-		term := fmt.Sprintf("%f * x%d", rand.Float64(), i)
-		terms = append(terms, term)
+		terms = append(terms, fmt.Sprintf("x%d", i))
 	}
-	return fmt.Sprintf("f := sqrt(a*x) + pow(a,b) + a-b+c/d + log(1 + exp(-y * (%s)))", strings.Join(terms, "+"))
+	return "f:=" + strings.Join(terms, "*")
 }
 
 func computeDerivatives(w io.Writer, steps []Step, private string) {
@@ -68,6 +59,7 @@ type Step struct {
 }
 
 func derivative(num, denom Step, private string) string {
+	singleArg := len(num.args) == 1
 	var args []int
 	for i, a := range num.args {
 		if a == denom.lhs {
@@ -79,7 +71,11 @@ func derivative(num, denom Step, private string) string {
 	}
 	var list []string
 	for _, a := range args {
-		list = append(list, fmt.Sprintf("d_%s_%s(%d,%s)", num.f, private, a, strings.Join(num.args, ",")))
+		if singleArg {
+			list = append(list, fmt.Sprintf("d_%s_%s(%s)", num.f, private, strings.Join(num.args, ",")))
+		} else {
+			list = append(list, fmt.Sprintf("d_%s_%s(%d,%s)", num.f, private, a, strings.Join(num.args, ",")))
+		}
 	}
 	return strings.Join(list, "+")
 }
