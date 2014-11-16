@@ -4,7 +4,7 @@ automatic or algorithmic differentiation
 a simple mathematical formula language, which is auto-differentiated
 and compiled to go for high performance.
 
-see https://autodiff.info for live demo
+see https://autodiff.info for live demo.
 
 to get started: make sure you have latest golang.org installed
 (e.g. https://golang.org/dl/), or build it yourself via
