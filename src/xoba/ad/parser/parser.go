@@ -192,7 +192,7 @@ return %s
 	decls := new(bytes.Buffer)
 	for _, v := range list {
 		fmt.Fprintf(decls, "%s := %.20f;\n", v, rand.NormFloat64())
-		fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%.20f\\n\",%s)\n", v, v)
+		fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%+.20f\\n\",%s)\n", v, v)
 	}
 	fmt.Fprintln(decls, `fmt.Println();`)
 
@@ -226,14 +226,14 @@ fmt.Printf("running autodiff code of {{.time}} on %q\n\n", {{ printf "%q" .formu
 
 	var total float64
 	add := func(n string, x float64) {
-		fmt.Printf("%s difference: %.20f\n", n, x)
+		fmt.Printf("%s difference: %+.20f\n", n, x)
 		total += math.Abs(x)
 	}
 	add("value", c1-c2)
 	for k, v := range grad2 {
 		add(fmt.Sprintf("grad[%3s]", k), grad1[k]-v)
 	}
-fmt.Printf("\nsum of absolute differences: %.20f\n",total);
+fmt.Printf("\nsum of absolute differences: %+.20f\n",total);
 }
 
 // numerically compute the value and gradient of {{.qformula}}
