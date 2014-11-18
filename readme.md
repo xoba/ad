@@ -12,7 +12,7 @@ https://github.com/xoba/goinit
 
 then:
 
-    git clone --recursive git@github.com:xoba/ad.git
+    git clone --recursive https://github.com/xoba/ad.git
     cd ad
     source goinit.sh
     ./install.sh
