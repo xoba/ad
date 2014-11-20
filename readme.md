@@ -2,7 +2,7 @@ automatic or algorithmic differentiation in go
 ----------------------------------------------
 
 a simple mathematical formula language, which is auto-differentiated
-and compiled to go for high performance.
+and compiled to http://golang.org for high performance.
 
 see https://autodiff.info for live demo.
 
