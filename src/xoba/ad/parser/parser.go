@@ -10,6 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -107,7 +108,7 @@ func Run(args []string) {
 	var dx float64
 	var main, timeComment bool
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
-	flags.StringVar(&formula, "formula", Formula(10), "the formula to parse")
+	flags.StringVar(&formula, "formula", Formula(10), "the formula to parse (or file)")
 	flags.StringVar(&private, "private", defaultPrivateString, "the private variable string")
 	flags.StringVar(&pkg, "package", "main", "the go package for generated code")
 	flags.StringVar(&templates, "templates", defaultTemplates, "directory of go template functions")
@@ -116,6 +117,10 @@ func Run(args []string) {
 	flags.BoolVar(&timeComment, "time", true, "embed time in source code comment")
 	flags.Float64Var(&dx, "dx", defaultDx, "infinitesimal for numerical differentiation")
 	flags.Parse(args)
+
+	if buf, err := ioutil.ReadFile(formula); err == nil {
+		formula = string(buf)
+	}
 
 	code, err := Parse(main, timeComment, pkg, private, templates, formula, 0.00001)
 	if err != nil {

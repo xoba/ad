@@ -7,146 +7,43 @@ import (
 	"math"
 )
 
-// automatically compute the value and gradient of "f:=x0*x1*x2*x3*x4*x5*x6*x7*x8*x9"
-func ComputeAD(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9 float64) (float64, map[string]float64) {
+// automatically compute the value and gradient of "f:= x*y\n"
+func ComputeAD(x, y float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
-	v_0_pvt := x0
-	v_1_pvt := x1
-	v_2_pvt := x2
-	v_3_pvt := x3
-	v_4_pvt := x4
-	v_5_pvt := x5
-	v_6_pvt := x6
-	v_7_pvt := x7
-	v_8_pvt := x8
-	v_9_pvt := x9
+	v_0_pvt := x
+	v_1_pvt := y
 	s_0_pvt := multiply_pvt(v_0_pvt, v_1_pvt)
-	s_1_pvt := multiply_pvt(s_0_pvt, v_2_pvt)
-	s_2_pvt := multiply_pvt(s_1_pvt, v_3_pvt)
-	s_3_pvt := multiply_pvt(s_2_pvt, v_4_pvt)
-	s_4_pvt := multiply_pvt(s_3_pvt, v_5_pvt)
-	s_5_pvt := multiply_pvt(s_4_pvt, v_6_pvt)
-	s_6_pvt := multiply_pvt(s_5_pvt, v_7_pvt)
-	s_7_pvt := multiply_pvt(s_6_pvt, v_8_pvt)
-	s_8_pvt := multiply_pvt(s_7_pvt, v_9_pvt)
-	const b_s_8_pvt = 1.0
-	b_s_7_pvt := 0.0
-	b_s_7_pvt += b_s_8_pvt * (d_multiply_pvt(0, s_7_pvt, v_9_pvt))
-	b_s_6_pvt := 0.0
-	b_s_6_pvt += b_s_7_pvt * (d_multiply_pvt(0, s_6_pvt, v_8_pvt))
-	b_s_5_pvt := 0.0
-	b_s_5_pvt += b_s_6_pvt * (d_multiply_pvt(0, s_5_pvt, v_7_pvt))
-	b_s_4_pvt := 0.0
-	b_s_4_pvt += b_s_5_pvt * (d_multiply_pvt(0, s_4_pvt, v_6_pvt))
-	b_s_3_pvt := 0.0
-	b_s_3_pvt += b_s_4_pvt * (d_multiply_pvt(0, s_3_pvt, v_5_pvt))
-	b_s_2_pvt := 0.0
-	b_s_2_pvt += b_s_3_pvt * (d_multiply_pvt(0, s_2_pvt, v_4_pvt))
-	b_s_1_pvt := 0.0
-	b_s_1_pvt += b_s_2_pvt * (d_multiply_pvt(0, s_1_pvt, v_3_pvt))
-	b_s_0_pvt := 0.0
-	b_s_0_pvt += b_s_1_pvt * (d_multiply_pvt(0, s_0_pvt, v_2_pvt))
-	b_v_9_pvt := 0.0
-	b_v_9_pvt += b_s_8_pvt * (d_multiply_pvt(1, s_7_pvt, v_9_pvt))
-	grad_pvt["x9"] = b_v_9_pvt
-	b_v_8_pvt := 0.0
-	b_v_8_pvt += b_s_7_pvt * (d_multiply_pvt(1, s_6_pvt, v_8_pvt))
-	grad_pvt["x8"] = b_v_8_pvt
-	b_v_7_pvt := 0.0
-	b_v_7_pvt += b_s_6_pvt * (d_multiply_pvt(1, s_5_pvt, v_7_pvt))
-	grad_pvt["x7"] = b_v_7_pvt
-	b_v_6_pvt := 0.0
-	b_v_6_pvt += b_s_5_pvt * (d_multiply_pvt(1, s_4_pvt, v_6_pvt))
-	grad_pvt["x6"] = b_v_6_pvt
-	b_v_5_pvt := 0.0
-	b_v_5_pvt += b_s_4_pvt * (d_multiply_pvt(1, s_3_pvt, v_5_pvt))
-	grad_pvt["x5"] = b_v_5_pvt
-	b_v_4_pvt := 0.0
-	b_v_4_pvt += b_s_3_pvt * (d_multiply_pvt(1, s_2_pvt, v_4_pvt))
-	grad_pvt["x4"] = b_v_4_pvt
-	b_v_3_pvt := 0.0
-	b_v_3_pvt += b_s_2_pvt * (d_multiply_pvt(1, s_1_pvt, v_3_pvt))
-	grad_pvt["x3"] = b_v_3_pvt
-	b_v_2_pvt := 0.0
-	b_v_2_pvt += b_s_1_pvt * (d_multiply_pvt(1, s_0_pvt, v_2_pvt))
-	grad_pvt["x2"] = b_v_2_pvt
+	const b_s_0_pvt = 1.0
 	b_v_1_pvt := 0.0
 	b_v_1_pvt += b_s_0_pvt * (d_multiply_pvt(1, v_0_pvt, v_1_pvt))
-	grad_pvt["x1"] = b_v_1_pvt
+	grad_pvt["y"] = b_v_1_pvt
 	b_v_0_pvt := 0.0
 	b_v_0_pvt += b_s_0_pvt * (d_multiply_pvt(0, v_0_pvt, v_1_pvt))
-	grad_pvt["x0"] = b_v_0_pvt
-	return s_8_pvt, grad_pvt
+	grad_pvt["x"] = b_v_0_pvt
+	return s_0_pvt, grad_pvt
 }
 
-// numerically compute the value and gradient of "f:=x0*x1*x2*x3*x4*x5*x6*x7*x8*x9"
-func ComputeNumerical(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9 float64) (float64, map[string]float64) {
+// numerically compute the value and gradient of "f:= x*y\n"
+func ComputeNumerical(x, y float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
 	const delta_pvt = 0.000010
 	calc_pvt := func() float64 {
-		f := x0 * x1 * x2 * x3 * x4 * x5 * x6 * x7 * x8 * x9
+		f := x * y
+
 		return f
 	}
 	tmp1_pvt := calc_pvt()
 	{
-		x0 += delta_pvt
+		x += delta_pvt
 		tmp2_pvt := calc_pvt()
-		x0 -= delta_pvt
-		grad_pvt["x0"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		x -= delta_pvt
+		grad_pvt["x"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		x1 += delta_pvt
+		y += delta_pvt
 		tmp2_pvt := calc_pvt()
-		x1 -= delta_pvt
-		grad_pvt["x1"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
-	}
-	{
-		x2 += delta_pvt
-		tmp2_pvt := calc_pvt()
-		x2 -= delta_pvt
-		grad_pvt["x2"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
-	}
-	{
-		x3 += delta_pvt
-		tmp2_pvt := calc_pvt()
-		x3 -= delta_pvt
-		grad_pvt["x3"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
-	}
-	{
-		x4 += delta_pvt
-		tmp2_pvt := calc_pvt()
-		x4 -= delta_pvt
-		grad_pvt["x4"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
-	}
-	{
-		x5 += delta_pvt
-		tmp2_pvt := calc_pvt()
-		x5 -= delta_pvt
-		grad_pvt["x5"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
-	}
-	{
-		x6 += delta_pvt
-		tmp2_pvt := calc_pvt()
-		x6 -= delta_pvt
-		grad_pvt["x6"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
-	}
-	{
-		x7 += delta_pvt
-		tmp2_pvt := calc_pvt()
-		x7 -= delta_pvt
-		grad_pvt["x7"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
-	}
-	{
-		x8 += delta_pvt
-		tmp2_pvt := calc_pvt()
-		x8 -= delta_pvt
-		grad_pvt["x8"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
-	}
-	{
-		x9 += delta_pvt
-		tmp2_pvt := calc_pvt()
-		x9 -= delta_pvt
-		grad_pvt["x9"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		y -= delta_pvt
+		grad_pvt["y"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	return tmp1_pvt, grad_pvt
 }
