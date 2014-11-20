@@ -169,7 +169,12 @@ return %s
 }
 `, private, formula, lex.lhs.S)
 		fmt.Fprintf(checker, "tmp1_%s := calc_%s()\n", private, private)
+		var names []string
 		for k := range vars {
+			names = append(names, k)
+		}
+		sort.Strings(names)
+		for _, k := range names {
 			fmt.Fprintln(checker, "{")
 			fmt.Fprintf(checker, "%s += delta_%s\n", k, private)
 			fmt.Fprintf(checker, "tmp2_%s := calc_%s()\n", private, private)
