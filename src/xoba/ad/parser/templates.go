@@ -2,29 +2,13 @@ package parser
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"io/ioutil"
-	"log"
 	"strings"
 )
-
-func RunTemplates(args []string) {
-	var private, templates string
-	flags := flag.NewFlagSet("templates", flag.ExitOnError)
-	flags.StringVar(&private, "private", defaultPrivateString, "the private variable string")
-	flags.StringVar(&templates, "dir", "src/xoba/ad/parser/templates", "directory of go template functions")
-	flags.Parse(args)
-	imports, code, err := GenTemplates(templates, private)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("imports: %v\n", imports)
-	fmt.Printf("code:\n%s", code)
-}
 
 // generate function templates, output imports and actual code
 func GenTemplates(dir, private string) ([]string, string, error) {

@@ -16,6 +16,5 @@ func init() {
 	add := func(name, desc string, f func([]string)) {
 		tool.Register(tool.Named(name+","+desc, tool.RunFunc(f)))
 	}
-	add("templates", "run templates", parser.RunTemplates)
-	add("parse", "emit formula code", parser.Run)
+	add("compile", "compile formula to go", parser.Run)
 }
