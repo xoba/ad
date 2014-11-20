@@ -7,43 +7,43 @@ import (
 	"math"
 )
 
-// automatically compute the value and gradient of "f:= x*y\n"
-func ComputeAD(x, y float64) (float64, map[string]float64) {
+// automatically compute the value and gradient of "f := a+b\n"
+func ComputeAD(a, b float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
-	v_0_pvt := x
-	v_1_pvt := y
-	s_0_pvt := multiply_pvt(v_0_pvt, v_1_pvt)
+	v_0_pvt := a
+	v_1_pvt := b
+	s_0_pvt := add_pvt(v_0_pvt, v_1_pvt)
 	const b_s_0_pvt = 1.0
 	b_v_1_pvt := 0.0
-	b_v_1_pvt += b_s_0_pvt * (d_multiply_pvt(1, v_0_pvt, v_1_pvt))
-	grad_pvt["y"] = b_v_1_pvt
+	b_v_1_pvt += b_s_0_pvt * (d_add_pvt(1, v_0_pvt, v_1_pvt))
+	grad_pvt["b"] = b_v_1_pvt
 	b_v_0_pvt := 0.0
-	b_v_0_pvt += b_s_0_pvt * (d_multiply_pvt(0, v_0_pvt, v_1_pvt))
-	grad_pvt["x"] = b_v_0_pvt
+	b_v_0_pvt += b_s_0_pvt * (d_add_pvt(0, v_0_pvt, v_1_pvt))
+	grad_pvt["a"] = b_v_0_pvt
 	return s_0_pvt, grad_pvt
 }
 
-// numerically compute the value and gradient of "f:= x*y\n"
-func ComputeNumerical(x, y float64) (float64, map[string]float64) {
+// numerically compute the value and gradient of "f := a+b\n"
+func ComputeNumerical(a, b float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
 	const delta_pvt = 0.000010
 	calc_pvt := func() float64 {
-		f := x * y
+		f := a + b
 
 		return f
 	}
 	tmp1_pvt := calc_pvt()
 	{
-		x += delta_pvt
+		a += delta_pvt
 		tmp2_pvt := calc_pvt()
-		x -= delta_pvt
-		grad_pvt["x"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		a -= delta_pvt
+		grad_pvt["a"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		y += delta_pvt
+		b += delta_pvt
 		tmp2_pvt := calc_pvt()
-		y -= delta_pvt
-		grad_pvt["y"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		b -= delta_pvt
+		grad_pvt["b"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	return tmp1_pvt, grad_pvt
 }
