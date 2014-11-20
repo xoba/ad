@@ -23,4 +23,13 @@ for help, you can try:
 
     run
     run compile -help
+    run nn -help
+
+to develop with emacs:
+
+    ./ide.sh
+
+to auto-generate various code:
+
+    lib/gogenerate.sh
 
