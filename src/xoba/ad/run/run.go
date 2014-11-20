@@ -2,6 +2,7 @@ package main
 
 import (
 	"xoba/ad/parser"
+	"xoba/nn"
 
 	"github.com/xoba/goutil"
 	"github.com/xoba/goutil/tool"
@@ -17,4 +18,5 @@ func init() {
 		tool.Register(tool.Named(name+","+desc, tool.RunFunc(f)))
 	}
 	add("compile", "compile formula to go", parser.Run)
+	add("nn", "neural network example", nn.Run)
 }
