@@ -34,7 +34,7 @@ func TestTwoDims(t *testing.T) {
 }
 
 func TestAbs(t *testing.T) {
-	if !doesPanic(func() {
+	if !panics(func() {
 		d_abs(0)
 	}) {
 		t.Fatal("oops: d_abs(0) doesn't panic")
@@ -78,7 +78,7 @@ func test2d(name string, f Function2D, df DFunction2D, t *testing.T) {
 		f := func() {
 			df(i, 0, 0)
 		}
-		if !doesPanic(f) {
+		if !panics(f) {
 			t.Fatalf("oops: %q didn't panic on bad index %d\n", name, i)
 		}
 	}
@@ -88,7 +88,7 @@ func test2d(name string, f Function2D, df DFunction2D, t *testing.T) {
 	}
 }
 
-func doesPanic(f func()) bool {
+func panics(f func()) bool {
 	var recovered bool
 	func() {
 		defer func() {
