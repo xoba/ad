@@ -33,45 +33,56 @@ func TestTwoDims(t *testing.T) {
 	test2d("pow", pow, d_pow, t)
 }
 
+func test1d(name string, f, df Function, t *testing.T) {
+	df2 := f.Derivative()
+	var n, failed int
+	for n < n0 {
+		a := rand.NormFloat64()
+		if y := f(a); math.IsNaN(y) || math.IsInf(y, 0) {
+			continue
+		}
+		n++
+		if df := math.Abs(df(a) - df2(a)); df > dx2 {
+			failed++
+		}
+	}
+	eval(name, n, failed, t)
+}
+
 func test2d(name string, f Function2D, df DFunction2D, t *testing.T) {
-	var n int
-	for n < 10 {
-		x := rand.NormFloat64()
-		y := rand.NormFloat64()
-		v := f(x, y)
-		if math.IsNaN(v) || math.IsInf(v, 0) {
+	df2 := f.Derivative()
+	var n, failed int
+	for n < n0 {
+		a, b := rand.NormFloat64(), rand.NormFloat64()
+		if y := f(a, b); math.IsNaN(y) || math.IsInf(y, 0) {
 			continue
 		}
 		n++
 		for i := 0; i < 2; i++ {
-			if df := math.Abs(df(i, x, y) - f.Derivative()(i, x, y)); df > 0.0001 {
-				t.Fatalf("oops: df(%d,%f,%f) = %f for %s", i, x, y, df, name)
+			if df := math.Abs(df(i, a, b) - df2(i, a, b)); df > dx2 {
+				failed++
 			}
 		}
 	}
+	eval(name, n, failed, t)
 }
 
-func test1d(name string, f, d Function, t *testing.T) {
-	var n int
-	for n < 10 {
-		x := rand.NormFloat64()
-		y := f(x)
-		if math.IsNaN(y) || math.IsInf(y, 0) {
-			continue
-		}
-		n++
-		if df := math.Abs(d(x) - f.Derivative()(x)); df > 0.0001 {
-			t.Fatalf("oops: df(%f) = %f for %s", x, df, name)
-		}
+func eval(name string, n, failed int, t *testing.T) {
+	if float64(failed)/float64(n) > threshold {
+		t.Fatalf("oops: failed %d / %d for %s\n", failed, n, name)
 	}
 }
 
+type Function func(x float64) float64
 type Function2D func(a, b float64) float64
 type DFunction2D func(i int, a, b float64) float64
 
-type Function func(x float64) float64
-
-const dx = 0.00000001
+const (
+	threshold = 0.03
+	n0        = 10000
+	dx        = 0.000000001
+	dx2       = 0.0001
+)
 
 func (f Function) Derivative() Function {
 	return func(x float64) float64 {
