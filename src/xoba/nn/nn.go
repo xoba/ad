@@ -47,6 +47,8 @@ func Run(args []string) {
 		return
 	}
 
+	pt := &PerformanceTracker{}
+
 	// a circle in quadrant I:
 	x0, y0 := 1.0, 0.5
 	r := 1.0
@@ -73,6 +75,8 @@ func Run(args []string) {
 			z = -1
 		}
 		v, g := ComputeAD(beta[0], beta[1], beta[2], beta[3], beta[4], beta[5], beta[6], beta[7], beta[8], beta[9], beta[10], beta[11], beta[12], beta[13], beta[14], beta[15], beta[16], beta[17], beta[18], beta[19], beta[20], x1, y1, z)
+		score := log2(exp2(v-1)) / (-z)
+		pt.Update(score, z == +1)
 		for i := 0; i < len(beta); i++ {
 			beta[i] = beta[i] - eta*g[fmt.Sprintf("b%02d", i)]
 		}
@@ -86,11 +90,12 @@ func Run(args []string) {
 				eta *= 0.99
 			}
 			fmt.Fprintf(f, "%d,%f\n", iterations, meanLoss)
-			fmt.Printf("%1s%10d. eta=%f; loss = %f; beta = %6.3f\n",
+			fmt.Printf("%1s%10d. eta=%f; risk = %f; acc=%.2f; beta = %6.3f\n",
 				msg,
 				iterations,
 				eta,
 				meanLoss,
+				100*pt.Accuracy(),
 				beta,
 			)
 			last = meanLoss

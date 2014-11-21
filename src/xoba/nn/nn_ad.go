@@ -621,10 +621,16 @@ func add_pvt(a, b float64) float64 {
 }
 
 func d_add(i int, a, b float64) float64 {
+	if i < 0 || i > 1 {
+		panic("illegal index")
+	}
 	return 1
 }
 
 func d_add_pvt(i int, a, b float64) float64 {
+	if i < 0 || i > 1 {
+		panic("illegal index")
+	}
 	return 1
 }
 
