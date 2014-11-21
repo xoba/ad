@@ -9,10 +9,11 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"image/png"
+	"image/jpeg"
 	"math"
 	"math/rand"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -23,7 +24,7 @@ func Run(args []string) {
 	var hidden int
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.BoolVar(&gen, "gen", false, "whether to generate formula")
-	flags.IntVar(&hidden, "hidden", 0, "number of hidden units")
+	flags.IntVar(&hidden, "hidden", 5, "number of hidden units")
 	flags.Parse(args)
 	switch hidden {
 	case 0:
@@ -115,10 +116,10 @@ func Run(args []string) {
 			j := int(-y*float64(h)/10) + w/2
 			i := int(x*float64(w)/10) + w/2
 			if i < 0 || i >= w {
-				return
+				continue
 			}
 			if j < 0 || j >= h {
-				return
+				continue
 			}
 			var c color.RGBA
 			if score > 0 {
@@ -142,7 +143,7 @@ func Run(args []string) {
 	skip := 10.0
 	var recentTotal, totalLoss, last float64
 	var iterations, recentIterations, frames int
-	for iterations < 1000000 {
+	for iterations < 2000000 {
 
 		// run a trial
 		x1, y1, z := trial()
@@ -158,7 +159,7 @@ func Run(args []string) {
 
 		// logging
 		if recentIterations%int(skip) == 0 {
-			skip *= 1.1
+			skip *= 1.05
 			risk := totalLoss / float64(iterations)
 			var msg string
 			if risk > last {
@@ -177,25 +178,29 @@ func Run(args []string) {
 			last = risk
 			recentTotal = 0
 			recentIterations = 0
-			plot(fmt.Sprintf("img_%d_%05d.png", hidden, frames))
+			plot(fmt.Sprintf("img_%d_%05d.jpg", hidden, frames))
 			frames++
 		}
 
 		iterations++
 		recentIterations++
 	}
+
+	cmd := exec.Command("ffmpeg", "-y", "-r", "30", "-b", "1800", "-i", fmt.Sprintf("img_%d%%05d.jpg", hidden), fmt.Sprintf("test_%d.mp4", hidden))
+	fmt.Println(cmd.Args)
+	check(cmd.Run())
 }
 
 func save(name string, img image.Image) {
 	f, err := os.Create(name)
 	check(err)
-	png.Encode(f, img)
+	jpeg.Encode(f, img, &jpeg.Options{100})
 	f.Close()
 }
 
 func randSlice(n int) (out []float64) {
 	for i := 0; i < n; i++ {
-		out = append(out, 0) //rand.NormFloat64())
+		out = append(out, rand.NormFloat64())
 	}
 	return
 }

@@ -10,7 +10,7 @@ type PerformanceTracker struct {
 }
 
 func (t PerformanceTracker) String() string {
-	return fmt.Sprintf("acc = %.2f%%; tp=%d; tn=%d; fp=%d; fn=%d", 100*t.Accuracy(), t.tp, t.tn, t.fp, t.fn)
+	return fmt.Sprintf("acc = %.2f%%", 100*t.Accuracy())
 }
 
 func (t *PerformanceTracker) Update(score float64, class bool) {

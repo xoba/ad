@@ -8,3 +8,5 @@ plot.r
 coverage.out
 *.png
 *.csv
+*.jpg
+*.mp4
