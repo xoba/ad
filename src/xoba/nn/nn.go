@@ -22,9 +22,14 @@ func Run(args []string) {
 	flags.BoolVar(&gen, "gen", false, "whether to generate formula")
 	flags.IntVar(&hidden, "hidden", 5, "number of hidden units")
 	flags.Parse(args)
+	switch hidden {
+	case 0:
+	case 5:
+	default:
+		panic("unsupported hidden units")
+	}
 	if gen {
 		// 2-d input, and one output; classifies as true/false (like logistic regression)
-		fmt.Println("generating formula")
 		f, err := os.Create("nn.txt")
 		check(err)
 		defer f.Close()
@@ -38,12 +43,22 @@ func Run(args []string) {
 			betas = append(betas, fmt.Sprintf("beta[%d]", i))
 			return x
 		}
-		for i := 0; i < hidden; i++ {
-			f := fmt.Sprintf("%s * (1 / (1 + exp2(- (%s + %s * x1 + %s * x2))))", p(), p(), p(), p())
-			layer = append(layer, f)
+		switch hidden {
+		case 0:
+			for i := 0; i < 5; i++ {
+				f := fmt.Sprintf("0 * %s * (1 / (1 + exp2(- (%s + %s * x1 + %s * x2))))", p(), p(), p(), p())
+				layer = append(layer, f)
+			}
+			fmt.Fprintf(f, "f := log2( 1 + exp2(-z * (%s +  %s)))\n", p(), strings.Join(layer, " + "))
+		case 5:
+			for i := 0; i < 5; i++ {
+				f := fmt.Sprintf("%s * (1 / (1 + exp2(- (%s + %s * x1 + %s * x2))))", p(), p(), p(), p())
+				layer = append(layer, f)
+			}
+			fmt.Fprintf(f, "f := log2( 1 + exp2(-z * (%s +  %s)))\n", p(), strings.Join(layer, " + "))
+		default:
+			panic("unsupported hidden units")
 		}
-		fmt.Fprintf(f, "f := log2( 1 + exp2(-z * (%s +  %s)))\n", p(), strings.Join(layer, " + "))
-		fmt.Println(strings.Join(betas, ","))
 		return
 	}
 
@@ -90,12 +105,13 @@ func Run(args []string) {
 				eta *= 0.99
 			}
 			fmt.Fprintf(f, "%d,%f\n", iterations, meanLoss)
-			fmt.Printf("%1s%10d. eta=%f; risk = %f; acc=%.2f; beta = %6.3f\n",
+			fmt.Printf("%1s%10d. eta=%f; risk = %f; acc=%.2f%%; mcc =%.2f%%; beta = %6.3f\n",
 				msg,
 				iterations,
 				eta,
 				meanLoss,
 				100*pt.Accuracy(),
+				100*pt.Mcc(),
 				beta,
 			)
 			last = meanLoss

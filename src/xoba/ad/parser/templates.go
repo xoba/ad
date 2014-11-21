@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const genTests = false
+
 // generate function templates, output imports and actual code
 func GenTemplates(dir, private string) ([]string, string, error) {
 	imports := make(map[string]struct{})
@@ -33,7 +35,7 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 				switch t := s.(type) {
 				case *ast.FuncDecl:
 					output := func(name string, testing bool) error {
-						if testing && !strings.HasPrefix(name, "d_") {
+						if genTests && testing && !strings.HasPrefix(name, "d_") {
 							switch count(t.Type.Params.List) {
 							case 1:
 								fmt.Printf("test1d(%q,%s,d_%s,t)\n", name, name, name)
