@@ -104,10 +104,11 @@ func (n Node) String() string {
 }
 
 func Run(args []string) {
-	var private, pkg, templates, formula, output string
+	var funcName, private, pkg, templates, formula, output string
 	var dx float64
 	var main, timeComment, funcs bool
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
+	flags.StringVar(&funcName, "name", "ComputeAD", "ad function name")
 	flags.StringVar(&formula, "formula", Formula(10), "the formula to parse (or file)")
 	flags.StringVar(&private, "private", defaultPrivateString, "the private variable string")
 	flags.StringVar(&pkg, "package", "main", "the go package for generated code")
@@ -123,7 +124,7 @@ func Run(args []string) {
 		formula = string(buf)
 	}
 
-	code, err := Parse(funcs, main, timeComment, pkg, private, templates, formula, 0.00001)
+	code, err := Parse(funcs, main, timeComment, funcName, pkg, private, templates, formula, 0.00001)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -141,7 +142,7 @@ const (
 	defaultTemplates     = "src/xoba/ad/parser/templates"
 )
 
-func Parse(funcs, main, timeComment bool, pkg, private, templates, formula string, dx float64) ([]byte, error) {
+func Parse(funcs, main, timeComment bool, name, pkg, private, templates, formula string, dx float64) ([]byte, error) {
 	if len(private) == 0 {
 		private = defaultPrivateString
 	}
@@ -224,7 +225,7 @@ package {{.package}}
 {{.imports}}
 
 // automatically compute the value and gradient of {{.qformula}}
-func ComputeAD({{.vars}} float64) (float64,map[string]float64) {
+func {{.funcName}}({{.vars}} float64) (float64,map[string]float64) {
 grad_{{.private}} := make(map[string]float64)
 {{.program}} return {{.y}},grad_{{.private}};
 }
@@ -234,7 +235,7 @@ func main() {
 fmt.Printf("running autodiff code of {{.time}} on %q\n\n", {{ printf "%q" .formula }});
 {{.decls}} 
 
-	c1, grad1 := ComputeAD({{.vars}})
+	c1, grad1 := {{.funcName}}({{.vars}})
 	fmt.Printf("autodiff value   : %.20f\n", c1)
 	fmt.Printf("autodiff gradient: %v\n\n", grad1)
 
@@ -274,6 +275,7 @@ grad_{{.private}} := make(map[string]float64)
 	imports.AddAll(templateImports)
 
 	t.Execute(f, map[string]interface{}{
+		"funcName":    name,
 		"timeComment": timeComment,
 		"package":     pkg,
 		"time":        time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),

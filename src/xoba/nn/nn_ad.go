@@ -8,7 +8,7 @@ import (
 )
 
 // automatically compute the value and gradient of "f := a+b\n"
-func ComputeAD(a, b float64) (float64, map[string]float64) {
+func ComputeADx(a, b float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
 	v_0_pvt := a
 	v_1_pvt := b
