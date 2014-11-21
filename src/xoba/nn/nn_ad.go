@@ -7,10 +7,10 @@ import (
 	"math"
 )
 
-// automatically compute the value and gradient of "f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * y1)))\n"
-func ComputeAD(b0, b1, b2, x1, y, y1 float64) (float64, map[string]float64) {
+// automatically compute the value and gradient of "f := log( 1 + exp(-z * (b0 +  b1 * x1 + b2 * y1)))\n"
+func ComputeAD(b0, b1, b2, x1, y1, z float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
-	v_0_pvt := y
+	v_0_pvt := z
 	v_1_pvt := b0
 	v_2_pvt := b1
 	v_3_pvt := x1
@@ -59,16 +59,16 @@ func ComputeAD(b0, b1, b2, x1, y, y1 float64) (float64, map[string]float64) {
 	grad_pvt["b0"] = b_v_1_pvt
 	b_v_0_pvt := 0.0
 	b_v_0_pvt += b_s_0_pvt * (d_multiply_pvt(1, -1.000000, v_0_pvt))
-	grad_pvt["y"] = b_v_0_pvt
+	grad_pvt["z"] = b_v_0_pvt
 	return s_8_pvt, grad_pvt
 }
 
-// numerically compute the value and gradient of "f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * y1)))\n"
-func ComputeNumerical(b0, b1, b2, x1, y, y1 float64) (float64, map[string]float64) {
+// numerically compute the value and gradient of "f := log( 1 + exp(-z * (b0 +  b1 * x1 + b2 * y1)))\n"
+func ComputeNumerical(b0, b1, b2, x1, y1, z float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
 	const delta_pvt = 0.000010
 	calc_pvt := func() float64 {
-		f := log(1 + exp(-y*(b0+b1*x1+b2*y1)))
+		f := log(1 + exp(-z*(b0+b1*x1+b2*y1)))
 
 		return f
 	}
@@ -98,16 +98,16 @@ func ComputeNumerical(b0, b1, b2, x1, y, y1 float64) (float64, map[string]float6
 		grad_pvt["x1"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		y += delta_pvt
-		tmp2_pvt := calc_pvt()
-		y -= delta_pvt
-		grad_pvt["y"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
-	}
-	{
 		y1 += delta_pvt
 		tmp2_pvt := calc_pvt()
 		y1 -= delta_pvt
 		grad_pvt["y1"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+	}
+	{
+		z += delta_pvt
+		tmp2_pvt := calc_pvt()
+		z -= delta_pvt
+		grad_pvt["z"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	return tmp1_pvt, grad_pvt
 }

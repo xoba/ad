@@ -23,7 +23,7 @@ func Run(args []string) {
 		f, err := os.Create("nn.txt")
 		check(err)
 		defer f.Close()
-		fmt.Fprintln(f, "f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * y1)))")
+		fmt.Fprintln(f, "f := log( 1 + exp(-z * (b0 +  b1 * x1 + b2 * y1)))")
 		return
 	}
 
@@ -42,24 +42,24 @@ func Run(args []string) {
 		iterations++
 		x1 := rand.NormFloat64()
 		y1 := rand.NormFloat64()
-		var y float64
+		var z float64
 		if math.Sqrt(math.Pow(x0-x1, 2)+math.Pow(y0-y1, 2)) < r {
-			y = +1
+			z = +1
 		} else {
-			y = -1
+			z = -1
 		}
-		v, g := ComputeAD(beta[0], beta[1], beta[2], x1, y1, y)
+		v, g := ComputeAD(beta[0], beta[1], beta[2], x1, y1, z)
 		totalLoss += v
 		{
 			f := beta[0] + beta[1]*x1 + beta[2]*y1
 			if f > 0 {
-				if y > 0 {
+				if z > 0 {
 					tp++
 				} else {
 					fp++
 				}
 			} else {
-				if y > 0 {
+				if z > 0 {
 					fn++
 				} else {
 					tn++
@@ -80,12 +80,11 @@ func Run(args []string) {
 			n := fp + tn
 			acc := 100 * float64(tp+tn) / float64(p+n)
 			mcc := 100 * float64(tp*tn-fp*fn) / (math.Sqrt(float64(tp+fp)) * math.Sqrt(float64(tp+fn)) * math.Sqrt(float64(tn+fp)) * math.Sqrt(float64(tn+fn)))
-			fmt.Printf("%1s%10d. loss = %f; acc = %.2f%%; %d/%d/%d/%d; mcc = %.2f%%; beta = %6.3f\n",
+			fmt.Printf("%1s%10d. loss = %f; acc = %.2f%%; mcc = %.2f%%; beta = %6.3f\n",
 				msg,
 				iterations,
 				meanLoss,
 				acc,
-				tp, fp, tn, fn,
 				mcc,
 				beta,
 			)

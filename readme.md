@@ -33,3 +33,7 @@ to auto-generate various code:
 
     lib/gogenerate.sh
 
+to run a simple neural network example:
+
+    run nn
+
