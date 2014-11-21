@@ -6,11 +6,14 @@ package nn
 import (
 	"flag"
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/png"
 	"math"
 	"math/rand"
 	"os"
 	"strings"
-	"time"
 )
 
 //go:generate run nn -gen
@@ -20,7 +23,7 @@ func Run(args []string) {
 	var hidden int
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.BoolVar(&gen, "gen", false, "whether to generate formula")
-	flags.IntVar(&hidden, "hidden", 5, "number of hidden units")
+	flags.IntVar(&hidden, "hidden", 0, "number of hidden units")
 	flags.Parse(args)
 	switch hidden {
 	case 0:
@@ -44,12 +47,15 @@ func Run(args []string) {
 			return x
 		}
 		switch hidden {
-		case 0:
+		case 0: // zero out the hidden=5 stuff...
+			var a, b string
 			for i := 0; i < 5; i++ {
-				f := fmt.Sprintf("0 * %s * (1 / (1 + exp2(- (%s + %s * x1 + %s * x2))))", p(), p(), p(), p())
+				a = p()
+				b = p()
+				f := fmt.Sprintf("0 * %s * (1 / (1 + exp2(- (%s + %s * x1 + %s * x2))))", a, b, p(), p())
 				layer = append(layer, f)
 			}
-			fmt.Fprintf(f, "f := log2( 1 + exp2(-z * (%s +  %s)))\n", p(), strings.Join(layer, " + "))
+			fmt.Fprintf(f, "f := log2( 1 + exp2(-z * (%s + %s + %s * x1 + %s * x2)))\n", p(), strings.Join(layer, " + "), a, b)
 		case 5:
 			for i := 0; i < 5; i++ {
 				f := fmt.Sprintf("%s * (1 / (1 + exp2(- (%s + %s * x1 + %s * x2))))", p(), p(), p(), p())
@@ -67,62 +73,129 @@ func Run(args []string) {
 	// a circle in quadrant I:
 	x0, y0 := 1.0, 0.5
 	r := 1.0
-	eta := 0.1
+	var eta float64
+	if hidden == 5 {
+		eta = 0.01
+	} else {
+		eta = 0.0001
+	}
 
 	beta := randSlice(21)
 
 	f, err := os.Create(fmt.Sprintf("loss_%d.csv", hidden))
 	check(err)
 	defer f.Close()
-	fmt.Fprintln(f, "t,risk")
+	fmt.Fprintln(f, "t,risk,acc")
 
-	lastTime := time.Now()
-	var totalLoss, last float64
-	var iterations int
-	for iterations < 10000000 {
-		iterations++
+	w, h := 1000, 1000
+
+	trial := func() (x float64, y float64, z float64) {
 		x1 := rand.NormFloat64()
 		y1 := rand.NormFloat64()
-		var z float64
 		if math.Sqrt(math.Pow(x0-x1, 2)+math.Pow(y0-y1, 2)) < r {
 			z = +1
 		} else {
 			z = -1
 		}
+		return x1, y1, z
+	}
+
+	run := func(x1, y1, z float64) (float64, map[string]float64, float64) {
 		v, g := ComputeAD(beta[0], beta[1], beta[2], beta[3], beta[4], beta[5], beta[6], beta[7], beta[8], beta[9], beta[10], beta[11], beta[12], beta[13], beta[14], beta[15], beta[16], beta[17], beta[18], beta[19], beta[20], x1, y1, z)
-		score := log2(exp2(v-1)) / (-z)
+		score := log2(exp2(v)-1) / (-z)
+		return v, g, score
+	}
+
+	plot := func(name string) {
+		img := image.NewRGBA(image.Rect(0, 0, w, h))
+		draw.Draw(img, img.Bounds(), &image.Uniform{color.RGBA{0, 0, 0, 255}}, image.ZP, draw.Src)
+		for n := 0; n < 100000; n++ {
+			x, y, z := trial()
+			_, _, score := run(x, y, z)
+			j := int(-y*float64(h)/10) + w/2
+			i := int(x*float64(w)/10) + w/2
+			if i < 0 || i >= w {
+				return
+			}
+			if j < 0 || j >= h {
+				return
+			}
+			var c color.RGBA
+			if score > 0 {
+				if z == +1 {
+					c = color.RGBA{200, 200, 200, 255}
+				} else {
+					c = color.RGBA{200, 0, 0, 255}
+				}
+			} else {
+				if z == -1 {
+					c = color.RGBA{100, 100, 100, 255}
+				} else {
+					c = color.RGBA{100, 0, 0, 255}
+				}
+			}
+			img.SetRGBA(i, j, c)
+		}
+		save(name, img)
+	}
+
+	skip := 10.0
+	var recentTotal, totalLoss, last float64
+	var iterations, recentIterations, frames int
+	for iterations < 1000000 {
+
+		// run a trial
+		x1, y1, z := trial()
+		v, g, score := run(x1, y1, z)
+		totalLoss += v
+		recentTotal += v
 		pt.Update(score, z == +1)
+
+		// gradient descent
 		for i := 0; i < len(beta); i++ {
 			beta[i] = beta[i] - eta*g[fmt.Sprintf("b%02d", i)]
 		}
-		totalLoss += v
-		if time.Now().Sub(lastTime) > 100*time.Millisecond {
-			lastTime = time.Now()
-			meanLoss := totalLoss / float64(iterations)
+
+		// logging
+		if recentIterations%int(skip) == 0 {
+			skip *= 1.1
+			risk := totalLoss / float64(iterations)
 			var msg string
-			if meanLoss > last {
+			if risk > last {
 				msg = "*"
-				eta *= 0.99
 			}
-			fmt.Fprintf(f, "%d,%f\n", iterations, meanLoss)
-			fmt.Printf("%1s%10d. eta=%f; risk = %f; acc=%.2f%%; mcc =%.2f%%; beta = %6.3f\n",
+			fmt.Fprintf(f, "%d,%f,%f\n", iterations, risk, 100*pt.Accuracy())
+			fmt.Printf("%1s%10d. eta=%f; risk = %f / %f; %v; beta = %6.3f\n",
 				msg,
 				iterations,
 				eta,
-				meanLoss,
-				100*pt.Accuracy(),
-				100*pt.Mcc(),
+				risk,
+				recentTotal/float64(recentIterations),
+				pt,
 				beta,
 			)
-			last = meanLoss
-
+			last = risk
+			recentTotal = 0
+			recentIterations = 0
+			plot(fmt.Sprintf("img_%d_%05d.png", hidden, frames))
+			frames++
 		}
+
+		iterations++
+		recentIterations++
 	}
+}
+
+func save(name string, img image.Image) {
+	f, err := os.Create(name)
+	check(err)
+	png.Encode(f, img)
+	f.Close()
 }
 
 func randSlice(n int) (out []float64) {
 	for i := 0; i < n; i++ {
-		out = append(out, rand.NormFloat64())
+		out = append(out, 0) //rand.NormFloat64())
 	}
 	return
 }

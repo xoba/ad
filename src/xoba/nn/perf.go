@@ -1,9 +1,16 @@
 package nn
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 type PerformanceTracker struct {
 	tp, tn, fp, fn int
+}
+
+func (t PerformanceTracker) String() string {
+	return fmt.Sprintf("acc = %.2f%%; tp=%d; tn=%d; fp=%d; fn=%d", 100*t.Accuracy(), t.tp, t.tn, t.fp, t.fn)
 }
 
 func (t *PerformanceTracker) Update(score float64, class bool) {
