@@ -7,6 +7,7 @@ import (
 	"go/parser"
 	"go/token"
 	"io/ioutil"
+	"log"
 	"strings"
 )
 
@@ -20,14 +21,26 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 		return nil, "", err
 	}
 	for _, p := range pkgs {
-		for _, f := range p.Files {
+		for n, f := range p.Files {
+			if strings.HasSuffix(n, "_test.go") {
+				continue
+			}
+			log.Printf("parsing %s\n", n)
 			for _, s := range f.Imports {
 				imports[s.Path.Value] = struct{}{}
 			}
 			for _, s := range f.Decls {
 				switch t := s.(type) {
 				case *ast.FuncDecl:
-					output := func(name string) error {
+					output := func(name string, testing bool) error {
+						if testing && !strings.HasPrefix(name, "d_") {
+							switch count(t.Type.Params.List) {
+							case 1:
+								fmt.Printf("test1d(%q,%s,d_%s,t)\n", name, name, name)
+							case 2:
+								fmt.Printf("test2d(%q,%s,d_%s,t)\n", name, name, name)
+							}
+						}
 						fmt.Fprintf(body, "func %s(", name)
 						fmt.Fprint(body, fields(t.Type.Params.List))
 						fmt.Fprint(body, ")")
@@ -48,10 +61,10 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 						fmt.Fprintln(body, "}\n")
 						return nil
 					}
-					if err := output(t.Name.Name); err != nil {
+					if err := output(t.Name.Name, true); err != nil {
 						return nil, "", err
 					}
-					if err := output(fmt.Sprintf("%s_%s", t.Name.Name, private)); err != nil {
+					if err := output(fmt.Sprintf("%s_%s", t.Name.Name, private), false); err != nil {
 						return nil, "", err
 					}
 				}
@@ -63,6 +76,15 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 		out = append(out, k)
 	}
 	return out, body.String(), nil
+}
+
+func count(fields []*ast.Field) (out int) {
+	for _, r := range fields {
+		for range r.Names {
+			out++
+		}
+	}
+	return
 }
 
 func fields(fields []*ast.Field) string {

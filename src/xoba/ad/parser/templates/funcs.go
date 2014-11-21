@@ -149,11 +149,26 @@ func d_exp(a float64) float64 {
 	return math.Exp(a)
 }
 
+// 2^a --- sort of like exponentiation base 2
+func exp2(a float64) float64 {
+	return math.Pow(2, a)
+}
+func d_exp2(a float64) float64 {
+	return math.Log(2) * math.Pow(2, a)
+}
+
 func log(a float64) float64 {
 	return math.Log(a)
 }
 func d_log(a float64) float64 {
 	return 1 / a
+}
+
+func log2(a float64) float64 {
+	return math.Log2(a)
+}
+func d_log2(a float64) float64 {
+	return 1 / (a * math.Log(2))
 }
 
 func pow(a, b float64) float64 {

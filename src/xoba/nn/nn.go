@@ -1,12 +1,15 @@
 // a simple neural network example using automatic differentiation
 package nn
 
+// without hidden units: 27096644. loss = 0.415957; acc = 77.23%; mcc = 30.10%; beta = [-1.637  1.429  0.715]
+
 import (
 	"flag"
 	"fmt"
 	"math"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -14,8 +17,10 @@ import (
 //go:generate run compile -formula=nn.txt -output nn_ad.go -templates "../ad/parser/templates" -package nn -main=false -time=false
 func Run(args []string) {
 	var gen bool
+	var hidden int
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.BoolVar(&gen, "gen", false, "whether to generate formula")
+	flags.IntVar(&hidden, "hidden", 5, "number of hidden units")
 	flags.Parse(args)
 	if gen {
 		// 2-d input, and one output; classifies as true/false (like logistic regression)
@@ -23,7 +28,22 @@ func Run(args []string) {
 		f, err := os.Create("nn.txt")
 		check(err)
 		defer f.Close()
-		fmt.Fprintln(f, "f := log( 1 + exp(-z * (b0 +  b1 * x1 + b2 * y1)))")
+		var layer []string
+		var parms []string
+		var betas []string
+		p := func() string {
+			i := len(parms)
+			x := fmt.Sprintf("b%02d", i)
+			parms = append(parms, x)
+			betas = append(betas, fmt.Sprintf("beta[%d]", i))
+			return x
+		}
+		for i := 0; i < hidden; i++ {
+			f := fmt.Sprintf("%s * (1 / (1 + exp2(- (%s + %s * x1 + %s * x2))))", p(), p(), p(), p())
+			layer = append(layer, f)
+		}
+		fmt.Fprintf(f, "f := log2( 1 + exp2(-z * (%s +  %s)))\n", p(), strings.Join(layer, " + "))
+		fmt.Println(strings.Join(betas, ","))
 		return
 	}
 
@@ -32,13 +52,17 @@ func Run(args []string) {
 	r := 1.0
 	eta := 0.00001
 
-	beta := make([]float64, 3)
+	beta := randSlice(21)
 
-	var tp, tn, fn, fp int
-	var lastTime time.Time
+	f, err := os.Create(fmt.Sprintf("loss_%d.csv", hidden))
+	check(err)
+	defer f.Close()
+	fmt.Fprintln(f, "t,risk")
+
+	lastTime := time.Now()
 	var totalLoss, last float64
 	var iterations int
-	for {
+	for iterations < 30000000 {
 		iterations++
 		x1 := rand.NormFloat64()
 		y1 := rand.NormFloat64()
@@ -48,27 +72,11 @@ func Run(args []string) {
 		} else {
 			z = -1
 		}
-		v, g := ComputeAD(beta[0], beta[1], beta[2], x1, y1, z)
-		totalLoss += v
-		{
-			f := beta[0] + beta[1]*x1 + beta[2]*y1
-			if f > 0 {
-				if z > 0 {
-					tp++
-				} else {
-					fp++
-				}
-			} else {
-				if z > 0 {
-					fn++
-				} else {
-					tn++
-				}
-			}
-		}
+		v, g := ComputeAD(beta[0], beta[1], beta[2], beta[3], beta[4], beta[5], beta[6], beta[7], beta[8], beta[9], beta[10], beta[11], beta[12], beta[13], beta[14], beta[15], beta[16], beta[17], beta[18], beta[19], beta[20], x1, y1, z)
 		for i := 0; i < len(beta); i++ {
-			beta[i] = beta[i] - eta*g[fmt.Sprintf("b%d", i)]
+			beta[i] = beta[i] - eta*g[fmt.Sprintf("b%02d", i)]
 		}
+		totalLoss += v
 		if time.Now().Sub(lastTime) > 100*time.Millisecond {
 			lastTime = time.Now()
 			meanLoss := totalLoss / float64(iterations)
@@ -76,22 +84,24 @@ func Run(args []string) {
 			if meanLoss > last {
 				msg = "*"
 			}
-			p := tp + fn
-			n := fp + tn
-			acc := 100 * float64(tp+tn) / float64(p+n)
-			mcc := 100 * float64(tp*tn-fp*fn) / (math.Sqrt(float64(tp+fp)) * math.Sqrt(float64(tp+fn)) * math.Sqrt(float64(tn+fp)) * math.Sqrt(float64(tn+fn)))
-			fmt.Printf("%1s%10d. loss = %f; acc = %.2f%%; mcc = %.2f%%; beta = %6.3f\n",
+			fmt.Fprintf(f, "%d,%f\n", iterations, meanLoss)
+			fmt.Printf("%1s%10d. loss = %f; beta = %6.3f\n",
 				msg,
 				iterations,
 				meanLoss,
-				acc,
-				mcc,
 				beta,
 			)
 			last = meanLoss
 
 		}
 	}
+}
+
+func randSlice(n int) (out []float64) {
+	for i := 0; i < n; i++ {
+		out = append(out, rand.NormFloat64())
+	}
+	return
 }
 
 func check(e error) {

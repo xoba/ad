@@ -4,3 +4,5 @@ pkg
 .hg
 compute.go
 *.test
+loss_5.csv
+plot.r
