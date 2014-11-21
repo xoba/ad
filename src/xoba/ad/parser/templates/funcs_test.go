@@ -36,13 +36,13 @@ func TestTwoDims(t *testing.T) {
 func test1d(name string, f, df Function, t *testing.T) {
 	df2 := f.Derivative()
 	var n, failed int
-	for n < n0 {
+	for n < runs {
 		a := rand.NormFloat64()
 		if y := f(a); math.IsNaN(y) || math.IsInf(y, 0) {
 			continue
 		}
 		n++
-		if df := math.Abs(df(a) - df2(a)); df > dx2 {
+		if df := math.Abs(df(a) - df2(a)); df > equalityThreshold {
 			failed++
 		}
 	}
@@ -52,14 +52,14 @@ func test1d(name string, f, df Function, t *testing.T) {
 func test2d(name string, f Function2D, df DFunction2D, t *testing.T) {
 	df2 := f.Derivative()
 	var n, failed int
-	for n < n0 {
+	for n < runs {
 		a, b := rand.NormFloat64(), rand.NormFloat64()
 		if y := f(a, b); math.IsNaN(y) || math.IsInf(y, 0) {
 			continue
 		}
 		n++
 		for i := 0; i < 2; i++ {
-			if df := math.Abs(df(i, a, b) - df2(i, a, b)); df > dx2 {
+			if df := math.Abs(df(i, a, b) - df2(i, a, b)); df > equalityThreshold {
 				failed++
 			}
 		}
@@ -68,7 +68,7 @@ func test2d(name string, f Function2D, df DFunction2D, t *testing.T) {
 }
 
 func eval(name string, n, failed int, t *testing.T) {
-	if float64(failed)/float64(n) > threshold {
+	if float64(failed)/float64(n) > failureThreshold {
 		t.Fatalf("oops: failed %d / %d for %s\n", failed, n, name)
 	}
 }
@@ -78,10 +78,10 @@ type Function2D func(a, b float64) float64
 type DFunction2D func(i int, a, b float64) float64
 
 const (
-	threshold = 0.03
-	n0        = 10000
-	dx        = 0.000000001
-	dx2       = 0.0001
+	failureThreshold  = 0.03
+	runs              = 10000
+	dx                = 0.000000001
+	equalityThreshold = 0.0001
 )
 
 func (f Function) Derivative() Function {
