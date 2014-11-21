@@ -106,7 +106,7 @@ func (n Node) String() string {
 func Run(args []string) {
 	var private, pkg, templates, formula, output string
 	var dx float64
-	var main, timeComment bool
+	var main, timeComment, funcs bool
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.StringVar(&formula, "formula", Formula(10), "the formula to parse (or file)")
 	flags.StringVar(&private, "private", defaultPrivateString, "the private variable string")
@@ -114,6 +114,7 @@ func Run(args []string) {
 	flags.StringVar(&templates, "templates", defaultTemplates, "directory of go template functions")
 	flags.StringVar(&output, "output", "compute.go", "name of go source file to output")
 	flags.BoolVar(&main, "main", true, "whether to emit a main method")
+	flags.BoolVar(&funcs, "funcs", true, "whether to emit template functions")
 	flags.BoolVar(&timeComment, "time", true, "embed time in source code comment")
 	flags.Float64Var(&dx, "dx", defaultDx, "infinitesimal for numerical differentiation")
 	flags.Parse(args)
@@ -122,7 +123,7 @@ func Run(args []string) {
 		formula = string(buf)
 	}
 
-	code, err := Parse(main, timeComment, pkg, private, templates, formula, 0.00001)
+	code, err := Parse(funcs, main, timeComment, pkg, private, templates, formula, 0.00001)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,7 +141,7 @@ const (
 	defaultTemplates     = "src/xoba/ad/parser/templates"
 )
 
-func Parse(main, timeComment bool, pkg, private, templates, formula string, dx float64) ([]byte, error) {
+func Parse(funcs, main, timeComment bool, pkg, private, templates, formula string, dx float64) ([]byte, error) {
 	if len(private) == 0 {
 		private = defaultPrivateString
 	}
@@ -260,8 +261,9 @@ grad_{{.private}} := make(map[string]float64)
 {{.checker}} return tmp1_{{.private}},grad_{{.private}};
 }
 
-{{.funcs}}
-
+{{ if .emitFuncs }}
+  {{.funcs}}
+{{end}}
 
 `))
 
@@ -284,6 +286,7 @@ grad_{{.private}} := make(map[string]float64)
 		"checker":     checker.String(),
 		"y":           y,
 		"funcs":       code,
+		"emitFuncs":   funcs,
 		"private":     private,
 		"imports":     imports.String(),
 	})
