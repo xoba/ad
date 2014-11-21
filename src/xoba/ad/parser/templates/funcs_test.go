@@ -33,6 +33,14 @@ func TestTwoDims(t *testing.T) {
 	test2d("pow", pow, d_pow, t)
 }
 
+func TestAbs(t *testing.T) {
+	if !doesPanic(func() {
+		d_abs(0)
+	}) {
+		t.Fatal("oops: d_abs(0) doesn't panic")
+	}
+}
+
 func test1d(name string, f, df Function, t *testing.T) {
 	df2 := f.Derivative()
 	var n, failed int
@@ -65,11 +73,37 @@ func test2d(name string, f Function2D, df DFunction2D, t *testing.T) {
 		}
 	}
 	eval(name, n, failed, t)
+
+	checkIndex := func(i int) {
+		f := func() {
+			df(i, 0, 0)
+		}
+		if !doesPanic(f) {
+			t.Fatalf("oops: %q didn't panic on bad index %d\n", name, i)
+		}
+	}
+
+	for i := 2; i < 100; i++ {
+		checkIndex(i)
+	}
+}
+
+func doesPanic(f func()) bool {
+	var recovered bool
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				recovered = true
+			}
+		}()
+		f()
+	}()
+	return recovered
 }
 
 func eval(name string, n, failed int, t *testing.T) {
 	if float64(failed)/float64(n) > failureThreshold {
-		t.Fatalf("oops: failed %d / %d for %s\n", failed, n, name)
+		t.Fatalf("oops: failed %d / %d for %q\n", failed, n, name)
 	}
 }
 

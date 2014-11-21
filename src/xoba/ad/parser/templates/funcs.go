@@ -90,6 +90,9 @@ func add(a, b float64) float64 {
 	return a + b
 }
 func d_add(i int, a, b float64) float64 {
+	if i < 0 || i > 1 {
+		panic("illegal index")
+	}
 	return 1
 }
 
