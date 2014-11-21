@@ -47,10 +47,10 @@ func Run(args []string) {
 		return
 	}
 
-	// a circcle in quadrant I:
+	// a circle in quadrant I:
 	x0, y0 := 1.0, 0.5
 	r := 1.0
-	eta := 0.00001
+	eta := 0.1
 
 	beta := randSlice(21)
 
@@ -62,7 +62,7 @@ func Run(args []string) {
 	lastTime := time.Now()
 	var totalLoss, last float64
 	var iterations int
-	for iterations < 30000000 {
+	for iterations < 10000000 {
 		iterations++
 		x1 := rand.NormFloat64()
 		y1 := rand.NormFloat64()
@@ -83,11 +83,13 @@ func Run(args []string) {
 			var msg string
 			if meanLoss > last {
 				msg = "*"
+				eta *= 0.99
 			}
 			fmt.Fprintf(f, "%d,%f\n", iterations, meanLoss)
-			fmt.Printf("%1s%10d. loss = %f; beta = %6.3f\n",
+			fmt.Printf("%1s%10d. eta=%f; loss = %f; beta = %6.3f\n",
 				msg,
 				iterations,
+				eta,
 				meanLoss,
 				beta,
 			)
