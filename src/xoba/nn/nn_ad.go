@@ -7,15 +7,15 @@ import (
 	"math"
 )
 
-// automatically compute the value and gradient of "f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * x2)))\n"
-func ComputeAD(b0, b1, b2, x1, x2, y float64) (float64, map[string]float64) {
+// automatically compute the value and gradient of "f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * y1)))\n"
+func ComputeAD(b0, b1, b2, x1, y, y1 float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
 	v_0_pvt := y
 	v_1_pvt := b0
 	v_2_pvt := b1
 	v_3_pvt := x1
 	v_4_pvt := b2
-	v_5_pvt := x2
+	v_5_pvt := y1
 	s_0_pvt := multiply_pvt(-1.000000, v_0_pvt)
 	s_1_pvt := multiply_pvt(v_2_pvt, v_3_pvt)
 	s_2_pvt := add_pvt(v_1_pvt, s_1_pvt)
@@ -44,7 +44,7 @@ func ComputeAD(b0, b1, b2, x1, x2, y float64) (float64, map[string]float64) {
 	b_s_0_pvt += b_s_5_pvt * (d_multiply_pvt(0, s_0_pvt, s_4_pvt))
 	b_v_5_pvt := 0.0
 	b_v_5_pvt += b_s_3_pvt * (d_multiply_pvt(1, v_4_pvt, v_5_pvt))
-	grad_pvt["x2"] = b_v_5_pvt
+	grad_pvt["y1"] = b_v_5_pvt
 	b_v_4_pvt := 0.0
 	b_v_4_pvt += b_s_3_pvt * (d_multiply_pvt(0, v_4_pvt, v_5_pvt))
 	grad_pvt["b2"] = b_v_4_pvt
@@ -63,12 +63,12 @@ func ComputeAD(b0, b1, b2, x1, x2, y float64) (float64, map[string]float64) {
 	return s_8_pvt, grad_pvt
 }
 
-// numerically compute the value and gradient of "f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * x2)))\n"
-func ComputeNumerical(b0, b1, b2, x1, x2, y float64) (float64, map[string]float64) {
+// numerically compute the value and gradient of "f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * y1)))\n"
+func ComputeNumerical(b0, b1, b2, x1, y, y1 float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
 	const delta_pvt = 0.000010
 	calc_pvt := func() float64 {
-		f := log(1 + exp(-y*(b0+b1*x1+b2*x2)))
+		f := log(1 + exp(-y*(b0+b1*x1+b2*y1)))
 
 		return f
 	}
@@ -98,16 +98,16 @@ func ComputeNumerical(b0, b1, b2, x1, x2, y float64) (float64, map[string]float6
 		grad_pvt["x1"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		x2 += delta_pvt
-		tmp2_pvt := calc_pvt()
-		x2 -= delta_pvt
-		grad_pvt["x2"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
-	}
-	{
 		y += delta_pvt
 		tmp2_pvt := calc_pvt()
 		y -= delta_pvt
 		grad_pvt["y"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+	}
+	{
+		y1 += delta_pvt
+		tmp2_pvt := calc_pvt()
+		y1 -= delta_pvt
+		grad_pvt["y1"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	return tmp1_pvt, grad_pvt
 }

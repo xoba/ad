@@ -1,1 +1,1 @@
-f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * x2)))
+f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * y1)))
