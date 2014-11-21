@@ -7,43 +7,107 @@ import (
 	"math"
 )
 
-// automatically compute the value and gradient of "f := a+b\n"
-func ComputeADx(a, b float64) (float64, map[string]float64) {
+// automatically compute the value and gradient of "f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * x2)))\n"
+func ComputeAD(b0, b1, b2, x1, x2, y float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
-	v_0_pvt := a
-	v_1_pvt := b
-	s_0_pvt := add_pvt(v_0_pvt, v_1_pvt)
-	const b_s_0_pvt = 1.0
+	v_0_pvt := y
+	v_1_pvt := b0
+	v_2_pvt := b1
+	v_3_pvt := x1
+	v_4_pvt := b2
+	v_5_pvt := x2
+	s_0_pvt := multiply_pvt(-1.000000, v_0_pvt)
+	s_1_pvt := multiply_pvt(v_2_pvt, v_3_pvt)
+	s_2_pvt := add_pvt(v_1_pvt, s_1_pvt)
+	s_3_pvt := multiply_pvt(v_4_pvt, v_5_pvt)
+	s_4_pvt := add_pvt(s_2_pvt, s_3_pvt)
+	s_5_pvt := multiply_pvt(s_0_pvt, s_4_pvt)
+	s_6_pvt := exp_pvt(s_5_pvt)
+	s_7_pvt := add_pvt(1.000000, s_6_pvt)
+	s_8_pvt := log_pvt(s_7_pvt)
+	const b_s_8_pvt = 1.0
+	b_s_7_pvt := 0.0
+	b_s_7_pvt += b_s_8_pvt * (d_log_pvt(s_7_pvt))
+	b_s_6_pvt := 0.0
+	b_s_6_pvt += b_s_7_pvt * (d_add_pvt(1, 1.000000, s_6_pvt))
+	b_s_5_pvt := 0.0
+	b_s_5_pvt += b_s_6_pvt * (d_exp_pvt(s_5_pvt))
+	b_s_4_pvt := 0.0
+	b_s_4_pvt += b_s_5_pvt * (d_multiply_pvt(1, s_0_pvt, s_4_pvt))
+	b_s_3_pvt := 0.0
+	b_s_3_pvt += b_s_4_pvt * (d_add_pvt(1, s_2_pvt, s_3_pvt))
+	b_s_2_pvt := 0.0
+	b_s_2_pvt += b_s_4_pvt * (d_add_pvt(0, s_2_pvt, s_3_pvt))
+	b_s_1_pvt := 0.0
+	b_s_1_pvt += b_s_2_pvt * (d_add_pvt(1, v_1_pvt, s_1_pvt))
+	b_s_0_pvt := 0.0
+	b_s_0_pvt += b_s_5_pvt * (d_multiply_pvt(0, s_0_pvt, s_4_pvt))
+	b_v_5_pvt := 0.0
+	b_v_5_pvt += b_s_3_pvt * (d_multiply_pvt(1, v_4_pvt, v_5_pvt))
+	grad_pvt["x2"] = b_v_5_pvt
+	b_v_4_pvt := 0.0
+	b_v_4_pvt += b_s_3_pvt * (d_multiply_pvt(0, v_4_pvt, v_5_pvt))
+	grad_pvt["b2"] = b_v_4_pvt
+	b_v_3_pvt := 0.0
+	b_v_3_pvt += b_s_1_pvt * (d_multiply_pvt(1, v_2_pvt, v_3_pvt))
+	grad_pvt["x1"] = b_v_3_pvt
+	b_v_2_pvt := 0.0
+	b_v_2_pvt += b_s_1_pvt * (d_multiply_pvt(0, v_2_pvt, v_3_pvt))
+	grad_pvt["b1"] = b_v_2_pvt
 	b_v_1_pvt := 0.0
-	b_v_1_pvt += b_s_0_pvt * (d_add_pvt(1, v_0_pvt, v_1_pvt))
-	grad_pvt["b"] = b_v_1_pvt
+	b_v_1_pvt += b_s_2_pvt * (d_add_pvt(0, v_1_pvt, s_1_pvt))
+	grad_pvt["b0"] = b_v_1_pvt
 	b_v_0_pvt := 0.0
-	b_v_0_pvt += b_s_0_pvt * (d_add_pvt(0, v_0_pvt, v_1_pvt))
-	grad_pvt["a"] = b_v_0_pvt
-	return s_0_pvt, grad_pvt
+	b_v_0_pvt += b_s_0_pvt * (d_multiply_pvt(1, -1.000000, v_0_pvt))
+	grad_pvt["y"] = b_v_0_pvt
+	return s_8_pvt, grad_pvt
 }
 
-// numerically compute the value and gradient of "f := a+b\n"
-func ComputeNumerical(a, b float64) (float64, map[string]float64) {
+// numerically compute the value and gradient of "f := log( 1 + exp(-y * (b0 +  b1 * x1 + b2 * x2)))\n"
+func ComputeNumerical(b0, b1, b2, x1, x2, y float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
 	const delta_pvt = 0.000010
 	calc_pvt := func() float64 {
-		f := a + b
+		f := log(1 + exp(-y*(b0+b1*x1+b2*x2)))
 
 		return f
 	}
 	tmp1_pvt := calc_pvt()
 	{
-		a += delta_pvt
+		b0 += delta_pvt
 		tmp2_pvt := calc_pvt()
-		a -= delta_pvt
-		grad_pvt["a"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		b0 -= delta_pvt
+		grad_pvt["b0"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b += delta_pvt
+		b1 += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b -= delta_pvt
-		grad_pvt["b"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		b1 -= delta_pvt
+		grad_pvt["b1"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+	}
+	{
+		b2 += delta_pvt
+		tmp2_pvt := calc_pvt()
+		b2 -= delta_pvt
+		grad_pvt["b2"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+	}
+	{
+		x1 += delta_pvt
+		tmp2_pvt := calc_pvt()
+		x1 -= delta_pvt
+		grad_pvt["x1"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+	}
+	{
+		x2 += delta_pvt
+		tmp2_pvt := calc_pvt()
+		x2 -= delta_pvt
+		grad_pvt["x2"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+	}
+	{
+		y += delta_pvt
+		tmp2_pvt := calc_pvt()
+		y -= delta_pvt
+		grad_pvt["y"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	return tmp1_pvt, grad_pvt
 }
