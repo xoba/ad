@@ -7,7 +7,6 @@ import (
 	"go/parser"
 	"go/token"
 	"io/ioutil"
-	"log"
 	"strings"
 )
 
@@ -22,14 +21,11 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	for pname, p := range pkgs {
-		log.Printf("pkg = %q\n", pname)
+	for _, p := range pkgs {
 		for n, f := range p.Files {
 			if strings.HasSuffix(n, "_test.go") {
-				log.Printf("skipping %s\n", n)
 				continue
 			}
-			log.Printf("parsing %s\n", n)
 			for _, s := range f.Imports {
 				imports[s.Path.Value] = struct{}{}
 			}
@@ -37,7 +33,6 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 				switch t := s.(type) {
 				case *ast.FuncDecl:
 					output := func(name string) error {
-						log.Printf("name = %q\n", name)
 						fmt.Fprintf(body, "func %s(", name)
 						fmt.Fprint(body, fields(t.Type.Params.List))
 						fmt.Fprint(body, ")")
@@ -46,7 +41,6 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 							fmt.Fprint(body, fields(t.Type.Results.List))
 							fmt.Fprint(body, ")")
 						}
-						fmt.Fprint(body, "{")
 						start := t.Body.Lbrace
 						file := fset.File(start)
 						end := t.Body.Rbrace
@@ -56,8 +50,7 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 						}
 						p0 := fset.Position(start).Offset
 						p1 := fset.Position(end).Offset
-						log.Printf("%s (%d bytes) %d to %d\n", file.Name(), len(buf), p0, p1)
-						fmt.Fprint(body, string(buf[p0:p1-1]))
+						fmt.Fprint(body, string(buf[p0:p1]))
 						fmt.Fprintln(body, "}\n")
 						return nil
 					}
