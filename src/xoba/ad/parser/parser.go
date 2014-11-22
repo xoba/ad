@@ -138,10 +138,11 @@ func Parse(funcs, main, timeComment bool, name, pkg, private, templates, formula
 		return nil, fmt.Errorf("parse error: lhs or rhs is nil")
 	}
 	vars := make(map[string]string)
-	vp := &VarParser{vars: vars, indexed: make(map[string]bool)}
+	vp := &VarParser{vars: vars, indexed: make(map[string]string)}
 	sp := &StepParser{vars: vars}
 	var steps []Step
 	steps = append(steps, vp.getVars(lex.rhs, private)...)
+	fmt.Printf("vars = %v; indexed = %v\n", vp.vars, vp.indexed)
 	steps = append(steps, sp.program(lex.rhs, private)...)
 	y := steps[len(steps)-1].lhs
 
@@ -174,17 +175,23 @@ return %s
 		fmt.Fprintln(pgm, s)
 	}
 	computeDerivatives(pgm, steps, private)
-	var argList, scalarArgList, indexedArgList []string
+
+	indexedArgs := make(map[string]bool)
+	scalarArgs := make(map[string]bool)
+
+	var argList []string
 	for v := range vars {
-		argList = append(indexedArgList, v)
-		if vp.indexed[v] {
-			indexedArgList = append(indexedArgList, v)
+		argList = append(argList, v)
+		if x, ok := vp.indexed[v]; ok {
+			indexedArgs[x] = true
 		} else {
-			scalarArgList = append(scalarArgList, v)
+			scalarArgs[v] = true
 		}
 	}
-	sort.Strings(scalarArgList)
-	sort.Strings(indexedArgList)
+	sort.Strings(argList)
+
+	scalarArgList := sort1(scalarArgs)
+	indexedArgList := sort1(indexedArgs)
 
 	args := func() string {
 		var out []string
@@ -227,9 +234,19 @@ return %s
 	f := new(bytes.Buffer)
 
 	decls := new(bytes.Buffer)
+
+	for _, v := range indexedArgList {
+		fmt.Fprintf(decls, "var %s []float64;\n", v)
+	}
 	for _, v := range argList {
-		fmt.Fprintf(decls, "%s := %.20f;\n", v, rand.NormFloat64())
-		fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%+.20f\\n\",%s)\n", v, v)
+		if _, ok := vp.indexed[v]; ok {
+			name := vp.indexed[v]
+			fmt.Fprintf(decls, "%s = append(%s,%.20f);\n", name, name, rand.NormFloat64())
+			fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%+.20f\\n\",%s)\n", v, v)
+		} else {
+			fmt.Fprintf(decls, "%s := %.20f;\n", v, rand.NormFloat64())
+			fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%+.20f\\n\",%s)\n", v, v)
+		}
 	}
 	fmt.Fprintln(decls, `fmt.Println();`)
 
@@ -381,7 +398,7 @@ func GofmtBuffer(code []byte) ([]byte, error) {
 type VarParser struct {
 	i       int
 	vars    map[string]string
-	indexed map[string]bool
+	indexed map[string]string
 }
 
 // gets all the vars and name them in-place
@@ -390,7 +407,7 @@ func (v *VarParser) getVars(root *Node, private string) (out []Step) {
 	case identifierNT, indexedIdentifierNT:
 		if _, ok := v.vars[root.S]; !ok {
 			root.Name = fmt.Sprintf("v_%d_%s", v.i, private)
-			v.vars[root.S] = root.Name
+			v.vars[root.VarName()] = root.Name
 			v.i++
 			step := Step{
 				decl: true,
@@ -399,7 +416,7 @@ func (v *VarParser) getVars(root *Node, private string) (out []Step) {
 			}
 			if root.Type == indexedIdentifierNT {
 				step.rhs = fmt.Sprintf("%s[%d]", root.S, root.I)
-				v.indexed[root.S] = true
+				v.indexed[root.VarName()] = root.S
 			}
 			out = append(out, step)
 		} else {
@@ -491,4 +508,13 @@ func (c *context) Error(e string) {
 func (c *context) Error2(e error) {
 	log.Printf("oops: %v\n", e)
 	c.errors = append(c.errors, e)
+}
+
+func sort1(m map[string]bool) (out []string) {
+	for k, v := range m {
+		if v {
+			out = append(out, k)
+		}
+	}
+	return
 }

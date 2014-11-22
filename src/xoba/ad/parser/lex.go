@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
@@ -26,6 +27,17 @@ type Node struct {
 func (n Node) String() string {
 	buf, _ := json.Marshal(n)
 	return string(buf)
+}
+
+func (n Node) VarName() string {
+	switch n.Type {
+	case identifierNT:
+		return n.S
+	case indexedIdentifierNT:
+		return fmt.Sprintf("%s[%d]", n.S, n.I)
+	default:
+		panic(fmt.Sprintf("illegal type: %d", n.Type))
+	}
 }
 
 func LexNumber(s string) *Node {
