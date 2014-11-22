@@ -38,13 +38,11 @@ func Run(args []string) {
 		check(err)
 		defer f.Close()
 		var layer []string
-		var parms []string
 		var betas []string
 		p := func() string {
-			i := len(parms)
-			x := fmt.Sprintf("b%02d", i)
-			parms = append(parms, x)
-			betas = append(betas, fmt.Sprintf("beta[%d]", i))
+			i := len(betas)
+			x := fmt.Sprintf("beta[%d]", i)
+			betas = append(betas, x)
 			return x
 		}
 		switch hidden {
@@ -102,7 +100,7 @@ func Run(args []string) {
 	}
 
 	run := func(x1, y1, z float64) (float64, map[string]float64, float64) {
-		v, g := ComputeAD(beta[0], beta[1], beta[2], beta[3], beta[4], beta[5], beta[6], beta[7], beta[8], beta[9], beta[10], beta[11], beta[12], beta[13], beta[14], beta[15], beta[16], beta[17], beta[18], beta[19], beta[20], x1, y1, z)
+		v, g := ComputeAD(x1, y1, z, beta)
 		score := log2(exp2(v)-1) / (-z)
 		return v, g, score
 	}
@@ -154,7 +152,7 @@ func Run(args []string) {
 
 		// gradient descent
 		for i := 0; i < len(beta); i++ {
-			beta[i] = beta[i] - eta*g[fmt.Sprintf("b%02d", i)]
+			beta[i] = beta[i] - eta*g[fmt.Sprintf("beta[%d]", i)]
 		}
 
 		// logging
@@ -186,8 +184,10 @@ func Run(args []string) {
 		recentIterations++
 	}
 
-	cmd := exec.Command("ffmpeg", "-y", "-r", "30", "-b", "1800", "-i", fmt.Sprintf("img_%d%%05d.jpg", hidden), fmt.Sprintf("test_%d.mp4", hidden))
+	cmd := exec.Command("ffmpeg", "-y", "-r", "30", "-b", "1800", "-i", fmt.Sprintf("img_%d_%%05d.jpg", hidden), fmt.Sprintf("test_%d.mp4", hidden))
 	fmt.Println(cmd.Args)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	check(cmd.Run())
 }
 

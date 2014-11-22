@@ -142,7 +142,6 @@ func Parse(funcs, main, timeComment bool, name, pkg, private, templates, formula
 	sp := &StepParser{vars: vars}
 	var steps []Step
 	steps = append(steps, vp.getVars(lex.rhs, private)...)
-	fmt.Printf("vars = %v; indexed = %v\n", vp.vars, vp.indexed)
 	steps = append(steps, sp.program(lex.rhs, private)...)
 	y := steps[len(steps)-1].lhs
 

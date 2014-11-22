@@ -25,6 +25,10 @@ for help, you can try:
     run compile -help
     run nn -help
 
+it runs with both scalar and slice variables; e.g.:
+
+    run compile -formula "f:= 2*x[0]+1 + a + x[1] * sin(x[2]) + z/y[0]"
+
 to develop with emacs:
 
     ./ide.sh

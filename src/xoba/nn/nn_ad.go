@@ -7,33 +7,33 @@ import (
 	"math"
 )
 
-// automatically compute the value and gradient of "f := log2( 1 + exp2(-z * (b20 +  b00 * (1 / (1 + exp2(- (b01 + b02 * x1 + b03 * x2)))) + b04 * (1 / (1 + exp2(- (b05 + b06 * x1 + b07 * x2)))) + b08 * (1 / (1 + exp2(- (b09 + b10 * x1 + b11 * x2)))) + b12 * (1 / (1 + exp2(- (b13 + b14 * x1 + b15 * x2)))) + b16 * (1 / (1 + exp2(- (b17 + b18 * x1 + b19 * x2)))))))\n"
-func ComputeAD(b00, b01, b02, b03, b04, b05, b06, b07, b08, b09, b10, b11, b12, b13, b14, b15, b16, b17, b18, b19, b20, x1, x2, z float64) (float64, map[string]float64) {
+// automatically compute the value and gradient of "f := log2( 1 + exp2(-z * (beta[20] +  beta[0] * (1 / (1 + exp2(- (beta[1] + beta[2] * x1 + beta[3] * x2)))) + beta[4] * (1 / (1 + exp2(- (beta[5] + beta[6] * x1 + beta[7] * x2)))) + beta[8] * (1 / (1 + exp2(- (beta[9] + beta[10] * x1 + beta[11] * x2)))) + beta[12] * (1 / (1 + exp2(- (beta[13] + beta[14] * x1 + beta[15] * x2)))) + beta[16] * (1 / (1 + exp2(- (beta[17] + beta[18] * x1 + beta[19] * x2)))))))\n"
+func ComputeAD(x1, x2, z float64, beta []float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
 	v_0_pvt := z
-	v_1_pvt := b20
-	v_2_pvt := b00
-	v_3_pvt := b01
-	v_4_pvt := b02
+	v_1_pvt := beta[20]
+	v_2_pvt := beta[0]
+	v_3_pvt := beta[1]
+	v_4_pvt := beta[2]
 	v_5_pvt := x1
-	v_6_pvt := b03
+	v_6_pvt := beta[3]
 	v_7_pvt := x2
-	v_8_pvt := b04
-	v_9_pvt := b05
-	v_10_pvt := b06
-	v_11_pvt := b07
-	v_12_pvt := b08
-	v_13_pvt := b09
-	v_14_pvt := b10
-	v_15_pvt := b11
-	v_16_pvt := b12
-	v_17_pvt := b13
-	v_18_pvt := b14
-	v_19_pvt := b15
-	v_20_pvt := b16
-	v_21_pvt := b17
-	v_22_pvt := b18
-	v_23_pvt := b19
+	v_8_pvt := beta[4]
+	v_9_pvt := beta[5]
+	v_10_pvt := beta[6]
+	v_11_pvt := beta[7]
+	v_12_pvt := beta[8]
+	v_13_pvt := beta[9]
+	v_14_pvt := beta[10]
+	v_15_pvt := beta[11]
+	v_16_pvt := beta[12]
+	v_17_pvt := beta[13]
+	v_18_pvt := beta[14]
+	v_19_pvt := beta[15]
+	v_20_pvt := beta[16]
+	v_21_pvt := beta[17]
+	v_22_pvt := beta[18]
+	v_23_pvt := beta[19]
 	s_0_pvt := multiply_pvt(-1.000000, v_0_pvt)
 	s_1_pvt := multiply_pvt(v_4_pvt, v_5_pvt)
 	s_2_pvt := add_pvt(v_3_pvt, s_1_pvt)
@@ -200,52 +200,52 @@ func ComputeAD(b00, b01, b02, b03, b04, b05, b06, b07, b08, b09, b10, b11, b12, 
 	b_s_0_pvt += b_s_51_pvt * (d_multiply_pvt(0, s_0_pvt, s_50_pvt))
 	b_v_23_pvt := 0.0
 	b_v_23_pvt += b_s_43_pvt * (d_multiply_pvt(0, v_23_pvt, v_7_pvt))
-	grad_pvt["b19"] = b_v_23_pvt
+	grad_pvt["beta[19]"] = b_v_23_pvt
 	b_v_22_pvt := 0.0
 	b_v_22_pvt += b_s_41_pvt * (d_multiply_pvt(0, v_22_pvt, v_5_pvt))
-	grad_pvt["b18"] = b_v_22_pvt
+	grad_pvt["beta[18]"] = b_v_22_pvt
 	b_v_21_pvt := 0.0
 	b_v_21_pvt += b_s_42_pvt * (d_add_pvt(0, v_21_pvt, s_41_pvt))
-	grad_pvt["b17"] = b_v_21_pvt
+	grad_pvt["beta[17]"] = b_v_21_pvt
 	b_v_20_pvt := 0.0
 	b_v_20_pvt += b_s_49_pvt * (d_multiply_pvt(0, v_20_pvt, s_48_pvt))
-	grad_pvt["b16"] = b_v_20_pvt
+	grad_pvt["beta[16]"] = b_v_20_pvt
 	b_v_19_pvt := 0.0
 	b_v_19_pvt += b_s_33_pvt * (d_multiply_pvt(0, v_19_pvt, v_7_pvt))
-	grad_pvt["b15"] = b_v_19_pvt
+	grad_pvt["beta[15]"] = b_v_19_pvt
 	b_v_18_pvt := 0.0
 	b_v_18_pvt += b_s_31_pvt * (d_multiply_pvt(0, v_18_pvt, v_5_pvt))
-	grad_pvt["b14"] = b_v_18_pvt
+	grad_pvt["beta[14]"] = b_v_18_pvt
 	b_v_17_pvt := 0.0
 	b_v_17_pvt += b_s_32_pvt * (d_add_pvt(0, v_17_pvt, s_31_pvt))
-	grad_pvt["b13"] = b_v_17_pvt
+	grad_pvt["beta[13]"] = b_v_17_pvt
 	b_v_16_pvt := 0.0
 	b_v_16_pvt += b_s_39_pvt * (d_multiply_pvt(0, v_16_pvt, s_38_pvt))
-	grad_pvt["b12"] = b_v_16_pvt
+	grad_pvt["beta[12]"] = b_v_16_pvt
 	b_v_15_pvt := 0.0
 	b_v_15_pvt += b_s_23_pvt * (d_multiply_pvt(0, v_15_pvt, v_7_pvt))
-	grad_pvt["b11"] = b_v_15_pvt
+	grad_pvt["beta[11]"] = b_v_15_pvt
 	b_v_14_pvt := 0.0
 	b_v_14_pvt += b_s_21_pvt * (d_multiply_pvt(0, v_14_pvt, v_5_pvt))
-	grad_pvt["b10"] = b_v_14_pvt
+	grad_pvt["beta[10]"] = b_v_14_pvt
 	b_v_13_pvt := 0.0
 	b_v_13_pvt += b_s_22_pvt * (d_add_pvt(0, v_13_pvt, s_21_pvt))
-	grad_pvt["b09"] = b_v_13_pvt
+	grad_pvt["beta[9]"] = b_v_13_pvt
 	b_v_12_pvt := 0.0
 	b_v_12_pvt += b_s_29_pvt * (d_multiply_pvt(0, v_12_pvt, s_28_pvt))
-	grad_pvt["b08"] = b_v_12_pvt
+	grad_pvt["beta[8]"] = b_v_12_pvt
 	b_v_11_pvt := 0.0
 	b_v_11_pvt += b_s_13_pvt * (d_multiply_pvt(0, v_11_pvt, v_7_pvt))
-	grad_pvt["b07"] = b_v_11_pvt
+	grad_pvt["beta[7]"] = b_v_11_pvt
 	b_v_10_pvt := 0.0
 	b_v_10_pvt += b_s_11_pvt * (d_multiply_pvt(0, v_10_pvt, v_5_pvt))
-	grad_pvt["b06"] = b_v_10_pvt
+	grad_pvt["beta[6]"] = b_v_10_pvt
 	b_v_9_pvt := 0.0
 	b_v_9_pvt += b_s_12_pvt * (d_add_pvt(0, v_9_pvt, s_11_pvt))
-	grad_pvt["b05"] = b_v_9_pvt
+	grad_pvt["beta[5]"] = b_v_9_pvt
 	b_v_8_pvt := 0.0
 	b_v_8_pvt += b_s_19_pvt * (d_multiply_pvt(0, v_8_pvt, s_18_pvt))
-	grad_pvt["b04"] = b_v_8_pvt
+	grad_pvt["beta[4]"] = b_v_8_pvt
 	b_v_7_pvt := 0.0
 	b_v_7_pvt += b_s_3_pvt * (d_multiply_pvt(1, v_6_pvt, v_7_pvt))
 	b_v_7_pvt += b_s_13_pvt * (d_multiply_pvt(1, v_11_pvt, v_7_pvt))
@@ -255,7 +255,7 @@ func ComputeAD(b00, b01, b02, b03, b04, b05, b06, b07, b08, b09, b10, b11, b12, 
 	grad_pvt["x2"] = b_v_7_pvt
 	b_v_6_pvt := 0.0
 	b_v_6_pvt += b_s_3_pvt * (d_multiply_pvt(0, v_6_pvt, v_7_pvt))
-	grad_pvt["b03"] = b_v_6_pvt
+	grad_pvt["beta[3]"] = b_v_6_pvt
 	b_v_5_pvt := 0.0
 	b_v_5_pvt += b_s_1_pvt * (d_multiply_pvt(1, v_4_pvt, v_5_pvt))
 	b_v_5_pvt += b_s_11_pvt * (d_multiply_pvt(1, v_10_pvt, v_5_pvt))
@@ -265,157 +265,157 @@ func ComputeAD(b00, b01, b02, b03, b04, b05, b06, b07, b08, b09, b10, b11, b12, 
 	grad_pvt["x1"] = b_v_5_pvt
 	b_v_4_pvt := 0.0
 	b_v_4_pvt += b_s_1_pvt * (d_multiply_pvt(0, v_4_pvt, v_5_pvt))
-	grad_pvt["b02"] = b_v_4_pvt
+	grad_pvt["beta[2]"] = b_v_4_pvt
 	b_v_3_pvt := 0.0
 	b_v_3_pvt += b_s_2_pvt * (d_add_pvt(0, v_3_pvt, s_1_pvt))
-	grad_pvt["b01"] = b_v_3_pvt
+	grad_pvt["beta[1]"] = b_v_3_pvt
 	b_v_2_pvt := 0.0
 	b_v_2_pvt += b_s_9_pvt * (d_multiply_pvt(0, v_2_pvt, s_8_pvt))
-	grad_pvt["b00"] = b_v_2_pvt
+	grad_pvt["beta[0]"] = b_v_2_pvt
 	b_v_1_pvt := 0.0
 	b_v_1_pvt += b_s_10_pvt * (d_add_pvt(0, v_1_pvt, s_9_pvt))
-	grad_pvt["b20"] = b_v_1_pvt
+	grad_pvt["beta[20]"] = b_v_1_pvt
 	b_v_0_pvt := 0.0
 	b_v_0_pvt += b_s_0_pvt * (d_multiply_pvt(1, -1.000000, v_0_pvt))
 	grad_pvt["z"] = b_v_0_pvt
 	return s_54_pvt, grad_pvt
 }
 
-// numerically compute the value and gradient of "f := log2( 1 + exp2(-z * (b20 +  b00 * (1 / (1 + exp2(- (b01 + b02 * x1 + b03 * x2)))) + b04 * (1 / (1 + exp2(- (b05 + b06 * x1 + b07 * x2)))) + b08 * (1 / (1 + exp2(- (b09 + b10 * x1 + b11 * x2)))) + b12 * (1 / (1 + exp2(- (b13 + b14 * x1 + b15 * x2)))) + b16 * (1 / (1 + exp2(- (b17 + b18 * x1 + b19 * x2)))))))\n"
-func ComputeNumerical(b00, b01, b02, b03, b04, b05, b06, b07, b08, b09, b10, b11, b12, b13, b14, b15, b16, b17, b18, b19, b20, x1, x2, z float64) (float64, map[string]float64) {
+// numerically compute the value and gradient of "f := log2( 1 + exp2(-z * (beta[20] +  beta[0] * (1 / (1 + exp2(- (beta[1] + beta[2] * x1 + beta[3] * x2)))) + beta[4] * (1 / (1 + exp2(- (beta[5] + beta[6] * x1 + beta[7] * x2)))) + beta[8] * (1 / (1 + exp2(- (beta[9] + beta[10] * x1 + beta[11] * x2)))) + beta[12] * (1 / (1 + exp2(- (beta[13] + beta[14] * x1 + beta[15] * x2)))) + beta[16] * (1 / (1 + exp2(- (beta[17] + beta[18] * x1 + beta[19] * x2)))))))\n"
+func ComputeNumerical(x1, x2, z float64, beta []float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
 	const delta_pvt = 0.000010
 	calc_pvt := func() float64 {
-		f := log2(1 + exp2(-z*(b20+b00*(1/(1+exp2(-(b01+b02*x1+b03*x2))))+b04*(1/(1+exp2(-(b05+b06*x1+b07*x2))))+b08*(1/(1+exp2(-(b09+b10*x1+b11*x2))))+b12*(1/(1+exp2(-(b13+b14*x1+b15*x2))))+b16*(1/(1+exp2(-(b17+b18*x1+b19*x2)))))))
+		f := log2(1 + exp2(-z*(beta[20]+beta[0]*(1/(1+exp2(-(beta[1]+beta[2]*x1+beta[3]*x2))))+beta[4]*(1/(1+exp2(-(beta[5]+beta[6]*x1+beta[7]*x2))))+beta[8]*(1/(1+exp2(-(beta[9]+beta[10]*x1+beta[11]*x2))))+beta[12]*(1/(1+exp2(-(beta[13]+beta[14]*x1+beta[15]*x2))))+beta[16]*(1/(1+exp2(-(beta[17]+beta[18]*x1+beta[19]*x2)))))))
 
 		return f
 	}
 	tmp1_pvt := calc_pvt()
 	{
-		b00 += delta_pvt
+		beta[0] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b00 -= delta_pvt
-		grad_pvt["b00"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[0] -= delta_pvt
+		grad_pvt["beta[0]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b01 += delta_pvt
+		beta[10] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b01 -= delta_pvt
-		grad_pvt["b01"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[10] -= delta_pvt
+		grad_pvt["beta[10]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b02 += delta_pvt
+		beta[11] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b02 -= delta_pvt
-		grad_pvt["b02"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[11] -= delta_pvt
+		grad_pvt["beta[11]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b03 += delta_pvt
+		beta[12] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b03 -= delta_pvt
-		grad_pvt["b03"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[12] -= delta_pvt
+		grad_pvt["beta[12]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b04 += delta_pvt
+		beta[13] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b04 -= delta_pvt
-		grad_pvt["b04"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[13] -= delta_pvt
+		grad_pvt["beta[13]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b05 += delta_pvt
+		beta[14] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b05 -= delta_pvt
-		grad_pvt["b05"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[14] -= delta_pvt
+		grad_pvt["beta[14]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b06 += delta_pvt
+		beta[15] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b06 -= delta_pvt
-		grad_pvt["b06"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[15] -= delta_pvt
+		grad_pvt["beta[15]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b07 += delta_pvt
+		beta[16] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b07 -= delta_pvt
-		grad_pvt["b07"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[16] -= delta_pvt
+		grad_pvt["beta[16]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b08 += delta_pvt
+		beta[17] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b08 -= delta_pvt
-		grad_pvt["b08"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[17] -= delta_pvt
+		grad_pvt["beta[17]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b09 += delta_pvt
+		beta[18] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b09 -= delta_pvt
-		grad_pvt["b09"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[18] -= delta_pvt
+		grad_pvt["beta[18]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b10 += delta_pvt
+		beta[19] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b10 -= delta_pvt
-		grad_pvt["b10"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[19] -= delta_pvt
+		grad_pvt["beta[19]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b11 += delta_pvt
+		beta[1] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b11 -= delta_pvt
-		grad_pvt["b11"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[1] -= delta_pvt
+		grad_pvt["beta[1]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b12 += delta_pvt
+		beta[20] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b12 -= delta_pvt
-		grad_pvt["b12"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[20] -= delta_pvt
+		grad_pvt["beta[20]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b13 += delta_pvt
+		beta[2] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b13 -= delta_pvt
-		grad_pvt["b13"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[2] -= delta_pvt
+		grad_pvt["beta[2]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b14 += delta_pvt
+		beta[3] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b14 -= delta_pvt
-		grad_pvt["b14"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[3] -= delta_pvt
+		grad_pvt["beta[3]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b15 += delta_pvt
+		beta[4] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b15 -= delta_pvt
-		grad_pvt["b15"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[4] -= delta_pvt
+		grad_pvt["beta[4]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b16 += delta_pvt
+		beta[5] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b16 -= delta_pvt
-		grad_pvt["b16"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[5] -= delta_pvt
+		grad_pvt["beta[5]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b17 += delta_pvt
+		beta[6] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b17 -= delta_pvt
-		grad_pvt["b17"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[6] -= delta_pvt
+		grad_pvt["beta[6]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b18 += delta_pvt
+		beta[7] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b18 -= delta_pvt
-		grad_pvt["b18"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[7] -= delta_pvt
+		grad_pvt["beta[7]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b19 += delta_pvt
+		beta[8] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b19 -= delta_pvt
-		grad_pvt["b19"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[8] -= delta_pvt
+		grad_pvt["beta[8]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
-		b20 += delta_pvt
+		beta[9] += delta_pvt
 		tmp2_pvt := calc_pvt()
-		b20 -= delta_pvt
-		grad_pvt["b20"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
+		beta[9] -= delta_pvt
+		grad_pvt["beta[9]"] = (tmp2_pvt - tmp1_pvt) / delta_pvt
 	}
 	{
 		x1 += delta_pvt
