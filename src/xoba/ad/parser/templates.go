@@ -23,7 +23,7 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 		return nil, "", err
 	}
 	for pname, p := range pkgs {
-		fmt.Printf("pkg = %q\n", pname)
+		log.Printf("pkg = %q\n", pname)
 		for n, f := range p.Files {
 			if strings.HasSuffix(n, "_test.go") {
 				log.Printf("skipping %s\n", n)
@@ -36,16 +36,8 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 			for _, s := range f.Decls {
 				switch t := s.(type) {
 				case *ast.FuncDecl:
-					output := func(name string, testing bool) error {
-						fmt.Printf("name = %q\n", name)
-						if genTests && testing && !strings.HasPrefix(name, "d_") {
-							switch count(t.Type.Params.List) {
-							case 1:
-								fmt.Printf("test1d(%q,%s,d_%s,t)\n", name, name, name)
-							case 2:
-								fmt.Printf("test2d(%q,%s,d_%s,t)\n", name, name, name)
-							}
-						}
+					output := func(name string) error {
+						log.Printf("name = %q\n", name)
 						fmt.Fprintf(body, "func %s(", name)
 						fmt.Fprint(body, fields(t.Type.Params.List))
 						fmt.Fprint(body, ")")
@@ -62,15 +54,17 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 						if err != nil {
 							return err
 						}
-						fmt.Printf("%s (%d bytes) %d to %d\n", file.Name(), len(buf), start, end)
-						fmt.Fprint(body, string(buf[start:end-1]))
+						p0 := fset.Position(start).Offset
+						p1 := fset.Position(end).Offset
+						log.Printf("%s (%d bytes) %d to %d\n", file.Name(), len(buf), p0, p1)
+						fmt.Fprint(body, string(buf[p0:p1-1]))
 						fmt.Fprintln(body, "}\n")
 						return nil
 					}
-					if err := output(t.Name.Name, true); err != nil {
+					if err := output(t.Name.Name); err != nil {
 						return nil, "", err
 					}
-					if err := output(fmt.Sprintf("%s_%s", t.Name.Name, private), false); err != nil {
+					if err := output(fmt.Sprintf("%s_%s", t.Name.Name, private)); err != nil {
 						return nil, "", err
 					}
 				}
