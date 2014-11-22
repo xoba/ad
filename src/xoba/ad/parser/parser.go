@@ -35,6 +35,7 @@ func Formula(n int) string {
 }
 
 func computeDerivatives(w io.Writer, steps []Step, private string) {
+	fmt.Fprintf(w, "b_inputs_pvt := make([]float64,30);\n")
 	fmt.Fprintf(w, "grad_%s := make(map[string]float64)\n", private)
 	n := len(steps)
 	for i := 0; i < n; i++ {
@@ -43,7 +44,11 @@ func computeDerivatives(w io.Writer, steps []Step, private string) {
 		if i == 0 {
 			fmt.Fprintf(w, "const b_%s = 1.0\n", step.lhs)
 		} else {
-			fmt.Fprintf(w, "b_%s := 0.0\n", step.lhs)
+			if strings.Contains(step.lhs, "inputs") { // bad design, to depend on var name!!!!
+				fmt.Fprintf(w, "b_%s = 0.0\n", step.lhs)
+			} else {
+				fmt.Fprintf(w, "b_%s := 0.0\n", step.lhs)
+			}
 		}
 		for k := j + 1; k < n; k++ {
 			s3 := steps[k]
@@ -63,6 +68,14 @@ type Step struct {
 	rhs  string
 	f    string
 	args []string
+}
+
+func (s Step) String() string {
+	if s.decl {
+		return fmt.Sprintf("%s = %s;", s.lhs, s.rhs)
+	} else {
+		return fmt.Sprintf("%s := %s;", s.lhs, s.rhs)
+	}
 }
 
 func derivative(num, denom Step, private string) string {
@@ -111,7 +124,7 @@ func Run(args []string) {
 
 	code, err := Parse(numerical, funcs, main, timeComment, funcName, pkg, private, templates, formula, 0.00001)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("oops, error creating output: %v\n", err)
 	}
 	f, err := os.Create(output)
 	if err != nil {
@@ -176,6 +189,7 @@ return %s
 	}
 
 	pgm := new(bytes.Buffer)
+	fmt.Fprintf(pgm, "var inputs_pvt []float64;\n")
 	for _, s := range steps {
 		fmt.Fprintln(pgm, s)
 	}
@@ -400,26 +414,24 @@ func GofmtBuffer(code []byte) ([]byte, error) {
 	cmd.Stdin = bytes.NewReader(code)
 	cmd.Stdout = out
 	if err := cmd.Run(); err != nil {
-		return nil, err
+		return code, err
 	}
 	return out.Bytes(), nil
 }
 
 type VarParser struct {
-	i           int
 	vars        map[string]string
 	indexed     map[string]string
 	maxIndicies map[string]int
 }
 
-// gets all the vars and name them in-place
+// gets all the vars and names them in-place
 func (v *VarParser) getVars(root *Node, private string) (out []Step) {
 	switch root.Type {
 	case identifierNT, indexedIdentifierNT:
 		if _, ok := v.vars[root.S]; !ok {
-			root.Name = fmt.Sprintf("v_%d_%s", v.i, private)
+			root.Name = fmt.Sprintf("inputs_%s[%d]", private, len(v.vars))
 			v.vars[root.VarName()] = root.Name
-			v.i++
 			step := Step{
 				decl: true,
 				lhs:  root.Name,
@@ -428,9 +440,6 @@ func (v *VarParser) getVars(root *Node, private string) (out []Step) {
 			if root.Type == indexedIdentifierNT {
 				step.rhs = fmt.Sprintf("%s[%d]", root.S, root.I)
 				v.indexed[root.VarName()] = root.S
-				if v.i > v.maxIndicies[root.S] {
-					v.maxIndicies[root.S] = v.i
-				}
 			}
 			out = append(out, step)
 		} else {
@@ -447,10 +456,6 @@ func (v *VarParser) getVars(root *Node, private string) (out []Step) {
 type StepParser struct {
 	i    int
 	vars map[string]string
-}
-
-func (s Step) String() string {
-	return fmt.Sprintf("%s := %s;", s.lhs, s.rhs)
 }
 
 func (s *StepParser) program(rhs *Node, private string) (out []Step) {
