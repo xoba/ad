@@ -26,6 +26,7 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 		fmt.Printf("pkg = %q\n", pname)
 		for n, f := range p.Files {
 			if strings.HasSuffix(n, "_test.go") {
+				log.Printf("skipping %s\n", n)
 				continue
 			}
 			log.Printf("parsing %s\n", n)
