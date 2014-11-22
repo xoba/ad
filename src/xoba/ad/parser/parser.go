@@ -29,12 +29,13 @@ const (
 func Formula(n int) string {
 	var terms []string
 	for i := 0; i < n; i++ {
-		terms = append(terms, fmt.Sprintf("x%d", i))
+		terms = append(terms, fmt.Sprintf("x[%d]", i))
 	}
-	return "f:=" + strings.Join(terms, "*")
+	return "f:=z*" + strings.Join(terms, "*")
 }
 
 func computeDerivatives(w io.Writer, steps []Step, private string) {
+	fmt.Fprintf(w, "grad_%s := make(map[string]float64)\n", private)
 	n := len(steps)
 	for i := 0; i < n; i++ {
 		j := n - i - 1
@@ -173,6 +174,9 @@ return %s
 	for _, s := range steps {
 		fmt.Fprintln(pgm, s)
 	}
+	fmt.Fprintf(pgm, "if !computeGrad {\n")
+	fmt.Fprintf(pgm, "return %s, nil;\n", y)
+	fmt.Fprintln(pgm, "}")
 	computeDerivatives(pgm, steps, private)
 
 	indexedArgs := make(map[string]bool)
@@ -262,8 +266,7 @@ package {{.package}}
 {{.imports}}
 
 // automatically compute the value and gradient of {{.qformula}}
-func {{.funcName}}({{.varsDecl}}) (float64,map[string]float64) {
-grad_{{.private}} := make(map[string]float64)
+func {{.funcName}}(computeGrad bool,{{.varsDecl}}) (float64,map[string]float64) {
 {{.program}} return {{.y}},grad_{{.private}};
 }
 
@@ -272,7 +275,7 @@ func main() {
 fmt.Printf("running autodiff code of {{.time}} on %q\n\n", {{ printf "%q" .formula }});
 {{.decls}} 
 
-	c1, grad1 := {{.funcName}}({{.vars}})
+	c1, grad1 := {{.funcName}}(true,{{.vars}})
 	fmt.Printf("autodiff value   : %.20f\n", c1)
 	fmt.Printf("autodiff gradient: %v\n\n", grad1)
 
@@ -332,6 +335,7 @@ grad_{{.private}} := make(map[string]float64)
 		"y":           y,
 	})
 
+	//	return f.Bytes(), nil
 	return GofmtBuffer(f.Bytes())
 }
 
