@@ -36,53 +36,57 @@ var yyExca = []int{
 	-2, 0,
 }
 
-const yyNprod = 13
+const yyNprod = 14
 const yyPrivate = 57344
 
 var yyTokenNames []string
 var yyStates []string
 
-const yyLast = 48
+const yyLast = 51
 
 var yyAct = []int{
 
-	5, 10, 11, 12, 13, 14, 15, 3, 28, 16,
-	17, 18, 19, 20, 21, 22, 23, 10, 11, 12,
-	13, 14, 4, 2, 25, 26, 1, 27, 10, 11,
-	12, 13, 14, 6, 7, 24, 0, 9, 0, 12,
-	13, 14, 8, 10, 11, 12, 13, 14,
+	5, 15, 3, 16, 10, 11, 12, 13, 14, 17,
+	18, 19, 20, 21, 22, 23, 27, 25, 10, 11,
+	12, 13, 14, 4, 2, 6, 7, 28, 29, 9,
+	30, 10, 11, 12, 13, 14, 8, 12, 13, 14,
+	31, 10, 11, 12, 13, 14, 24, 1, 0, 0,
+	26,
 }
 var yyPact = []int{
 
-	18, -1000, -5, 16, 29, 36, -1000, -7, 29, 29,
-	29, 29, 29, 29, 29, 29, 21, -1000, 30, 30,
-	-1000, -1000, -1000, 10, -1000, -1000, 29, -6, -1000,
+	19, -1000, -10, 17, 21, -3, -1000, -12, 21, 21,
+	21, 21, 21, 21, 21, 42, 21, 34, -1000, 28,
+	28, -1000, -1000, -1000, 2, 11, -1000, -1000, -1000, 21,
+	24, -1000,
 }
 var yyPgo = []int{
 
-	0, 26, 0,
+	0, 47, 0,
 }
 var yyR1 = []int{
 
 	0, 1, 2, 2, 2, 2, 2, 2, 2, 2,
-	2, 2, 2,
+	2, 2, 2, 2,
 }
 var yyR2 = []int{
 
-	0, 4, 1, 1, 3, 4, 6, 2, 3, 3,
-	3, 3, 3,
+	0, 4, 1, 1, 4, 3, 4, 6, 2, 3,
+	3, 3, 3, 3,
 }
 var yyChk = []int{
 
-	-1000, -1, 5, 12, 6, -2, 4, 5, 13, 8,
-	7, 8, 9, 10, 11, 13, -2, -2, -2, -2,
-	-2, -2, -2, -2, 14, 14, 15, -2, 14,
+	-1000, -1, 5, 12, 6, -2, 4, 5, 15, 8,
+	7, 8, 9, 10, 11, 13, 15, -2, -2, -2,
+	-2, -2, -2, -2, 4, -2, 16, 14, 16, 17,
+	-2, 16,
 }
 var yyDef = []int{
 
 	0, -2, 0, 0, 0, 1, 2, 3, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 7, 8, 9,
-	10, 11, 12, 0, 4, 5, 0, 0, 6,
+	0, 0, 0, 0, 0, 0, 0, 0, 8, 9,
+	10, 11, 12, 13, 0, 0, 5, 4, 6, 0,
+	0, 7,
 }
 var yyTok1 = []int{
 
@@ -90,12 +94,12 @@ var yyTok1 = []int{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	13, 14, 9, 7, 15, 8, 3, 10, 3, 3,
+	15, 16, 9, 7, 17, 8, 3, 10, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 12, 3,
 	3, 6, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 11,
+	3, 13, 3, 14, 11,
 }
 var yyTok2 = []int{
 
@@ -349,45 +353,50 @@ yydefault:
 	case 4:
 		//line parser.y:23
 		{
-			yyVAL = yyS[yypt-1]
+			yyVAL.node = IndexedIdentifier(yyS[yypt-3].node, yyS[yypt-1].node)
 		}
 	case 5:
 		//line parser.y:24
 		{
-			yyVAL.node = Function(yyS[yypt-3].node.S, yyS[yypt-1].node)
+			yyVAL = yyS[yypt-1]
 		}
 	case 6:
 		//line parser.y:25
 		{
-			yyVAL.node = Function(yyS[yypt-5].node.S, yyS[yypt-3].node, yyS[yypt-1].node)
+			yyVAL.node = Function(yyS[yypt-3].node.S, yyS[yypt-1].node)
 		}
 	case 7:
 		//line parser.y:26
 		{
-			yyVAL.node = Negate(yyS[yypt-0].node)
+			yyVAL.node = Function(yyS[yypt-5].node.S, yyS[yypt-3].node, yyS[yypt-1].node)
 		}
 	case 8:
 		//line parser.y:27
 		{
-			yyVAL.node = Function("add", yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Negate(yyS[yypt-0].node)
 		}
 	case 9:
 		//line parser.y:28
 		{
-			yyVAL.node = Function("subtract", yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("add", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 10:
 		//line parser.y:29
 		{
-			yyVAL.node = Function("multiply", yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("subtract", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 11:
 		//line parser.y:30
 		{
-			yyVAL.node = Function("divide", yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("multiply", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 12:
 		//line parser.y:31
+		{
+			yyVAL.node = Function("divide", yyS[yypt-2].node, yyS[yypt-0].node)
+		}
+	case 13:
+		//line parser.y:32
 		{
 			yyVAL.node = Function("pow", yyS[yypt-2].node, yyS[yypt-0].node)
 		}

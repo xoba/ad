@@ -85,15 +85,17 @@ func derivative(num, denom Step, private string) string {
 type NodeType string
 
 const (
-	numberNT     NodeType = "NUM"
-	identifierNT NodeType = "IDENT"
-	functionNT   NodeType = "FUNC"
+	numberNT            NodeType = "NUM"
+	identifierNT        NodeType = "IDENT"
+	indexedIdentifierNT NodeType = "INDEXED"
+	functionNT          NodeType = "FUNC"
 )
 
 type Node struct {
 	Type     NodeType `json:"T,omitempty"`
 	S        string   `json:",omitempty"`
 	F        float64  `json:",omitempty"`
+	I        int      `json:",omitempty"`
 	Children []*Node  `json:"C,omitempty"`
 	Name     string   `json:"N,omitempty"`
 }
@@ -161,7 +163,7 @@ func Parse(funcs, main, timeComment bool, name, pkg, private, templates, formula
 		return nil, fmt.Errorf("parse error: lhs or rhs is nil")
 	}
 	vars := make(map[string]string)
-	vp := &VarParser{vars: vars}
+	vp := &VarParser{vars: vars, indexed: make(map[string]bool)}
 	sp := &StepParser{vars: vars}
 	var steps []Step
 	steps = append(steps, vp.getVars(lex.rhs, private)...)
@@ -197,16 +199,60 @@ return %s
 		fmt.Fprintln(pgm, s)
 	}
 	computeDerivatives(pgm, steps, private)
-	var list []string
+	var argList, scalarArgList, indexedArgList []string
 	for v := range vars {
-		list = append(list, v)
+		argList = append(indexedArgList, v)
+		if vp.indexed[v] {
+			indexedArgList = append(indexedArgList, v)
+		} else {
+			scalarArgList = append(scalarArgList, v)
+		}
 	}
-	sort.Strings(list)
+	sort.Strings(scalarArgList)
+	sort.Strings(indexedArgList)
+
+	args := func() string {
+		var out []string
+		if len(scalarArgList) > 0 {
+			var list []string
+			for _, a := range scalarArgList {
+				list = append(list, a)
+			}
+			out = append(out, strings.Join(list, ","))
+		}
+		if len(indexedArgList) > 0 {
+			var list []string
+			for _, a := range indexedArgList {
+				list = append(list, a)
+			}
+			out = append(out, strings.Join(list, ","))
+		}
+		return strings.Join(out, ", ")
+	}()
+
+	declArgs := func() string {
+		var out []string
+		if len(scalarArgList) > 0 {
+			var list []string
+			for _, a := range scalarArgList {
+				list = append(list, a)
+			}
+			out = append(out, strings.Join(list, ",")+" float64")
+		}
+		if len(indexedArgList) > 0 {
+			var list []string
+			for _, a := range indexedArgList {
+				list = append(list, a)
+			}
+			out = append(out, strings.Join(list, ",")+" []float64")
+		}
+		return strings.Join(out, ", ")
+	}()
 
 	f := new(bytes.Buffer)
 
 	decls := new(bytes.Buffer)
-	for _, v := range list {
+	for _, v := range argList {
 		fmt.Fprintf(decls, "%s := %.20f;\n", v, rand.NormFloat64())
 		fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%+.20f\\n\",%s)\n", v, v)
 	}
@@ -225,7 +271,7 @@ package {{.package}}
 {{.imports}}
 
 // automatically compute the value and gradient of {{.qformula}}
-func {{.funcName}}({{.vars}} float64) (float64,map[string]float64) {
+func {{.funcName}}({{.varsDecl}}) (float64,map[string]float64) {
 grad_{{.private}} := make(map[string]float64)
 {{.program}} return {{.y}},grad_{{.private}};
 }
@@ -257,7 +303,7 @@ fmt.Printf("\nsum of absolute differences: %+.20f\n",total);
 {{ end }}
 
 // numerically compute the value and gradient of {{.qformula}}
-func ComputeNumerical({{.vars}} float64) (float64,map[string]float64) {
+func ComputeNumerical({{.varsDecl}}) (float64,map[string]float64) {
 grad_{{.private}} := make(map[string]float64)
 {{.checker}} return tmp1_{{.private}},grad_{{.private}};
 }
@@ -275,23 +321,24 @@ grad_{{.private}} := make(map[string]float64)
 	imports.AddAll(templateImports)
 
 	t.Execute(f, map[string]interface{}{
-		"main":        main,
-		"funcName":    name,
-		"timeComment": timeComment,
-		"package":     pkg,
-		"time":        time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
-		"decls":       decls.String(),
-		"formula":     formula,
-		"qformula":    fmt.Sprintf("%q", formula),
-		"lhs":         lex.lhs.S,
-		"vars":        strings.Join(list, ", "),
-		"program":     pgm.String(),
 		"checker":     checker.String(),
-		"y":           y,
-		"funcs":       code,
+		"decls":       decls.String(),
 		"emitFuncs":   funcs,
-		"private":     private,
+		"formula":     formula,
+		"funcName":    name,
+		"funcs":       code,
 		"imports":     imports.String(),
+		"lhs":         lex.lhs.S,
+		"main":        main,
+		"package":     pkg,
+		"private":     private,
+		"program":     pgm.String(),
+		"qformula":    fmt.Sprintf("%q", formula),
+		"timeComment": timeComment,
+		"time":        time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
+		"vars":        args,
+		"varsDecl":    declArgs,
+		"y":           y,
 	})
 
 	return GofmtBuffer(f.Bytes())
@@ -357,29 +404,34 @@ func GofmtBuffer(code []byte) ([]byte, error) {
 }
 
 type VarParser struct {
-	i    int
-	vars map[string]string
+	i       int
+	vars    map[string]string
+	indexed map[string]bool
 }
 
 // gets all the vars and name them in-place
-func (v *VarParser) getVars(rhs *Node, private string) (out []Step) {
-	switch rhs.Type {
-	case identifierNT:
-		if _, ok := v.vars[rhs.S]; !ok {
-			rhs.Name = fmt.Sprintf("v_%d_%s", v.i, private)
-			v.vars[rhs.S] = rhs.Name
+func (v *VarParser) getVars(root *Node, private string) (out []Step) {
+	switch root.Type {
+	case identifierNT, indexedIdentifierNT:
+		if _, ok := v.vars[root.S]; !ok {
+			root.Name = fmt.Sprintf("v_%d_%s", v.i, private)
+			v.vars[root.S] = root.Name
 			v.i++
 			step := Step{
 				decl: true,
-				lhs:  rhs.Name,
-				rhs:  rhs.S,
+				lhs:  root.Name,
+				rhs:  root.S,
+			}
+			if root.Type == indexedIdentifierNT {
+				step.rhs = fmt.Sprintf("%s[%d]", root.S, root.I)
+				v.indexed[root.S] = true
 			}
 			out = append(out, step)
 		} else {
-			rhs.Name = v.vars[rhs.S]
+			root.Name = v.vars[root.S]
 		}
 	case functionNT:
-		for _, n := range rhs.Children {
+		for _, n := range root.Children {
 			out = append(out, v.getVars(n, private)...)
 		}
 	}
@@ -438,6 +490,14 @@ func LexIdentifier(s string) *Node {
 	return &Node{
 		Type: identifierNT,
 		S:    s,
+	}
+}
+
+func IndexedIdentifier(ident, index *Node) *Node {
+	return &Node{
+		Type: indexedIdentifierNT,
+		S:    ident.S,
+		I:    int(index.F),
 	}
 }
 
