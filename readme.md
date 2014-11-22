@@ -49,4 +49,5 @@ units second one has none, and is equivalent to logistic regression):
 
 in these movies, white pixels are correctly guessed classes,
 red are incorrect. class#1 is a circle embedded in a 2-d feature 
-space, class#2 is everything else.
+space, class#2 is everything else. "time" in the movie
+is monotonic with training iteration.
