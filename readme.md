@@ -44,7 +44,7 @@ to run a simple neural network example:
 which produces one of these two videos (first one has 5 hidden
 units second one has none, and is equivalent to logistic regression):
 
-    https://s3.amazonaws.com/xoba-videos/test_5.mp4
-    https://s3.amazonaws.com/xoba-videos/test_0.mp4
+1. https://s3.amazonaws.com/xoba-videos/test_5.mp4
+2. https://s3.amazonaws.com/xoba-videos/test_0.mp4
 
 
