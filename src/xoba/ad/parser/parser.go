@@ -275,6 +275,7 @@ grad_{{.private}} := make(map[string]float64)
 	imports.AddAll(templateImports)
 
 	t.Execute(f, map[string]interface{}{
+		"main":        main,
 		"funcName":    name,
 		"timeComment": timeComment,
 		"package":     pkg,
