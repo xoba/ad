@@ -90,10 +90,10 @@ func derivative(num, denom Step, private string) string {
 func Run(args []string) {
 	var funcName, private, pkg, templates, formula, output string
 	var dx float64
-	var main, timeComment, funcs bool
+	var numerical, main, timeComment, funcs bool
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.StringVar(&funcName, "name", "ComputeAD", "ad function name")
-	flags.StringVar(&formula, "formula", Formula(10), "the formula to parse (or file)")
+	flags.StringVar(&formula, "formula", Formula(20), "the formula to parse (or file)")
 	flags.StringVar(&private, "private", defaultPrivateString, "the private variable string")
 	flags.StringVar(&pkg, "package", "main", "the go package for generated code")
 	flags.StringVar(&templates, "templates", defaultTemplates, "directory of go template functions")
@@ -101,6 +101,7 @@ func Run(args []string) {
 	flags.BoolVar(&main, "main", true, "whether to emit a main method")
 	flags.BoolVar(&funcs, "funcs", true, "whether to emit template functions")
 	flags.BoolVar(&timeComment, "time", true, "embed time in source code comment")
+	flags.BoolVar(&numerical, "numerical", true, "whether to output numerical gradient code")
 	flags.Float64Var(&dx, "dx", defaultDx, "infinitesimal for numerical differentiation")
 	flags.Parse(args)
 
@@ -108,7 +109,7 @@ func Run(args []string) {
 		formula = string(buf)
 	}
 
-	code, err := Parse(funcs, main, timeComment, funcName, pkg, private, templates, formula, 0.00001)
+	code, err := Parse(numerical, funcs, main, timeComment, funcName, pkg, private, templates, formula, 0.00001)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -120,7 +121,7 @@ func Run(args []string) {
 	f.Close()
 }
 
-func Parse(funcs, main, timeComment bool, name, pkg, private, templates, formula string, dx float64) ([]byte, error) {
+func Parse(numerical, funcs, main, timeComment bool, name, pkg, private, templates, formula string, dx float64) ([]byte, error) {
 	if len(private) == 0 {
 		private = defaultPrivateString
 	}
@@ -139,7 +140,11 @@ func Parse(funcs, main, timeComment bool, name, pkg, private, templates, formula
 		return nil, fmt.Errorf("parse error: lhs or rhs is nil")
 	}
 	vars := make(map[string]string)
-	vp := &VarParser{vars: vars, indexed: make(map[string]string)}
+	vp := &VarParser{
+		vars:        vars,
+		indexed:     make(map[string]string),
+		maxIndicies: make(map[string]int),
+	}
 	sp := &StepParser{vars: vars}
 	var steps []Step
 	steps = append(steps, vp.getVars(lex.rhs, private)...)
@@ -239,12 +244,11 @@ return %s
 	decls := new(bytes.Buffer)
 
 	for _, v := range indexedArgList {
-		fmt.Fprintf(decls, "var %s []float64;\n", v)
+		fmt.Fprintf(decls, "%s := make([]float64,%d);\n", v, vp.maxIndicies[v])
 	}
 	for _, v := range argList {
 		if _, ok := vp.indexed[v]; ok {
-			name := vp.indexed[v]
-			fmt.Fprintf(decls, "%s = append(%s,%.20f);\n", name, name, rand.NormFloat64())
+			fmt.Fprintf(decls, "%v = %.20f;\n", v, rand.NormFloat64())
 			fmt.Fprintf(decls, "fmt.Printf(\"setting %s = %%+.20f\\n\",%s)\n", v, v)
 		} else {
 			fmt.Fprintf(decls, "%s := %.20f;\n", v, rand.NormFloat64())
@@ -279,7 +283,7 @@ fmt.Printf("running autodiff code of {{.time}} on %q\n\n", {{ printf "%q" .formu
 	fmt.Printf("autodiff value   : %.20f\n", c1)
 	fmt.Printf("autodiff gradient: %v\n\n", grad1)
 
-	c2, grad2 := ComputeNumerical({{.vars}})
+	c2, grad2 := ComputeNumerical(true,{{.vars}})
 	fmt.Printf("numeric value   : %.20f\n", c2)
 	fmt.Printf("numeric gradient: %v\n\n", grad2)
 
@@ -296,11 +300,13 @@ fmt.Printf("\nsum of absolute differences: %+.20f\n",total);
 }
 {{ end }}
 
+{{if .numerical}}
 // numerically compute the value and gradient of {{.qformula}}
-func ComputeNumerical({{.varsDecl}}) (float64,map[string]float64) {
+func ComputeNumerical(computeGrad bool, {{.varsDecl}}) (float64,map[string]float64) {
 grad_{{.private}} := make(map[string]float64)
 {{.checker}} return tmp1_{{.private}},grad_{{.private}};
 }
+{{end}}
 
 {{ if .emitFuncs }}
   {{.funcs}}
@@ -333,9 +339,10 @@ grad_{{.private}} := make(map[string]float64)
 		"vars":        args,
 		"varsDecl":    declArgs,
 		"y":           y,
+		"numerical":   numerical,
 	})
 
-	//	return f.Bytes(), nil
+	//return f.Bytes(), nil
 	return GofmtBuffer(f.Bytes())
 }
 
@@ -399,9 +406,10 @@ func GofmtBuffer(code []byte) ([]byte, error) {
 }
 
 type VarParser struct {
-	i       int
-	vars    map[string]string
-	indexed map[string]string
+	i           int
+	vars        map[string]string
+	indexed     map[string]string
+	maxIndicies map[string]int
 }
 
 // gets all the vars and name them in-place
@@ -420,6 +428,9 @@ func (v *VarParser) getVars(root *Node, private string) (out []Step) {
 			if root.Type == indexedIdentifierNT {
 				step.rhs = fmt.Sprintf("%s[%d]", root.S, root.I)
 				v.indexed[root.VarName()] = root.S
+				if v.i > v.maxIndicies[root.S] {
+					v.maxIndicies[root.S] = v.i
+				}
 			}
 			out = append(out, step)
 		} else {

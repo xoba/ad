@@ -8,8 +8,7 @@ import (
 )
 
 // automatically compute the value and gradient of "f := log2( 1 + exp2(-z * (beta[20] +  beta[0] * (1 / (1 + exp2(- (beta[1] + beta[2] * x1 + beta[3] * x2)))) + beta[4] * (1 / (1 + exp2(- (beta[5] + beta[6] * x1 + beta[7] * x2)))) + beta[8] * (1 / (1 + exp2(- (beta[9] + beta[10] * x1 + beta[11] * x2)))) + beta[12] * (1 / (1 + exp2(- (beta[13] + beta[14] * x1 + beta[15] * x2)))) + beta[16] * (1 / (1 + exp2(- (beta[17] + beta[18] * x1 + beta[19] * x2)))))))\n"
-func ComputeAD(x1, x2, z float64, beta []float64) (float64, map[string]float64) {
-	grad_pvt := make(map[string]float64)
+func ComputeAD(computeGrad bool, x2, z, x1 float64, beta []float64) (float64, map[string]float64) {
 	v_0_pvt := z
 	v_1_pvt := beta[20]
 	v_2_pvt := beta[0]
@@ -89,6 +88,10 @@ func ComputeAD(x1, x2, z float64, beta []float64) (float64, map[string]float64) 
 	s_52_pvt := exp2_pvt(s_51_pvt)
 	s_53_pvt := add_pvt(1.000000, s_52_pvt)
 	s_54_pvt := log2_pvt(s_53_pvt)
+	if !computeGrad {
+		return s_54_pvt, nil
+	}
+	grad_pvt := make(map[string]float64)
 	const b_s_54_pvt = 1.0
 	b_s_53_pvt := 0.0
 	b_s_53_pvt += b_s_54_pvt * (d_log2_pvt(s_53_pvt))
@@ -282,7 +285,7 @@ func ComputeAD(x1, x2, z float64, beta []float64) (float64, map[string]float64) 
 }
 
 // numerically compute the value and gradient of "f := log2( 1 + exp2(-z * (beta[20] +  beta[0] * (1 / (1 + exp2(- (beta[1] + beta[2] * x1 + beta[3] * x2)))) + beta[4] * (1 / (1 + exp2(- (beta[5] + beta[6] * x1 + beta[7] * x2)))) + beta[8] * (1 / (1 + exp2(- (beta[9] + beta[10] * x1 + beta[11] * x2)))) + beta[12] * (1 / (1 + exp2(- (beta[13] + beta[14] * x1 + beta[15] * x2)))) + beta[16] * (1 / (1 + exp2(- (beta[17] + beta[18] * x1 + beta[19] * x2)))))))\n"
-func ComputeNumerical(x1, x2, z float64, beta []float64) (float64, map[string]float64) {
+func ComputeNumerical(x2, z, x1 float64, beta []float64) (float64, map[string]float64) {
 	grad_pvt := make(map[string]float64)
 	const delta_pvt = 0.000010
 	calc_pvt := func() float64 {
