@@ -22,7 +22,8 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	for _, p := range pkgs {
+	for pname, p := range pkgs {
+		fmt.Printf("pkg = %q\n", pname)
 		for n, f := range p.Files {
 			if strings.HasSuffix(n, "_test.go") {
 				continue
@@ -35,6 +36,7 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 				switch t := s.(type) {
 				case *ast.FuncDecl:
 					output := func(name string, testing bool) error {
+						fmt.Printf("name = %q\n", name)
 						if genTests && testing && !strings.HasPrefix(name, "d_") {
 							switch count(t.Type.Params.List) {
 							case 1:
@@ -59,6 +61,7 @@ func GenTemplates(dir, private string) ([]string, string, error) {
 						if err != nil {
 							return err
 						}
+						fmt.Printf("%s (%d bytes) %d to %d\n", file.Name(), len(buf), start, end)
 						fmt.Fprint(body, string(buf[start:end-1]))
 						fmt.Fprintln(body, "}\n")
 						return nil
