@@ -287,7 +287,7 @@ fmt.Printf("running autodiff code of {{.time}} on %q\n\n", {{ printf "%q" .formu
 	}
 	add("value", c1-c2)
 	for k, v := range grad2 {
-		add(fmt.Sprintf("grad[%3s]", k), grad1[k]-v)
+		add(fmt.Sprintf("grad[%s]", k), grad1[k]-v)
 	}
 fmt.Printf("\nsum of absolute differences: %+.20f\n",total);
 }
