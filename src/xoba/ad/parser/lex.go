@@ -1,0 +1,41 @@
+package parser
+
+import (
+	"encoding/json"
+	"strconv"
+)
+
+type NodeType string
+
+const (
+	numberNT            NodeType = "NUM"
+	identifierNT        NodeType = "IDENT"
+	indexedIdentifierNT NodeType = "INDEXED"
+	functionNT          NodeType = "FUNC"
+)
+
+type Node struct {
+	Type     NodeType `json:"T,omitempty"`
+	S        string   `json:",omitempty"`
+	F        float64  `json:",omitempty"`
+	I        int      `json:",omitempty"`
+	Children []*Node  `json:"C,omitempty"`
+	Name     string   `json:"N,omitempty"` // name of variable assigned by parser
+}
+
+func (n Node) String() string {
+	buf, _ := json.Marshal(n)
+	return string(buf)
+}
+
+func LexNumber(s string) *Node {
+	n, _ := strconv.ParseFloat(s, 64)
+	return Number(n)
+}
+
+func LexIdentifier(s string) *Node {
+	return &Node{
+		Type: identifierNT,
+		S:    s,
+	}
+}

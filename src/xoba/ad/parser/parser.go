@@ -6,7 +6,6 @@ package parser
 
 import (
 	"bytes"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -16,10 +15,15 @@ import (
 	"os"
 	"os/exec"
 	"sort"
-	"strconv"
 	"strings"
 	"text/template"
 	"time"
+)
+
+const (
+	defaultPrivateString = "pvt"
+	defaultDx            = 0.00001
+	defaultTemplates     = "src/xoba/ad/parser/templates"
 )
 
 func Formula(n int) string {
@@ -82,29 +86,6 @@ func derivative(num, denom Step, private string) string {
 	return strings.Join(list, "+")
 }
 
-type NodeType string
-
-const (
-	numberNT            NodeType = "NUM"
-	identifierNT        NodeType = "IDENT"
-	indexedIdentifierNT NodeType = "INDEXED"
-	functionNT          NodeType = "FUNC"
-)
-
-type Node struct {
-	Type     NodeType `json:"T,omitempty"`
-	S        string   `json:",omitempty"`
-	F        float64  `json:",omitempty"`
-	I        int      `json:",omitempty"`
-	Children []*Node  `json:"C,omitempty"`
-	Name     string   `json:"N,omitempty"`
-}
-
-func (n Node) String() string {
-	buf, _ := json.Marshal(n)
-	return string(buf)
-}
-
 func Run(args []string) {
 	var funcName, private, pkg, templates, formula, output string
 	var dx float64
@@ -137,12 +118,6 @@ func Run(args []string) {
 	f.Write(code)
 	f.Close()
 }
-
-const (
-	defaultPrivateString = "pvt"
-	defaultDx            = 0.00001
-	defaultTemplates     = "src/xoba/ad/parser/templates"
-)
 
 func Parse(funcs, main, timeComment bool, name, pkg, private, templates, formula string, dx float64) ([]byte, error) {
 	if len(private) == 0 {
@@ -486,24 +461,12 @@ func Number(n float64) *Node {
 	}
 }
 
-func LexIdentifier(s string) *Node {
-	return &Node{
-		Type: identifierNT,
-		S:    s,
-	}
-}
-
 func IndexedIdentifier(ident, index *Node) *Node {
 	return &Node{
 		Type: indexedIdentifierNT,
 		S:    ident.S,
 		I:    int(index.F),
 	}
-}
-
-func LexNumber(s string) *Node {
-	n, _ := strconv.ParseFloat(s, 64)
-	return Number(n)
 }
 
 func Negate(a *Node) *Node {
