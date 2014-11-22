@@ -47,4 +47,6 @@ units second one has none, and is equivalent to logistic regression):
 1. https://s3.amazonaws.com/xoba-videos/test_5.mp4
 2. https://s3.amazonaws.com/xoba-videos/test_0.mp4
 
-
+in these movies, white pixels are correctly guessed classes,
+red are incorrect. class#1 is a circle embedded in a 2-d feature 
+space, class#2 is everything else.
