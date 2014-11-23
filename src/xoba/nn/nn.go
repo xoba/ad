@@ -104,7 +104,7 @@ func Run(args []string) {
 	}
 
 	run := func(grad bool, x1, y1, z float64) (float64, map[string]float64, float64) {
-		v, g := ComputeAD(grad, x1, y1, z, beta)
+		v, g, _, _, _, _ := ComputeAD(grad, x1, y1, z, beta)
 		score := log2(exp2(v)-1) / (-z)
 		return v, g, score
 	}

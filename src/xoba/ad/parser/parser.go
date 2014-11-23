@@ -288,13 +288,13 @@ return %s
 
 	returnSig := func() string {
 		out := new(bytes.Buffer)
-		fmt.Fprint(out, "(float64,map[string]float64,")
+		fmt.Fprint(out, "(float64 /* value */, map[string]float64 /* gradients */,")
 		var list []string
-		for range scalarArgList {
-			list = append(list, "float64")
+		for _, a := range scalarArgList {
+			list = append(list, fmt.Sprintf("float64 /* d/d(%s) */", a))
 		}
-		for range indexedArgList {
-			list = append(list, "[]float64")
+		for _, a := range indexedArgList {
+			list = append(list, fmt.Sprintf("[]float64 /* d/d(%s) */", a))
 		}
 		fmt.Fprint(out, strings.Join(list, ","))
 		fmt.Fprint(out, ")")
@@ -598,6 +598,7 @@ func sort1(m map[string]bool) (out []string) {
 			out = append(out, k)
 		}
 	}
+	sort.Strings(out)
 	return
 }
 
@@ -605,5 +606,6 @@ func sort2(m map[string]int) (out []string) {
 	for k := range m {
 		out = append(out, k)
 	}
+	sort.Strings(out)
 	return
 }
