@@ -22,7 +22,7 @@ func betaVar(i int) string {
 }
 
 //go:generate run nn -gen
-//go:generate run compile -grad=true -formula=nn.txt -output nn_ad.go -templates "../ad/parser/templates" -package nn -main=false -time=false
+//go:generate run compile -grad=false -numerical=false -formula=nn.txt -output nn_ad.go -templates "../ad/parser/templates" -package nn -main=false -time=false
 func Run(args []string) {
 	var gen bool
 	var hidden int
@@ -103,10 +103,10 @@ func Run(args []string) {
 		return x1, y1, z
 	}
 
-	run := func(grad bool, x1, y1, z float64) (float64, map[string]float64, float64) {
-		v, g, _, _, _, _ := ComputeAD(grad, x1, y1, z, beta)
+	run := func(grad bool, x1, y1, z float64) (float64, float64, []float64) {
+		v, _, _, _, dbeta := ComputeAD(grad, x1, y1, z, beta)
 		score := log2(exp2(v)-1) / (-z)
-		return v, g, score
+		return v, score, dbeta
 	}
 
 	plot := func(name string) {
@@ -114,7 +114,7 @@ func Run(args []string) {
 		draw.Draw(img, img.Bounds(), &image.Uniform{color.RGBA{0, 0, 0, 255}}, image.ZP, draw.Src)
 		for n := 0; n < 100000; n++ {
 			x, y, z := trial()
-			_, _, score := run(false, x, y, z)
+			_, score, _ := run(false, x, y, z)
 			j := int(-y*float64(h)/10) + w/2
 			i := int(x*float64(w)/10) + w/2
 			if i < 0 || i >= w {
@@ -149,14 +149,14 @@ func Run(args []string) {
 
 		// run a trial
 		x1, y1, z := trial()
-		v, g, score := run(true, x1, y1, z)
+		v, score, dbeta := run(true, x1, y1, z)
 		totalLoss += v
 		recentTotal += v
 		pt.Update(score, z == +1)
 
 		// gradient descent
 		for i := 0; i < len(beta); i++ {
-			beta[i] = beta[i] - eta*g[betaVar(i)]
+			beta[i] = beta[i] - eta*dbeta[i]
 		}
 
 		// logging
