@@ -104,7 +104,7 @@ func Run(args []string) {
 	var grad, numerical, main, timeComment, funcs bool
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.StringVar(&funcName, "name", "ComputeAD", "ad function name")
-	flags.StringVar(&formula, "formula", Formula(20), "the formula to parse (or file)")
+	flags.StringVar(&formula, "formula", Formula(15), "the formula to parse (or file)")
 	flags.StringVar(&private, "private", defaultPrivateString, "the private variable string")
 	flags.StringVar(&pkg, "package", "main", "the go package for generated code")
 	flags.StringVar(&templates, "templates", defaultTemplates, "directory of go template functions")
