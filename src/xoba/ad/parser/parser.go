@@ -34,14 +34,16 @@ func Formula(n int) string {
 	return "f:=z*" + strings.Join(terms, "*")
 }
 
-func computeDerivatives(w io.Writer, steps []Step, private string, scalarArgs []string, indexedArgs map[string]int) {
+func computeDerivatives(grad bool, w io.Writer, steps []Step, private string, scalarArgs []string, indexedArgs map[string]int) {
 	for _, a := range scalarArgs {
 		fmt.Fprintf(w, "var b_%s_%s float64;\n", private, a)
 	}
 	for _, a := range sort2(indexedArgs) {
 		fmt.Fprintf(w, "b_%s_%s := make([]float64,%d);\n", private, a, 1+indexedArgs[a])
 	}
-	fmt.Fprintf(w, "grad_%s := make(map[string]float64)\n", private)
+	if grad {
+		fmt.Fprintf(w, "grad_%s := make(map[string]float64)\n", private)
+	}
 	n := len(steps)
 	for i := 0; i < n; i++ {
 		j := n - i - 1
@@ -58,7 +60,9 @@ func computeDerivatives(w io.Writer, steps []Step, private string, scalarArgs []
 			}
 		}
 		if step.decl {
-			fmt.Fprintf(w, "grad_%s[\"%s\"] = b_%s\n", private, step.rhs, step.lhs)
+			if grad {
+				fmt.Fprintf(w, "grad_%s[\"%s\"] = b_%s\n", private, step.rhs, step.lhs)
+			}
 			fmt.Fprintf(w, "b_%s_%s = b_%s\n", private, step.rhs, step.lhs)
 		}
 	}
@@ -206,7 +210,10 @@ return %s
 	}
 	fmt.Fprintf(pgm, "if !computeGrad {\n")
 	{
-		fmt.Fprintf(pgm, "return %s, nil,", y)
+		fmt.Fprintf(pgm, "return %s,", y)
+		if grad {
+			fmt.Fprint(pgm, "nil,")
+		}
 		var list []string
 		for range scalarArgList {
 			list = append(list, "0")
@@ -223,7 +230,7 @@ return %s
 	for _, a := range indexedArgList {
 		indexedArgMap[a] = vp.maxIndicies[a]
 	}
-	computeDerivatives(pgm, steps, private, scalarArgList, indexedArgMap)
+	computeDerivatives(grad, pgm, steps, private, scalarArgList, indexedArgMap)
 
 	args := func() string {
 		var out []string
@@ -289,7 +296,11 @@ return %s
 
 	returnSig := func() string {
 		out := new(bytes.Buffer)
-		fmt.Fprint(out, "(float64 /* value */, map[string]float64 /* gradients */,")
+		if grad {
+			fmt.Fprint(out, "(float64 /* value */, map[string]float64 /* gradients */,")
+		} else {
+			fmt.Fprint(out, "(float64 /* value */,")
+		}
 		var list []string
 		for _, a := range scalarArgList {
 			list = append(list, fmt.Sprintf("float64 /* d/d(%s) */", a))
@@ -307,7 +318,9 @@ return %s
 		fmt.Fprint(out, "return ")
 		var list []string
 		list = append(list, y)
-		list = append(list, fmt.Sprintf("grad_%s", private))
+		if grad {
+			list = append(list, fmt.Sprintf("grad_%s", private))
+		}
 		for _, a := range scalarArgList {
 			list = append(list, fmt.Sprintf("b_%s_%s", private, a))
 		}

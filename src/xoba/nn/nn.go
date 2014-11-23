@@ -22,7 +22,7 @@ func betaVar(i int) string {
 }
 
 //go:generate run nn -gen
-//go:generate run compile -formula=nn.txt -output nn_ad.go -templates "../ad/parser/templates" -package nn -main=false -time=false
+//go:generate run compile -grad=true -formula=nn.txt -output nn_ad.go -templates "../ad/parser/templates" -package nn -main=false -time=false
 func Run(args []string) {
 	var gen bool
 	var hidden int
