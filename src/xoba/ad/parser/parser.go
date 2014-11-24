@@ -101,7 +101,7 @@ func derivative(num, denom Step, private string) string {
 func Run(args []string) {
 	var funcName, private, pkg, templates, formula, output string
 	var dx float64
-	var grad, numerical, main, timeComment, funcs bool
+	var simple, grad, numerical, main, timeComment, funcs bool
 	flags := flag.NewFlagSet("parse", flag.ExitOnError)
 	flags.StringVar(&funcName, "name", "ComputeAD", "ad function name")
 	flags.StringVar(&formula, "formula", Formula(15), "the formula to parse (or file)")
@@ -111,6 +111,7 @@ func Run(args []string) {
 	flags.StringVar(&output, "output", "compute.go", "name of go source file to output")
 	flags.BoolVar(&grad, "grad", true, "whether to produce map of gradients")
 	flags.BoolVar(&main, "main", true, "whether to emit a main method")
+	flags.BoolVar(&simple, "simple", false, "whether to emit a simpler main method")
 	flags.BoolVar(&funcs, "funcs", true, "whether to emit template functions")
 	flags.BoolVar(&timeComment, "time", true, "embed time in source code comment")
 	flags.BoolVar(&numerical, "numerical", true, "whether to output numerical gradient code")
@@ -121,7 +122,7 @@ func Run(args []string) {
 		formula = string(buf)
 	}
 
-	code, err := Parse(grad, numerical, funcs, main, timeComment, funcName, pkg, private, templates, formula, 0.00001)
+	code, err := Parse(simple, grad, numerical, funcs, main, timeComment, funcName, pkg, private, templates, formula, 0.00001)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -133,7 +134,7 @@ func Run(args []string) {
 	f.Close()
 }
 
-func Parse(grad, numerical, funcs, main, timeComment bool, name, pkg, private, templates, formula string, dx float64) ([]byte, error) {
+func Parse(simple, grad, numerical, funcs, main, timeComment bool, name, pkg, private, templates, formula string, dx float64) ([]byte, error) {
 	if len(private) == 0 {
 		private = defaultPrivateString
 	}
@@ -353,6 +354,11 @@ func {{.funcName}}(computeGrad bool,{{.varsDecl}}) {{.returnSig}} {
 {{.program}} {{.returnStmt}};
 }
 
+{{ if .simple }}
+func main() {
+}
+{{end}}
+
 {{ if .main }}
 func main() {
 fmt.Printf("running autodiff code of {{.time}} on %q\n\n", {{ printf "%q" .formula }});
@@ -417,6 +423,7 @@ grad_{{.private}} := make(map[string]float64)
 		"qformula":         fmt.Sprintf("%q", formula),
 		"returnSig":        returnSig,
 		"returnStmt":       returnStmt,
+		"simple":           simple,
 		"timeComment":      timeComment,
 		"time":             time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
 		"vars":             args,
