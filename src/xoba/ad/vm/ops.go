@@ -4,6 +4,7 @@ type VmOp uint64
 
 const (
 	_ VmOp = iota
+
 	Add
 	Divide
 	Halt
