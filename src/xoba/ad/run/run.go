@@ -2,6 +2,7 @@ package main
 
 import (
 	"xoba/ad/parser"
+	"xoba/ad/vm"
 	"xoba/nn"
 
 	"github.com/xoba/goutil"
@@ -19,4 +20,5 @@ func init() {
 	}
 	add("compile", "compile formula to go", parser.Run)
 	add("nn", "neural network example", nn.Run)
+	add("vm", "play with vm code", vm.Run)
 }
