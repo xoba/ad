@@ -25,7 +25,7 @@ func Run(args []string) {
 	w := new(bytes.Buffer)
 	p := Program{
 		Name:      asm,
-		Registers: 5,
+		Registers: 10,
 	}
 	s := bufio.NewScanner(f)
 	var fields []string
@@ -48,7 +48,7 @@ func Run(args []string) {
 	for s.Scan() {
 		line := s.Text()
 		line = strings.TrimSpace(strings.ToLower(line))
-		if len(line) == 0 {
+		if len(line) == 0 || line[0] == '#' {
 			continue
 		}
 		fields = strings.Fields(line)
@@ -69,17 +69,17 @@ func Run(args []string) {
 			putInt(1)
 			putInt(2)
 		case "multiply":
-			putOp(Add)
+			putOp(Multiply)
 			putInt(1)
 			putInt(2)
 			putInt(3)
 		case "divide":
-			putOp(Add)
+			putOp(Divide)
 			putInt(1)
 			putInt(2)
 			putInt(3)
 		case "subtract":
-			putOp(Add)
+			putOp(Subtract)
 			putInt(1)
 			putInt(2)
 			putInt(3)
@@ -203,6 +203,8 @@ Loop:
 		case Multiply:
 			a, b, dest := three()
 			registers[dest] = registers[a] * registers[b]
+		default:
+			return 0, fmt.Errorf("unhandled op %s", VmOp(c))
 		}
 	}
 	return
