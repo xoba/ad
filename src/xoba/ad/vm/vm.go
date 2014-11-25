@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -88,6 +89,14 @@ func Run(args []string) {
 			putInt(1)
 			putInt(2)
 			putInt(3)
+		case "log":
+			putOp(Log)
+			putInt(1)
+			putInt(2)
+		case "log10":
+			putOp(Log10)
+			putInt(1)
+			putInt(2)
 		default:
 			log.Fatalf("unknown opcode: %s", fields[0])
 		}
@@ -185,6 +194,12 @@ Loop:
 		case SetVectorOutput: // set output from register
 			src, dest := two()
 			dmodel[dest] = registers[src]
+		case Log: // set output from register
+			src, dest := two()
+			registers[dest] = math.Log(registers[src])
+		case Log10: // set output from register
+			src, dest := two()
+			registers[dest] = math.Log10(registers[src])
 		case HaltIfDmodelNil:
 			if dmodel == nil {
 				break Loop

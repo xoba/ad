@@ -14,11 +14,13 @@ const (
 	Cosh
 	Divide
 	Exp
+	Exp10
 	Exp2
 	Halt
 	HaltIfDmodelNil
 	Literal
 	Log
+	Log10
 	Log2
 	Multiply
 	Pow
@@ -52,6 +54,8 @@ func (o VmOp) String() string {
 		return "Divide"
 	case Exp:
 		return "Exp"
+	case Exp10:
+		return "Exp10"
 	case Exp2:
 		return "Exp2"
 	case Halt:
@@ -62,6 +66,8 @@ func (o VmOp) String() string {
 		return "Literal"
 	case Log:
 		return "Log"
+	case Log10:
+		return "Log10"
 	case Log2:
 		return "Log2"
 	case Multiply:
@@ -100,11 +106,13 @@ var ops []string = []string{
 "Cosh",
 "Divide",
 "Exp",
+"Exp10",
 "Exp2",
 "Halt",
 "HaltIfDmodelNil",
 "Literal",
 "Log",
+"Log10",
 "Log2",
 "Multiply",
 "Pow",

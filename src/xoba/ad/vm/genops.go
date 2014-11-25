@@ -20,11 +20,13 @@ var ops []string = []string{
 	"Cosh",
 	"Divide",
 	"Exp",
+	"Exp10",
 	"Exp2",
 	"Halt",
 	"HaltIfDmodelNil",
 	"Literal",
 	"Log",
+	"Log10",
 	"Log2",
 	"Multiply",
 	"Pow",
@@ -76,7 +78,7 @@ var ops []string = []string{
 
 func init() {
 	// add to and re-sort the ops list
-	var additional = ""
+	var additional = "log10,exp10"
 	ops = append(ops, strings.Split(additional, ",")...)
 	opsMap := make(map[string]bool)
 	for _, o := range ops {
