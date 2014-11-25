@@ -1,5 +1,7 @@
 package vm
 
+import "math"
+
 func exp10(f float64) float64 {
-	panic("unimplemented")
+	return math.Pow(10, f)
 }
