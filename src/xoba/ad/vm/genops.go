@@ -8,7 +8,7 @@ import (
 	"xoba/ad/defs"
 )
 
-const source = "ops.go"
+const ops_source = "ops.go"
 
 var ops []string = []string{
 	"Abs",
@@ -41,9 +41,9 @@ var ops []string = []string{
 }
 
 func GenOps(args []string) {
-	f, err := os.Create(source)
+	f, err := os.Create(ops_source)
 	check(err)
-	t := template.Must(template.New("output.go").Parse(`package vm
+	t := template.Must(template.New(ops_source).Parse(`package vm
 
 type VmOp uint64
 
@@ -68,12 +68,22 @@ var ops []string = []string{
 {{range .ops}}"{{.}}",
 {{end}}}
 */
+
+// the following can serve as template for single-arg funcs
+/*
+
+	twos := map[VmOp]string{
+{{range .ops}}{{.}}:"math.{{.}}",
+{{end}}
+}
+*/
+
 `))
 	t.Execute(f, map[string]interface{}{
 		"ops": ops,
 	})
 	f.Close()
-	defs.Gofmt(source)
+	defs.Gofmt(ops_source)
 }
 
 func init() {

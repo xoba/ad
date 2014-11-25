@@ -22,4 +22,5 @@ func init() {
 	add("nn", "neural network example", nn.Run)
 	add("vm", "play with vm code", vm.Run)
 	add("genops", "generate vm ops definitions", vm.GenOps)
+	add("genvm", "generate vm", vm.GenVm)
 }
