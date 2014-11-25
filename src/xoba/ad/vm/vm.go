@@ -5,18 +5,26 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
+	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
 )
 
+//go:generate run genops
 func Run(args []string) {
-	f, err := os.Open("lib/test.asm")
+	var asm string
+	flags := flag.NewFlagSet("vm", flag.ExitOnError)
+	flags.StringVar(&asm, "asm", "lib/test.asm", "assmebly file to run")
+	flags.Parse(args)
+	f, err := os.Open(asm)
 	check(err)
 	defer f.Close()
 	w := new(bytes.Buffer)
 	p := Program{
+		Name:      asm,
 		Registers: 5,
 	}
 	s := bufio.NewScanner(f)
@@ -45,6 +53,10 @@ func Run(args []string) {
 		}
 		fields = strings.Fields(line)
 		switch fields[0] {
+		case "halt":
+			putOp(Halt)
+		case "haltifdmodelnil":
+			putOp(HaltIfDmodelNil)
 		case "literal":
 			putOp(Literal)
 			putInt(1)
@@ -52,13 +64,32 @@ func Run(args []string) {
 		case "setscalaroutput":
 			putOp(SetScalarOutput)
 			putInt(1)
-		case "halt":
-			putOp(Halt)
+		case "setvectoroutput":
+			putOp(SetVectorOutput)
+			putInt(1)
+			putInt(2)
+		case "multiply":
+			putOp(Add)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+		case "divide":
+			putOp(Add)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+		case "subtract":
+			putOp(Add)
+			putInt(1)
+			putInt(2)
+			putInt(3)
 		case "add":
 			putOp(Add)
 			putInt(1)
 			putInt(2)
 			putInt(3)
+		default:
+			log.Fatalf("unknown opcode: %s", fields[0])
 		}
 	}
 	check(s.Err())
@@ -92,6 +123,7 @@ func intToBytes(f uint64) []byte {
 }
 
 type Program struct {
+	Name      string
 	Registers int
 	Code      []byte
 }
@@ -101,33 +133,6 @@ var (
 	DimensionError = fmt.Errorf("dimension mismatch")
 )
 
-type VmOp uint64
-
-const (
-	_ VmOp = iota
-	Halt
-	Literal
-	SetScalarOutput
-	SetVectorOutput
-	HaltIfDmodelNil
-	Add
-	Multiply
-	Divide
-	Subtract
-)
-
-func (o VmOp) String() string {
-	switch o {
-	case Halt:
-		return "Halt"
-	case Literal:
-		return "Literal"
-	case SetScalarOutput:
-		return "SetScalarOutput"
-	}
-	return fmt.Sprintf("op[%d]", o)
-}
-
 // if dmodel == nil, don't calculate gradient
 func Execute(p Program, x, model, dmodel []float64) (y float64, err error) {
 	defer func() {
@@ -135,7 +140,7 @@ func Execute(p Program, x, model, dmodel []float64) (y float64, err error) {
 			err = fmt.Errorf("recovered from: %v", r)
 		}
 	}()
-	fmt.Printf("%d byte program = 0x%x\n", len(p.Code), p.Code)
+	fmt.Printf("%d byte program %q = 0x%x\n", len(p.Code), p.Name, p.Code)
 	r := bytes.NewReader(p.Code)
 	one := func() uint64 {
 		a, err := binary.ReadUvarint(r)

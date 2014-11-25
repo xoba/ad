@@ -21,4 +21,5 @@ func init() {
 	add("compile", "compile formula to go", parser.Run)
 	add("nn", "neural network example", nn.Run)
 	add("vm", "play with vm code", vm.Run)
+	add("genops", "generate vm ops definitions", vm.GenOps)
 }

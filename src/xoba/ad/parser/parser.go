@@ -13,11 +13,11 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"os/exec"
 	"sort"
 	"strings"
 	"text/template"
 	"time"
+	"xoba/ad/defs"
 )
 
 const (
@@ -432,7 +432,7 @@ grad_{{.private}} := make(map[string]float64)
 	})
 
 	//return f.Bytes(), nil
-	return GofmtBuffer(f.Bytes())
+	return defs.GofmtBuffer(f.Bytes())
 }
 
 type Imports struct {
@@ -474,24 +474,6 @@ func formatImports(list []string) string {
 		out = append(out, k)
 	}
 	return strings.Join(out, "\n")
-}
-
-func Gofmt(p string) error {
-	cmd := exec.Command("gofmt", "-w", p)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
-func GofmtBuffer(code []byte) ([]byte, error) {
-	out := new(bytes.Buffer)
-	cmd := exec.Command("gofmt")
-	cmd.Stdin = bytes.NewReader(code)
-	cmd.Stdout = out
-	if err := cmd.Run(); err != nil {
-		return nil, err
-	}
-	return out.Bytes(), nil
 }
 
 type VarParser struct {
