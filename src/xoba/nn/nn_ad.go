@@ -606,11 +606,11 @@ func d_exp_pvt(a float64) float64 {
 }
 
 func exp2(a float64) float64 {
-	return math.Pow(2, a)
+	return math.Exp2(a)
 }
 
 func exp2_pvt(a float64) float64 {
-	return math.Pow(2, a)
+	return math.Exp2(a)
 }
 
 func d_exp2(a float64) float64 {

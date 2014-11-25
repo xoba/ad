@@ -14,7 +14,7 @@ func Execute(p Program, x, model, dmodel []float64) (y float64, err error) {
 			err = fmt.Errorf("recovered from: %v", r)
 		}
 	}()
-	fmt.Printf("%d byte program %q = 0x%x\n", len(p.Code), p.Name, p.Code)
+	fmt.Printf("%d byte program = 0x%x\n", len(p.Code), p.Code)
 	r := bytes.NewReader(p.Code)
 	one := func() uint64 {
 		a, err := binary.ReadUvarint(r)
