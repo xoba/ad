@@ -38,6 +38,9 @@ var ops []string = []string{
 	"Subtract",
 	"Tan",
 	"Tanh",
+	"Inputs",
+	"Outputs",
+	"Registers",
 }
 
 func GenOps(args []string) {

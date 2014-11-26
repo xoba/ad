@@ -42,6 +42,9 @@ func Compile(f io.Reader) Program {
 		switch fields[0] {
 		case "halt":
 			putOp(Halt)
+		case "registers":
+			putOp(Registers)
+			putInt(1)
 		case "haltifdmodelnil":
 			putOp(HaltIfDmodelNil)
 		case "literal":

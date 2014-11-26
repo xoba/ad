@@ -19,12 +19,15 @@ const (
 	Exp2
 	Halt
 	HaltIfDmodelNil
+	Inputs
 	Literal
 	Log
 	Log10
 	Log2
 	Multiply
+	Outputs
 	Pow
+	Registers
 	SetScalarOutput
 	SetVectorOutput
 	Sin
@@ -63,6 +66,8 @@ func (o VmOp) String() string {
 		return "Halt"
 	case HaltIfDmodelNil:
 		return "HaltIfDmodelNil"
+	case Inputs:
+		return "Inputs"
 	case Literal:
 		return "Literal"
 	case Log:
@@ -73,8 +78,12 @@ func (o VmOp) String() string {
 		return "Log2"
 	case Multiply:
 		return "Multiply"
+	case Outputs:
+		return "Outputs"
 	case Pow:
 		return "Pow"
+	case Registers:
+		return "Registers"
 	case SetScalarOutput:
 		return "SetScalarOutput"
 	case SetVectorOutput:
@@ -111,12 +120,15 @@ var ops []string = []string{
 "Exp2",
 "Halt",
 "HaltIfDmodelNil",
+"Inputs",
 "Literal",
 "Log",
 "Log10",
 "Log2",
 "Multiply",
+"Outputs",
 "Pow",
+"Registers",
 "SetScalarOutput",
 "SetVectorOutput",
 "Sin",
@@ -145,12 +157,15 @@ Exp10:"math.Exp10",
 Exp2:"math.Exp2",
 Halt:"math.Halt",
 HaltIfDmodelNil:"math.HaltIfDmodelNil",
+Inputs:"math.Inputs",
 Literal:"math.Literal",
 Log:"math.Log",
 Log10:"math.Log10",
 Log2:"math.Log2",
 Multiply:"math.Multiply",
+Outputs:"math.Outputs",
 Pow:"math.Pow",
+Registers:"math.Registers",
 SetScalarOutput:"math.SetScalarOutput",
 SetVectorOutput:"math.SetVectorOutput",
 Sin:"math.Sin",

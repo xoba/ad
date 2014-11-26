@@ -93,7 +93,10 @@ p:=Program{}
 		switch fields[0] {
 		case "halt":
 			putOp(Halt)
-		case "haltifdmodelnil":
+		case "registers":
+			putOp(Registers)
+			putInt(1)
+	        case "haltifdmodelnil":
 			putOp(HaltIfDmodelNil)
 		case "literal":
 			putOp(Literal)
@@ -179,7 +182,7 @@ func Execute(p Program, x, model, dmodel []float64) (y float64, err error) {
 		check(err)
 		return a, b, c
 	}
-	registers := make([]float64, p.Registers)
+var registers []float64
 
 Loop:
 	for {
@@ -196,6 +199,10 @@ Loop:
 			var lit float64
 			binary.Read(r, order, &lit)
 			registers[loc] = lit
+		case Registers: 
+                        n, err := binary.ReadUvarint(r)
+			check(err)
+                        registers = make([]float64,n)
 		case SetScalarOutput: // set output from register
 			y = registers[one()]
 		case SetVectorOutput: // set output from register
