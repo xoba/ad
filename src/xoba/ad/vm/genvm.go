@@ -11,9 +11,8 @@ const (
 	vm_source  = "execute.go"
 )
 
-func GenVm(args []string) {
-
-	twos := map[VmOp]string{
+var (
+	twos map[VmOp]string = map[VmOp]string{
 		Abs:   "math.Abs",
 		Acos:  "math.Acos",
 		Asin:  "math.Asin",
@@ -32,17 +31,18 @@ func GenVm(args []string) {
 		Tan:   "math.Tan",
 		Tanh:  "math.Tanh",
 	}
-
-	twoArgFuncs := map[VmOp]string{
-		Pow: "math.Pow",
-	}
-
-	threes := map[VmOp]string{
+	threes map[VmOp]string = map[VmOp]string{
 		Add:      "+",
 		Multiply: "*",
 		Divide:   "/",
 		Subtract: "-",
 	}
+	twoArgFuncs map[VmOp]string = map[VmOp]string{
+		Pow: "math.Pow",
+	}
+)
+
+func GenVm(args []string) {
 
 	run := func(name, src string) {
 		f, err := os.Create(name)
@@ -141,6 +141,9 @@ case "{{$op.ToLower}}":
 			putInt(1)
 			putInt(2)
 			putInt(3)
+case "d{{$op.ToLower}}d0":
+case "d{{$op.ToLower}}d1":
+
 {{end}}
 
 {{range $op,$desc := .funcs2}}

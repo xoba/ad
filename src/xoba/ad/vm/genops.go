@@ -7,6 +7,10 @@ import (
 	"xoba/ad/defs"
 )
 
+func OrganizeOps(args []string) {
+
+}
+
 const ops_source = "ops.go"
 
 var ops map[string]string = map[string]string{

@@ -83,24 +83,32 @@ func Compile(f io.Reader) Program {
 			putInt(1)
 			putInt(2)
 			putInt(3)
+		case "daddd0":
+		case "daddd1":
 
 		case "divide":
 			putOp(Divide)
 			putInt(1)
 			putInt(2)
 			putInt(3)
+		case "ddivided0":
+		case "ddivided1":
 
 		case "multiply":
 			putOp(Multiply)
 			putInt(1)
 			putInt(2)
 			putInt(3)
+		case "dmultiplyd0":
+		case "dmultiplyd1":
 
 		case "subtract":
 			putOp(Subtract)
 			putInt(1)
 			putInt(2)
 			putInt(3)
+		case "dsubtractd0":
+		case "dsubtractd1":
 
 		case "pow":
 			putOp(Pow)
