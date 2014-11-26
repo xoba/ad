@@ -3,6 +3,7 @@ package vm
 
 type VmOp uint64
 
+// 59 total assignments (VmOp ∈ [0..58])
 const (
 	_ VmOp = iota
 

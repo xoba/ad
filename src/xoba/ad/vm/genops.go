@@ -176,6 +176,7 @@ package vm
 
 type VmOp uint64
 
+// {{.comment}}
 const (
 	_ VmOp = iota
 
@@ -195,7 +196,6 @@ return "{{$op}}"
 {{end}}}
 panic("illegal state")
 }
-
 `))
 
 	ops := make(map[string]string)
@@ -213,8 +213,9 @@ panic("illegal state")
 		}
 	}
 	t.Execute(f, map[string]interface{}{
-		"ops":    ops,
-		"derivs": derivs,
+		"ops":     ops,
+		"derivs":  derivs,
+		"comment": fmt.Sprintf("%d total assignments (VmOp ∈ [0..%d])", len(ops)+1, len(ops)),
 	})
 	f.Close()
 	defs.Gofmt(ops_source)
