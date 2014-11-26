@@ -21,11 +21,12 @@ func Compile(f io.Reader) Program {
 		n := binary.PutUvarint(tmp, uint64(o))
 		w.Write(tmp[:n])
 	}
-	putInt := func(i int) {
+	putInt := func(i int) uint64 {
 		v, err := strconv.ParseUint(fields[i], 10, 64)
 		check(err)
 		n := binary.PutUvarint(tmp, v)
 		w.Write(tmp[:n])
+		return v
 	}
 	putFloat := func(i int) {
 		v, err := strconv.ParseFloat(fields[i], 64)
@@ -35,7 +36,13 @@ func Compile(f io.Reader) Program {
 	for s.Scan() {
 		line := s.Text()
 		line = strings.TrimSpace(strings.ToLower(line))
-		if len(line) == 0 || line[0] == '#' {
+		if len(line) == 0 {
+			continue
+		}
+		if p.Name == "" && line[0] == '#' {
+			p.Name = strings.TrimSpace(line[1:])
+			continue
+		} else if line[0] == '#' {
 			continue
 		}
 		fields = strings.Fields(line)
@@ -44,17 +51,17 @@ func Compile(f io.Reader) Program {
 			putOp(Halt)
 		case "registers":
 			putOp(Registers)
-			putInt(1)
+			p.Registers = putInt(1)
 		case "literal":
 			putOp(Literal)
 			putInt(1)
 			putFloat(2)
 		case "outputs":
 			putOp(Outputs)
-			putInt(1)
+			p.Outputs = putInt(1)
 		case "inputs":
 			putOp(Inputs)
-			putInt(1)
+			p.Inputs = putInt(1)
 		case "setoutput":
 			putOp(SetOutput)
 			putInt(1)

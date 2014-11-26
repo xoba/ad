@@ -4,14 +4,18 @@ package vm
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 )
 
+type Executor func(p Program, model, in, out []float64) (err error)
+
 //go:generate run genops
 //go:generate run genvm
 func Run(args []string) {
+	var e Executor = Execute
 	var asm string
 	flags := flag.NewFlagSet("vm", flag.ExitOnError)
 	flags.StringVar(&asm, "asm", "lib/test.asm", "assmebly file to run")
@@ -20,10 +24,9 @@ func Run(args []string) {
 	check(err)
 	defer f.Close()
 	p := Compile(f)
-	p.Registers = 10
-	out := make([]float64, 1)
-	in := make([]float64, 1)
-	check(Execute(p, nil, in, out))
+	out := make([]float64, p.Outputs)
+	in := make([]float64, p.Inputs)
+	check(e(p, nil, in, out))
 	fmt.Println(out)
 }
 
@@ -50,8 +53,16 @@ func intToBytes(f uint64) []byte {
 }
 
 type Program struct {
-	Registers int
+	Name      string `json:",omitempty"`
+	Registers uint64 `json:",omitempty"`
+	Inputs    uint64 `json:",omitempty"`
+	Outputs   uint64 `json:",omitempty"`
 	Code      []byte
+}
+
+func (p Program) String() string {
+	buf, _ := json.Marshal(p)
+	return string(buf)
 }
 
 var (

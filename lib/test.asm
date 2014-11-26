@@ -1,8 +1,10 @@
-# adding two numbers
 registers 10
-outputs 1
+outputs 2
 inputs 1
 literal 1 90.001
-setoutput 1 0
+literal 2 2
+multiply 1 2 3
+setoutput 3 0
+setoutput 1 1
 halt
-
+# a test program
