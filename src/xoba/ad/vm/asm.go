@@ -102,6 +102,12 @@ func Compile(f io.Reader) Program {
 			putInt(2)
 			putInt(3)
 
+		case "pow":
+			putOp(Pow)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
 		case "abs":
 			putOp(Abs)
 			putInt(1)

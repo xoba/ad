@@ -51,7 +51,7 @@ func GenVm(args []string) {
 		t.Execute(f, map[string]interface{}{
 			"twos":   twos,
 			"threes": threes,
-			"funcs":  twoArgFuncs,
+			"funcs2": twoArgFuncs,
 		})
 		f.Close()
 		defs.Gofmt(name)
@@ -143,6 +143,13 @@ case "{{$op.ToLower}}":
 			putInt(3)
 {{end}}
 
+{{range $op,$desc := .funcs2}}
+case "{{$op.ToLower}}":
+			putOp({{$op}})
+			putInt(1)
+			putInt(2)
+			putInt(3)
+{{end}}
 
 {{range $op,$desc := .twos}}
 case "{{$op.ToLower}}":
@@ -254,7 +261,7 @@ Loop:
 			registers[dest] = registers[a] {{$op}} registers[b]
 {{end}} 
 
-{{range $name,$op := .funcs}}case {{$name}}:
+{{range $name,$op := .funcs2}}case {{$name}}:
 			a, b, dest := three()
 			registers[dest] = {{$op}}(registers[a], registers[b])
 {{end}} 
