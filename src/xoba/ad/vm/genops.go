@@ -1,14 +1,69 @@
 package vm
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"text/template"
 	"xoba/ad/defs"
 )
 
-func OrganizeOps(args []string) {
+type OpDef struct {
+	Name        string
+	Description string `json:",omitempty"`
+	Signature   string `json:",omitempty"`
+	Type        string `json:",omitempty"`
+	Runtime     string `json:",omitempty"`
+}
 
+func OrganizeOps(args []string) {
+	var list []OpDef
+	for _, op := range AllOps {
+		name := op.String()
+		var t, rt string
+		switch {
+		case twos[op] != "":
+			t = "twos"
+			rt = twos[op]
+		case threes[op] != "":
+			t = "threes"
+			rt = threes[op]
+		case twoArgFuncs[op] != "":
+			t = "funcs2"
+			rt = twoArgFuncs[op]
+		}
+		d := OpDef{
+			Name:        name,
+			Description: ops[name],
+			Signature:   string(sigs[name]),
+			Type:        t,
+			Runtime:     rt,
+		}
+		list = append(list, d)
+		continue
+		switch d.Type {
+		case "threes":
+			copy := d
+			copy.Type = "twos"
+			copy.Name = fmt.Sprintf("D%sD0", d.Name)
+			copy.Runtime = "dmultiplyd0"
+			list = append(list, copy)
+			copy.Name = fmt.Sprintf("D%sD1", d.Name)
+			copy.Runtime = "dmultiplyd1"
+			list = append(list, copy)
+		}
+	}
+	f, err := os.Create("opdefs.go")
+	check(err)
+	fmt.Fprintln(f, "package vm")
+	fmt.Fprintln(f, "var Defs []OpDef = []OpDef{")
+	for _, d := range list {
+		def := fmt.Sprintf("%#v", d)
+		fmt.Fprintf(f, "%s,\n", def[3:])
+	}
+	fmt.Fprintln(f, "}")
+	f.Close()
+	check(defs.Gofmt("opdefs.go"))
 }
 
 const ops_source = "ops.go"
@@ -107,6 +162,11 @@ const (
 {{range $op,$desc := .ops}}{{$op}} // {{$desc}}
 {{end}}
 )
+
+var AllOps []VmOp = []VmOp{
+{{range $op,$desc := .ops}}{{$op}},
+{{end}}
+}
 
 func (o VmOp) String() string {
 	switch o {

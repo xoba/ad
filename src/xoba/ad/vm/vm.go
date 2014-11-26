@@ -13,6 +13,7 @@ import (
 // e.g., if "model" has dim n, then first n dims of "out" could be gradient, dim n+1 can be scalar output
 type Executor func(p Program, model, in, out []float64) (err error)
 
+//go:generate run orgops
 //go:generate run genops
 //go:generate run genvm
 func Run(args []string) {

@@ -40,6 +40,40 @@ const (
 
 )
 
+var AllOps []VmOp = []VmOp{
+	Abs,
+	Acos,
+	Add,
+	Asin,
+	Atan,
+	Cos,
+	Cosh,
+	Divide,
+	Exp,
+	Exp10,
+	Exp2,
+	GetInput,
+	GetModel,
+	Halt,
+	Inputs,
+	Literal,
+	Log,
+	Log10,
+	Log2,
+	Models,
+	Multiply,
+	Outputs,
+	Pow,
+	Registers,
+	SetOutput,
+	Sin,
+	Sinh,
+	Sqrt,
+	Subtract,
+	Tan,
+	Tanh,
+}
+
 func (o VmOp) String() string {
 	switch o {
 	case Abs:
