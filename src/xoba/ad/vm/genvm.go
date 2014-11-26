@@ -42,6 +42,8 @@ func GenVm(args []string) {
 		switch d.Type {
 		case "twos":
 			twos[op] = d.Runtime
+			dOp0 := DerivativeOpForName(d.Name, 0)
+			twos[dOp0] = dOp0.ToLower()
 		case "threes":
 			threes[op] = d.Runtime
 			dOp0 := DerivativeOpForName(d.Name, 0)

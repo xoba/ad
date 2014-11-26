@@ -198,6 +198,91 @@ func Compile(f io.Reader) Program {
 			putInt(1)
 			putInt(2)
 
+		case "d_abs_d0":
+			putOp(D_Abs_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_acos_d0":
+			putOp(D_Acos_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_asin_d0":
+			putOp(D_Asin_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_atan_d0":
+			putOp(D_Atan_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_cos_d0":
+			putOp(D_Cos_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_cosh_d0":
+			putOp(D_Cosh_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_exp10_d0":
+			putOp(D_Exp10_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_exp2_d0":
+			putOp(D_Exp2_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_exp_d0":
+			putOp(D_Exp_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_log10_d0":
+			putOp(D_Log10_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_log2_d0":
+			putOp(D_Log2_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_log_d0":
+			putOp(D_Log_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_sin_d0":
+			putOp(D_Sin_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_sinh_d0":
+			putOp(D_Sinh_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_sqrt_d0":
+			putOp(D_Sqrt_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_tan_d0":
+			putOp(D_Tan_D0)
+			putInt(1)
+			putInt(2)
+
+		case "d_tanh_d0":
+			putOp(D_Tanh_D0)
+			putInt(1)
+			putInt(2)
+
 		case "exp":
 			putOp(Exp)
 			putInt(1)

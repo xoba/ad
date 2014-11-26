@@ -103,6 +103,57 @@ Loop:
 		case Cosh:
 			src, dest := two()
 			registers[dest] = math.Cosh(registers[src])
+		case D_Abs_D0:
+			src, dest := two()
+			registers[dest] = d_abs_d0(registers[src])
+		case D_Acos_D0:
+			src, dest := two()
+			registers[dest] = d_acos_d0(registers[src])
+		case D_Asin_D0:
+			src, dest := two()
+			registers[dest] = d_asin_d0(registers[src])
+		case D_Atan_D0:
+			src, dest := two()
+			registers[dest] = d_atan_d0(registers[src])
+		case D_Cos_D0:
+			src, dest := two()
+			registers[dest] = d_cos_d0(registers[src])
+		case D_Cosh_D0:
+			src, dest := two()
+			registers[dest] = d_cosh_d0(registers[src])
+		case D_Exp10_D0:
+			src, dest := two()
+			registers[dest] = d_exp10_d0(registers[src])
+		case D_Exp2_D0:
+			src, dest := two()
+			registers[dest] = d_exp2_d0(registers[src])
+		case D_Exp_D0:
+			src, dest := two()
+			registers[dest] = d_exp_d0(registers[src])
+		case D_Log10_D0:
+			src, dest := two()
+			registers[dest] = d_log10_d0(registers[src])
+		case D_Log2_D0:
+			src, dest := two()
+			registers[dest] = d_log2_d0(registers[src])
+		case D_Log_D0:
+			src, dest := two()
+			registers[dest] = d_log_d0(registers[src])
+		case D_Sin_D0:
+			src, dest := two()
+			registers[dest] = d_sin_d0(registers[src])
+		case D_Sinh_D0:
+			src, dest := two()
+			registers[dest] = d_sinh_d0(registers[src])
+		case D_Sqrt_D0:
+			src, dest := two()
+			registers[dest] = d_sqrt_d0(registers[src])
+		case D_Tan_D0:
+			src, dest := two()
+			registers[dest] = d_tan_d0(registers[src])
+		case D_Tanh_D0:
+			src, dest := two()
+			registers[dest] = d_tanh_d0(registers[src])
 		case Exp:
 			src, dest := two()
 			registers[dest] = math.Exp(registers[src])
