@@ -8,9 +8,9 @@ import (
 	"math"
 )
 
-func Execute(p Program, in, out, model []float64) (err error) {
+func Execute(p Program, model, in, out []float64) (err error) {
 	if len(out) == 0 {
-		return fmt.Errorf("need at least one output")
+		return fmt.Errorf("needs at least one output")
 	}
 	defer func() {
 		if r := recover(); r != nil {

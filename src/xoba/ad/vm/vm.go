@@ -21,9 +21,9 @@ func Run(args []string) {
 	defer f.Close()
 	p := Compile(f)
 	p.Registers = 10
-	var x, model, out []float64
-	out = make([]float64, 1)
-	check(Execute(p, x, model, out))
+	out := make([]float64, 1)
+	in := make([]float64, 1)
+	check(Execute(p, nil, in, out))
 	fmt.Println(out)
 }
 
