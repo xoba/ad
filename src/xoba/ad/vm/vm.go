@@ -30,7 +30,7 @@ func Run(args []string) {
 	model := make([]float64, p.Models)
 	in[0] = 99
 	check(e(p, model, in, out))
-	fmt.Println(out)
+	fmt.Printf("output = %.3f\n", out)
 }
 
 func bytesToFloat(buf []byte) (f float64) {

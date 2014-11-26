@@ -46,7 +46,7 @@ Loop:
 	for {
 		c, err := binary.ReadUvarint(r)
 		check(err)
-		fmt.Printf("op = %s\n", VmOp(c))
+		// fmt.Printf("op = %s\n", VmOp(c))
 		// general rules:
 		// locations stored first, values later
 		// source first, destination after
