@@ -30,3 +30,9 @@ func d_multiply_d1(a, b float64) float64 {
 func d_subtract_d1(a, b float64) float64 {
 	panic("unimplemented")
 }
+func d_pow_d0(a, b float64) float64 {
+	panic("unimplemented")
+}
+func d_pow_d1(a, b float64) float64 {
+	panic("unimplemented")
+}

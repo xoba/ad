@@ -138,6 +138,18 @@ func Compile(f io.Reader) Program {
 			putInt(2)
 			putInt(3)
 
+		case "d_pow_d0":
+			putOp(D_Pow_D0)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "d_pow_d1":
+			putOp(D_Pow_D1)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
 		case "d_subtract_d0":
 			putOp(D_Subtract_D0)
 			putInt(1)

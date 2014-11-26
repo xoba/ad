@@ -168,6 +168,12 @@ Loop:
 		case D_Multiply_D1:
 			a, b, dest := three()
 			registers[dest] = d_multiply_d1(registers[a], registers[b])
+		case D_Pow_D0:
+			a, b, dest := three()
+			registers[dest] = d_pow_d0(registers[a], registers[b])
+		case D_Pow_D1:
+			a, b, dest := three()
+			registers[dest] = d_pow_d1(registers[a], registers[b])
 		case D_Subtract_D0:
 			a, b, dest := three()
 			registers[dest] = d_subtract_d0(registers[a], registers[b])

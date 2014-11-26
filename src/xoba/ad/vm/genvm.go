@@ -50,6 +50,10 @@ func GenVm(args []string) {
 			twoArgFuncs[dOp1] = dOp1.ToLower()
 		case "funcs2":
 			twoArgFuncs[op] = d.Runtime
+			dOp0 := DerivativeOpForName(d.Name, 0)
+			twoArgFuncs[dOp0] = dOp0.ToLower()
+			dOp1 := DerivativeOpForName(d.Name, 1)
+			twoArgFuncs[dOp1] = dOp1.ToLower()
 		}
 	}
 
