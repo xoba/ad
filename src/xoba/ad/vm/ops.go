@@ -18,12 +18,14 @@ const (
 	Exp10     // 10^x
 	Exp2      // 2^x
 	GetInput  // copy input to register
+	GetModel  // copy model to register
 	Halt      //
 	Inputs    // validate input dimension is large enough
 	Literal   //
 	Log       //
 	Log10     //
 	Log2      //
+	Models    // validate model dimension is large enough
 	Multiply  //
 	Outputs   // validate output dimension is large enough
 	Pow       //
@@ -64,6 +66,8 @@ func (o VmOp) String() string {
 		return "Exp2"
 	case GetInput:
 		return "GetInput"
+	case GetModel:
+		return "GetModel"
 	case Halt:
 		return "Halt"
 	case Inputs:
@@ -76,6 +80,8 @@ func (o VmOp) String() string {
 		return "Log10"
 	case Log2:
 		return "Log2"
+	case Models:
+		return "Models"
 	case Multiply:
 		return "Multiply"
 	case Outputs:

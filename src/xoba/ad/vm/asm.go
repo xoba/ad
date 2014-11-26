@@ -62,8 +62,15 @@ func Compile(f io.Reader) Program {
 		case "inputs":
 			putOp(Inputs)
 			p.Inputs = putInt(1)
+		case "models":
+			putOp(Models)
+			p.Models = putInt(1)
 		case "getinput":
 			putOp(GetInput)
+			putInt(1)
+			putInt(2)
+		case "getmodel":
+			putOp(GetModel)
 			putInt(1)
 			putInt(2)
 		case "setoutput":

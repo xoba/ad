@@ -26,8 +26,10 @@ func Run(args []string) {
 	p := Compile(f)
 	out := make([]float64, p.Outputs)
 	in := make([]float64, p.Inputs)
+	model := make([]float64, p.Models)
 	in[0] = 99
-	check(e(p, nil, in, out))
+	model[0] = -3.14
+	check(e(p, model, in, out))
 	fmt.Println(out)
 }
 
@@ -57,6 +59,7 @@ type Program struct {
 	Name      string `json:",omitempty"`
 	Registers uint64 `json:",omitempty"`
 	Inputs    uint64 `json:",omitempty"`
+	Models    uint64 `json:",omitempty"`
 	Outputs   uint64 `json:",omitempty"`
 	Code      []byte
 }

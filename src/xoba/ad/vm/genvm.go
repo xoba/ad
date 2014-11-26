@@ -118,8 +118,15 @@ continue
 		case "inputs":
 			putOp(Inputs)
 			p.Inputs = putInt(1)
+		case "models":
+			putOp(Models)
+			p.Models = putInt(1)
 		case "getinput":
 			putOp(GetInput)
+			putInt(1)
+			putInt(2)
+		case "getmodel":
+			putOp(GetModel)
 			putInt(1)
 			putInt(2)
 		case "setoutput":
@@ -225,6 +232,11 @@ Loop:
                         if len(in) < int(n) {
                             return fmt.Errorf("needs at least %d inputs; has %d",n,len(in));
                         }
+		case Models:
+                        n := one();
+                        if len(model) < int(n) {
+                            return fmt.Errorf("needs at least %d model dimensions; has %d",n,len(model));
+                        }
 		case Outputs:
                         n := one();
                         if len(out) < int(n) {
@@ -236,6 +248,9 @@ Loop:
                 case GetInput: // set register from input
 			src, dest := two()
 			registers[dest] = in[src]
+                case GetModel: // set register from model
+			src, dest := two()
+			registers[dest] = model[src]
 		case Halt:
 			break Loop
 
