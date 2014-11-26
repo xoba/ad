@@ -132,6 +132,17 @@ func Run(args []string) {
 	}
 	f.Write(code)
 	f.Close()
+
+	{
+		f, err := os.Create("compute.asm")
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := GenerateVmAssembly(formula, f); err != nil {
+			log.Fatal(err)
+		}
+		f.Close()
+	}
 }
 
 func Parse(simple, grad, numerical, funcs, main, timeComment bool, name, pkg, private, templates, formula string, dx float64) ([]byte, error) {

@@ -1,5 +1,41 @@
 package parser
 
-func GenerateVmAssembly() {
+import (
+	"fmt"
+	"io"
+	"strings"
+)
 
+func GenerateVmAssembly(formula string, w io.Writer) error {
+	lex := NewContext(NewLexer(strings.NewReader(formula)))
+	yyParse(lex)
+
+	vp := &VarProcessor{
+		inputs: make(map[string]int),
+	}
+
+	vp.getVars(lex.rhs)
+	fmt.Fprintf(w, "# compute value and gradient of %s\n", formula)
+	fmt.Fprintf(w, "# inputs = %v\n", vp.inputs)
+	fmt.Fprintf(w, "inputs %d\n", len(vp.inputs))
+	fmt.Fprintf(w, "outputs %d\n", 1+len(vp.inputs))
+	return nil
+}
+
+type VarProcessor struct {
+	inputs map[string]int
+}
+
+func (v *VarProcessor) getVars(root *Node) {
+	switch root.Type {
+	case identifierNT, indexedIdentifierNT:
+		if _, ok := v.inputs[root.S]; !ok {
+			v.inputs[root.S] = len(v.inputs)
+		}
+	case functionNT:
+		for _, n := range root.Children {
+			v.getVars(n)
+		}
+	}
+	return
 }

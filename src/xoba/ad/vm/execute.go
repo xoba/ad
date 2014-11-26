@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"math"
 )
 
@@ -45,6 +46,9 @@ func Execute(p Program, model, in, out []float64) (err error) {
 Loop:
 	for {
 		c, err := binary.ReadUvarint(r)
+		if err == io.EOF {
+			break Loop
+		}
 		check(err)
 		// fmt.Printf("op = %s\n", VmOp(c))
 		// general rules:

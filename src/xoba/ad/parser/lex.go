@@ -22,6 +22,9 @@ type Node struct {
 	I        int      `json:",omitempty"`
 	Children []*Node  `json:"C,omitempty"`
 	Name     string   `json:"N,omitempty"` // name of variable assigned by parser
+
+	// for vm-assembly version:
+	register, output int
 }
 
 func (n Node) String() string {

@@ -184,6 +184,7 @@ return p
 
 	gen(vm_source, `import (
 "math"
+"io"
 	"bytes"
 	"encoding/binary"
 "fmt"
@@ -226,6 +227,9 @@ var registers []float64
 Loop:
 	for {
 		c, err := binary.ReadUvarint(r)
+if err == io.EOF {
+			break Loop
+}
 		check(err)
 		// fmt.Printf("op = %s\n", VmOp(c))
 		// general rules:

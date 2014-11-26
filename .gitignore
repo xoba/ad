@@ -3,6 +3,7 @@ bin
 pkg
 .hg
 compute.go
+compute.asm
 *.test
 plot.r
 coverage.out
