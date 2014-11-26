@@ -49,15 +49,12 @@ Loop:
 		// source first, destination after
 		switch VmOp(c) {
 		case Literal: // store a literal to register
-			loc, err := binary.ReadUvarint(r)
-			check(err)
+			loc := one()
 			var lit float64
 			binary.Read(r, order, &lit)
 			registers[loc] = lit
 		case Registers:
-			n, err := binary.ReadUvarint(r)
-			check(err)
-			registers = make([]float64, n)
+			registers = make([]float64, one())
 		case SetScalarOutput: // set output from register
 			y = registers[one()]
 		case SetVectorOutput: // set output from register
@@ -69,6 +66,7 @@ Loop:
 			}
 		case Halt:
 			break Loop
+
 		case Abs:
 			src, dest := two()
 			registers[dest] = math.Abs(registers[src])
@@ -120,6 +118,7 @@ Loop:
 		case Tanh:
 			src, dest := two()
 			registers[dest] = math.Tanh(registers[src])
+
 		case Add:
 			a, b, dest := three()
 			registers[dest] = registers[a] + registers[b]
@@ -132,6 +131,11 @@ Loop:
 		case Subtract:
 			a, b, dest := three()
 			registers[dest] = registers[a] - registers[b]
+
+		case Pow:
+			a, b, dest := three()
+			registers[dest] = math.Pow(registers[a], registers[b])
+
 		default:
 			return 0, fmt.Errorf("unhandled op %s", VmOp(c))
 		}

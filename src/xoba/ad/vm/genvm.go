@@ -33,6 +33,10 @@ func GenVm(args []string) {
 		Tanh:  "math.Tanh",
 	}
 
+	twoArgFuncs := map[VmOp]string{
+		Pow: "math.Pow",
+	}
+
 	threes := map[VmOp]string{
 		Add:      "+",
 		Multiply: "*",
@@ -47,6 +51,7 @@ func GenVm(args []string) {
 		t.Execute(f, map[string]interface{}{
 			"twos":   twos,
 			"threes": threes,
+			"funcs":  twoArgFuncs,
 		})
 		f.Close()
 		defs.Gofmt(name)
@@ -194,15 +199,12 @@ Loop:
 		// source first, destination after
 		switch VmOp(c) {
 		case Literal: // store a literal to register
-			loc, err := binary.ReadUvarint(r)
-			check(err)
+                        loc := one()
 			var lit float64
 			binary.Read(r, order, &lit)
 			registers[loc] = lit
 		case Registers: 
-                        n, err := binary.ReadUvarint(r)
-			check(err)
-                        registers = make([]float64,n)
+                        registers = make([]float64,one())
 		case SetScalarOutput: // set output from register
 			y = registers[one()]
 		case SetVectorOutput: // set output from register
@@ -214,13 +216,23 @@ Loop:
 			}
 		case Halt:
 			break Loop
+
 {{range $name,$func := .twos}}case {{$name}}:
 			src, dest := two()
 			registers[dest] = {{$func}}(registers[src])
-{{end}} {{range $name,$op := .threes}}case {{$name}}:
+{{end}} 
+
+{{range $name,$op := .threes}}case {{$name}}:
 			a, b, dest := three()
 			registers[dest] = registers[a] {{$op}} registers[b]
-{{end}} 	default:
+{{end}} 
+
+{{range $name,$op := .funcs}}case {{$name}}:
+			a, b, dest := three()
+			registers[dest] = {{$op}}(registers[a], registers[b])
+{{end}} 
+
+	default:
 			return 0, fmt.Errorf("unhandled op %s", VmOp(c))
 		}
 	}
