@@ -21,10 +21,10 @@ func Run(args []string) {
 	defer f.Close()
 	p := Compile(f)
 	p.Registers = 10
-	var x, model, dmodel []float64
-	y, err := Execute(p, x, model, dmodel)
-	check(err)
-	fmt.Println(y)
+	var x, model, out []float64
+	out = make([]float64, 10)
+	check(Execute(p, x, model, out))
+	fmt.Println(out)
 }
 
 func bytesToFloat(buf []byte) (f float64) {

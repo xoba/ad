@@ -107,11 +107,8 @@ p:=Program{}
 			putOp(Literal)
 			putInt(1)
 			putFloat(2)
-		case "setscalaroutput":
-			putOp(SetScalarOutput)
-			putInt(1)
-		case "setvectoroutput":
-			putOp(SetVectorOutput)
+		case "setoutput":
+			putOp(SetOutput)
 			putInt(1)
 			putInt(2)
 		case "multiply":
@@ -158,7 +155,7 @@ return p
 "fmt"
 )
 
-func Execute(p Program, x, model, dmodel []float64) (y float64, err error) {
+func Execute(p Program, x, model, out []float64) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("recovered from: %v", r)
@@ -205,15 +202,9 @@ Loop:
 			registers[loc] = lit
 		case Registers: 
                         registers = make([]float64,one())
-		case SetScalarOutput: // set output from register
-			y = registers[one()]
-		case SetVectorOutput: // set output from register
+		case SetOutput: // set output from register
 			src, dest := two()
-			dmodel[dest] = registers[src]
-		case HaltIfDmodelNil:
-			if dmodel == nil {
-				break Loop
-			}
+			out[dest] = registers[src]
 		case Halt:
 			break Loop
 
@@ -233,7 +224,7 @@ Loop:
 {{end}} 
 
 	default:
-			return 0, fmt.Errorf("unhandled op %s", VmOp(c))
+			return fmt.Errorf("unhandled op %s", VmOp(c))
 		}
 	}
 	return

@@ -8,7 +8,7 @@ import (
 	"math"
 )
 
-func Execute(p Program, x, model, dmodel []float64) (y float64, err error) {
+func Execute(p Program, x, model, dmodel []float64) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("recovered from: %v", r)
@@ -55,8 +55,6 @@ Loop:
 			registers[loc] = lit
 		case Registers:
 			registers = make([]float64, one())
-		case SetScalarOutput: // set output from register
-			y = registers[one()]
 		case SetVectorOutput: // set output from register
 			src, dest := two()
 			dmodel[dest] = registers[src]
@@ -137,7 +135,7 @@ Loop:
 			registers[dest] = math.Pow(registers[a], registers[b])
 
 		default:
-			return 0, fmt.Errorf("unhandled op %s", VmOp(c))
+			return fmt.Errorf("unhandled op %s", VmOp(c))
 		}
 	}
 	return
