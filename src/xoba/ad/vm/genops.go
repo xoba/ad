@@ -3,44 +3,43 @@ package vm
 import (
 	"os"
 	"sort"
-	"strings"
 	"text/template"
 	"xoba/ad/defs"
 )
 
 const ops_source = "ops.go"
 
-var ops []string = []string{
-	"Abs",
-	"Acos",
-	"Add",
-	"Asin",
-	"Atan",
-	"Cos",
-	"Cosh",
-	"Divide",
-	"Exp",
-	"Exp10",
-	"Exp2",
-	"Halt",
-	"HaltIfDmodelNil",
-	"Literal",
-	"Log",
-	"Log10",
-	"Log2",
-	"Multiply",
-	"Pow",
-	"SetScalarOutput",
-	"SetVectorOutput",
-	"Sin",
-	"Sinh",
-	"Sqrt",
-	"Subtract",
-	"Tan",
-	"Tanh",
-	"Inputs",
-	"Outputs",
-	"Registers",
+var ops map[string]string = map[string]string{
+	"Abs":             "",
+	"Acos":            "",
+	"Add":             "",
+	"Asin":            "",
+	"Atan":            "",
+	"Cos":             "",
+	"Cosh":            "",
+	"Divide":          "",
+	"Exp":             "",
+	"Exp10":           "",
+	"Exp2":            "",
+	"Halt":            "",
+	"HaltIfDmodelNil": "",
+	"Inputs":          "",
+	"Literal":         "",
+	"Log":             "",
+	"Log10":           "",
+	"Log2":            "",
+	"Multiply":        "",
+	"Outputs":         "",
+	"Pow":             "",
+	"Registers":       "",
+	"SetScalarOutput": "",
+	"SetVectorOutput": "",
+	"Sin":             "",
+	"Sinh":            "",
+	"Sqrt":            "",
+	"Subtract":        "",
+	"Tan":             "",
+	"Tanh":            "",
 }
 
 func GenOps(args []string) {
@@ -68,8 +67,8 @@ panic("illegal state")
 
 // the following can be copied over to "ops" var (self-reproduction)
 /*
-var ops []string = []string{
-{{range .ops}}"{{.}}",
+var ops map[string]string = map[string]string{
+{{$op,$desc := range .ops}}"{{.$op}" :"{{$desc}}",
 {{end}}}
 */
 
@@ -83,26 +82,16 @@ var ops []string = []string{
 */
 
 `))
+
+	var list []string
+	for op := range ops {
+		list = append(list, op)
+	}
+	sort.Strings(list)
+
 	t.Execute(f, map[string]interface{}{
-		"ops": ops,
+		"ops": list,
 	})
 	f.Close()
 	defs.Gofmt(ops_source)
-}
-
-func init() {
-	// add to and re-sort the ops list
-	var additional = "log10,exp10"
-	ops = append(ops, strings.Split(additional, ",")...)
-	opsMap := make(map[string]bool)
-	for _, o := range ops {
-		opsMap[strings.Title(o)] = true
-	}
-	ops = make([]string, 0)
-	for o := range opsMap {
-		if len(o) > 0 {
-			ops = append(ops, o)
-		}
-	}
-	sort.Strings(ops)
 }
