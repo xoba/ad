@@ -45,6 +45,71 @@ var (
 	_twoArgFuncs map[VmOp]string = map[VmOp]string{
 		Pow: "math.Pow",
 	}
+	_ops map[string]string = map[string]string{
+		"Abs":       "absolute value",
+		"Acos":      "",
+		"Add":       "",
+		"Asin":      "",
+		"Atan":      "",
+		"Cos":       "",
+		"Cosh":      "",
+		"Divide":    "",
+		"Exp":       "",
+		"Exp10":     "10^x",
+		"Exp2":      "2^x",
+		"Halt":      "",
+		"Inputs":    "validate input dimension is large enough",
+		"Models":    "validate model dimension is large enough",
+		"Literal":   "",
+		"Log":       "",
+		"Log10":     "",
+		"Log2":      "",
+		"Multiply":  "",
+		"Outputs":   "validate output dimension is large enough",
+		"Pow":       "",
+		"Registers": "1 argument, sets the number of registers",
+		"GetInput":  "copy input to register",
+		"GetModel":  "copy model to register",
+		"SetOutput": "copy register to output",
+		"Sin":       "",
+		"Sinh":      "",
+		"Sqrt":      "",
+		"Subtract":  "",
+		"Tan":       "",
+		"Tanh":      "",
+	}
+	_sigs map[string]Signature = map[string]Signature{
+		"Abs":             One,
+		"Acos":            One,
+		"Add":             Two,
+		"Asin":            One,
+		"Atan":            One,
+		"Cos":             One,
+		"Cosh":            One,
+		"Divide":          Two,
+		"Exp":             One,
+		"Exp10":           One,
+		"Exp2":            One,
+		"Halt":            None,
+		"HaltIfDmodelNil": None,
+		"Inputs":          Integer, // specify dimension of input
+		"Literal":         "DR,F",  // destination register, floating-point value
+		"Log":             One,
+		"Log10":           One,
+		"Log2":            One,
+		"Multiply":        Two,
+		"Outputs":         Integer, // specify dimension of output
+		"Pow":             Two,
+		"Registers":       Integer, // specify number of registers
+		"SetOutput":       "SR,DI", // source register, destination index
+		"GetInput":        "SI,DR", // source index, destination register
+		"Sin":             One,
+		"Sinh":            One,
+		"Sqrt":            One,
+		"Subtract":        Two,
+		"Tan":             One,
+		"Tanh":            One,
+	}
 )
 
 func OrganizeOps(args []string) {
@@ -99,40 +164,6 @@ func OrganizeOps(args []string) {
 
 const ops_source = "ops.go"
 
-var _ops map[string]string = map[string]string{
-	"Abs":       "absolute value",
-	"Acos":      "",
-	"Add":       "",
-	"Asin":      "",
-	"Atan":      "",
-	"Cos":       "",
-	"Cosh":      "",
-	"Divide":    "",
-	"Exp":       "",
-	"Exp10":     "10^x",
-	"Exp2":      "2^x",
-	"Halt":      "",
-	"Inputs":    "validate input dimension is large enough",
-	"Models":    "validate model dimension is large enough",
-	"Literal":   "",
-	"Log":       "",
-	"Log10":     "",
-	"Log2":      "",
-	"Multiply":  "",
-	"Outputs":   "validate output dimension is large enough",
-	"Pow":       "",
-	"Registers": "1 argument, sets the number of registers",
-	"GetInput":  "copy input to register",
-	"GetModel":  "copy model to register",
-	"SetOutput": "copy register to output",
-	"Sin":       "",
-	"Sinh":      "",
-	"Sqrt":      "",
-	"Subtract":  "",
-	"Tan":       "",
-	"Tanh":      "",
-}
-
 type Signature string
 
 const (
@@ -144,39 +175,6 @@ const (
 
 func (o VmOp) ToLower() string {
 	return strings.ToLower(o.String())
-}
-
-var _sigs map[string]Signature = map[string]Signature{
-	"Abs":             One,
-	"Acos":            One,
-	"Add":             Two,
-	"Asin":            One,
-	"Atan":            One,
-	"Cos":             One,
-	"Cosh":            One,
-	"Divide":          Two,
-	"Exp":             One,
-	"Exp10":           One,
-	"Exp2":            One,
-	"Halt":            None,
-	"HaltIfDmodelNil": None,
-	"Inputs":          Integer, // specify dimension of input
-	"Literal":         "DR,F",  // destination register, floating-point value
-	"Log":             One,
-	"Log10":           One,
-	"Log2":            One,
-	"Multiply":        Two,
-	"Outputs":         Integer, // specify dimension of output
-	"Pow":             Two,
-	"Registers":       Integer, // specify number of registers
-	"SetOutput":       "SR,DI", // source register, destination index
-	"GetInput":        "SI,DR", // source index, destination register
-	"Sin":             One,
-	"Sinh":            One,
-	"Sqrt":            One,
-	"Subtract":        Two,
-	"Tan":             One,
-	"Tanh":            One,
 }
 
 func GenOps(args []string) {
@@ -210,11 +208,21 @@ panic("illegal state")
 `))
 
 	ops := make(map[string]string)
+	derivs := make(map[string]string)
+
 	for _, op := range Defs {
-		ops[op.Name] = op.Description
+		name := op.Name
+		ops[name] = op.Description
+		switch op.Type {
+		case "twos":
+			ops[fmt.Sprintf("D_%s_D0", name)] = fmt.Sprintf("derivative of first argument of %s", name)
+		case "threes":
+		case "funcs2":
+		}
 	}
 	t.Execute(f, map[string]interface{}{
-		"ops": ops,
+		"ops":    ops,
+		"derivs": derivs,
 	})
 	f.Close()
 	defs.Gofmt(ops_source)
