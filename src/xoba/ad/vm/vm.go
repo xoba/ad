@@ -29,7 +29,6 @@ func Run(args []string) {
 	in := make([]float64, p.Inputs)
 	model := make([]float64, p.Models)
 	in[0] = 99
-	model[0] = -3.14
 	check(e(p, model, in, out))
 	fmt.Println(out)
 }

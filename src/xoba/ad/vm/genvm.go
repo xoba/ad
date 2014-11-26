@@ -133,34 +133,24 @@ continue
 			putOp(SetOutput)
 			putInt(1)
 			putInt(2)
-		case "multiply":
-			putOp(Multiply)
+
+
+{{range $op,$desc := .threes}}
+case "{{$op.ToLower}}":
+			putOp({{$op}})
 			putInt(1)
 			putInt(2)
 			putInt(3)
-		case "divide":
-			putOp(Divide)
+{{end}}
+
+
+{{range $op,$desc := .twos}}
+case "{{$op.ToLower}}":
+			putOp({{$op}})
 			putInt(1)
 			putInt(2)
-			putInt(3)
-		case "subtract":
-			putOp(Subtract)
-			putInt(1)
-			putInt(2)
-			putInt(3)
-		case "add":
-			putOp(Add)
-			putInt(1)
-			putInt(2)
-			putInt(3)
-		case "log":
-			putOp(Log)
-			putInt(1)
-			putInt(2)
-		case "log10":
-			putOp(Log10)
-			putInt(1)
-			putInt(2)
+{{end}}
+
 		default:
 			log.Fatalf("unknown opcode: %s", fields[0])
 		}

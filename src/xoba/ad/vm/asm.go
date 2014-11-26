@@ -77,34 +77,116 @@ func Compile(f io.Reader) Program {
 			putOp(SetOutput)
 			putInt(1)
 			putInt(2)
-		case "multiply":
-			putOp(Multiply)
-			putInt(1)
-			putInt(2)
-			putInt(3)
-		case "divide":
-			putOp(Divide)
-			putInt(1)
-			putInt(2)
-			putInt(3)
-		case "subtract":
-			putOp(Subtract)
-			putInt(1)
-			putInt(2)
-			putInt(3)
+
 		case "add":
 			putOp(Add)
 			putInt(1)
 			putInt(2)
 			putInt(3)
+
+		case "divide":
+			putOp(Divide)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "multiply":
+			putOp(Multiply)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "subtract":
+			putOp(Subtract)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "abs":
+			putOp(Abs)
+			putInt(1)
+			putInt(2)
+
+		case "acos":
+			putOp(Acos)
+			putInt(1)
+			putInt(2)
+
+		case "asin":
+			putOp(Asin)
+			putInt(1)
+			putInt(2)
+
+		case "atan":
+			putOp(Atan)
+			putInt(1)
+			putInt(2)
+
+		case "cos":
+			putOp(Cos)
+			putInt(1)
+			putInt(2)
+
+		case "cosh":
+			putOp(Cosh)
+			putInt(1)
+			putInt(2)
+
+		case "exp":
+			putOp(Exp)
+			putInt(1)
+			putInt(2)
+
+		case "exp10":
+			putOp(Exp10)
+			putInt(1)
+			putInt(2)
+
+		case "exp2":
+			putOp(Exp2)
+			putInt(1)
+			putInt(2)
+
 		case "log":
 			putOp(Log)
 			putInt(1)
 			putInt(2)
+
 		case "log10":
 			putOp(Log10)
 			putInt(1)
 			putInt(2)
+
+		case "log2":
+			putOp(Log2)
+			putInt(1)
+			putInt(2)
+
+		case "sin":
+			putOp(Sin)
+			putInt(1)
+			putInt(2)
+
+		case "sinh":
+			putOp(Sinh)
+			putInt(1)
+			putInt(2)
+
+		case "sqrt":
+			putOp(Sqrt)
+			putInt(1)
+			putInt(2)
+
+		case "tan":
+			putOp(Tan)
+			putInt(1)
+			putInt(2)
+
+		case "tanh":
+			putOp(Tanh)
+			putInt(1)
+			putInt(2)
+
 		default:
 			log.Fatalf("unknown opcode: %s", fields[0])
 		}

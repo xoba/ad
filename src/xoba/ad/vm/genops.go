@@ -2,6 +2,7 @@ package vm
 
 import (
 	"os"
+	"strings"
 	"text/template"
 	"xoba/ad/defs"
 )
@@ -50,6 +51,10 @@ const (
 	None              = "N/A"      // no arguments
 	Integer           = "I"        // an integer
 )
+
+func (o VmOp) ToLower() string {
+	return strings.ToLower(o.String())
+}
 
 var sigs map[string]Signature = map[string]Signature{
 	"Abs":             One,
