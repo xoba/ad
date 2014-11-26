@@ -13,14 +13,9 @@ const (
 )
 
 func OpForName(name string) VmOp {
-	for _, d := range Defs {
-		if name != d.Name {
-			continue
-		}
-		for _, op := range AllOps {
-			if d.Name == op.String() {
-				return op
-			}
+	for _, op := range AllOps {
+		if name == op.String() {
+			return op
 		}
 	}
 	panic("illegal name: " + name)
@@ -47,9 +42,12 @@ func GenVm(args []string) {
 		switch d.Type {
 		case "twos":
 			twos[op] = d.Runtime
-			fmt.Printf("twos %v: %v\n", op, DerivativeOpForName(d.Name, 0))
 		case "threes":
 			threes[op] = d.Runtime
+			dOp0 := DerivativeOpForName(d.Name, 0)
+			twoArgFuncs[dOp0] = dOp0.ToLower()
+			dOp1 := DerivativeOpForName(d.Name, 1)
+			twoArgFuncs[dOp1] = dOp1.ToLower()
 		case "funcs2":
 			twoArgFuncs[op] = d.Runtime
 		}

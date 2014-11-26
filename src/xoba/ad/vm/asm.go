@@ -102,6 +102,54 @@ func Compile(f io.Reader) Program {
 			putInt(2)
 			putInt(3)
 
+		case "d_add_d0":
+			putOp(D_Add_D0)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "d_add_d1":
+			putOp(D_Add_D1)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "d_divide_d0":
+			putOp(D_Divide_D0)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "d_divide_d1":
+			putOp(D_Divide_D1)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "d_multiply_d0":
+			putOp(D_Multiply_D0)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "d_multiply_d1":
+			putOp(D_Multiply_D1)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "d_subtract_d0":
+			putOp(D_Subtract_D0)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
+		case "d_subtract_d1":
+			putOp(D_Subtract_D1)
+			putInt(1)
+			putInt(2)
+			putInt(3)
+
 		case "pow":
 			putOp(Pow)
 			putInt(1)

@@ -150,6 +150,30 @@ Loop:
 			a, b, dest := three()
 			registers[dest] = registers[a] - registers[b]
 
+		case D_Add_D0:
+			a, b, dest := three()
+			registers[dest] = d_add_d0(registers[a], registers[b])
+		case D_Add_D1:
+			a, b, dest := three()
+			registers[dest] = d_add_d1(registers[a], registers[b])
+		case D_Divide_D0:
+			a, b, dest := three()
+			registers[dest] = d_divide_d0(registers[a], registers[b])
+		case D_Divide_D1:
+			a, b, dest := three()
+			registers[dest] = d_divide_d1(registers[a], registers[b])
+		case D_Multiply_D0:
+			a, b, dest := three()
+			registers[dest] = d_multiply_d0(registers[a], registers[b])
+		case D_Multiply_D1:
+			a, b, dest := three()
+			registers[dest] = d_multiply_d1(registers[a], registers[b])
+		case D_Subtract_D0:
+			a, b, dest := three()
+			registers[dest] = d_subtract_d0(registers[a], registers[b])
+		case D_Subtract_D1:
+			a, b, dest := three()
+			registers[dest] = d_subtract_d1(registers[a], registers[b])
 		case Pow:
 			a, b, dest := three()
 			registers[dest] = math.Pow(registers[a], registers[b])
