@@ -11,38 +11,37 @@ const (
 	vm_source  = "execute.go"
 )
 
-var (
-	twos map[VmOp]string = map[VmOp]string{
-		Abs:   "math.Abs",
-		Acos:  "math.Acos",
-		Asin:  "math.Asin",
-		Atan:  "math.Atan",
-		Cos:   "math.Cos",
-		Cosh:  "math.Cosh",
-		Exp:   "math.Exp",
-		Exp10: "exp10",
-		Exp2:  "math.Exp2",
-		Log:   "math.Log",
-		Log10: "math.Log10",
-		Log2:  "math.Log2",
-		Sin:   "math.Sin",
-		Sinh:  "math.Sinh",
-		Sqrt:  "math.Sqrt",
-		Tan:   "math.Tan",
-		Tanh:  "math.Tanh",
+func OpForName(name string) VmOp {
+	for _, d := range Defs {
+		if name != d.Name {
+			continue
+		}
+		for _, op := range AllOps {
+			if d.Name == op.String() {
+				return op
+			}
+		}
 	}
-	threes map[VmOp]string = map[VmOp]string{
-		Add:      "+",
-		Multiply: "*",
-		Divide:   "/",
-		Subtract: "-",
-	}
-	twoArgFuncs map[VmOp]string = map[VmOp]string{
-		Pow: "math.Pow",
-	}
-)
+	panic("illegal name: " + name)
+}
 
 func GenVm(args []string) {
+
+	twos := make(map[VmOp]string)
+	threes := make(map[VmOp]string)
+	twoArgFuncs := make(map[VmOp]string)
+
+	for _, d := range Defs {
+		op := OpForName(d.Name)
+		switch d.Type {
+		case "twos":
+			twos[op] = d.Runtime
+		case "threes":
+			threes[op] = d.Runtime
+		case "funcs2":
+			twoArgFuncs[op] = d.Runtime
+		}
+	}
 
 	run := func(name, src string) {
 		f, err := os.Create(name)

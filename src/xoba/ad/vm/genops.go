@@ -16,26 +16,57 @@ type OpDef struct {
 	Runtime     string `json:",omitempty"`
 }
 
+var (
+	_twos map[VmOp]string = map[VmOp]string{
+		Abs:   "math.Abs",
+		Acos:  "math.Acos",
+		Asin:  "math.Asin",
+		Atan:  "math.Atan",
+		Cos:   "math.Cos",
+		Cosh:  "math.Cosh",
+		Exp:   "math.Exp",
+		Exp10: "exp10",
+		Exp2:  "math.Exp2",
+		Log:   "math.Log",
+		Log10: "math.Log10",
+		Log2:  "math.Log2",
+		Sin:   "math.Sin",
+		Sinh:  "math.Sinh",
+		Sqrt:  "math.Sqrt",
+		Tan:   "math.Tan",
+		Tanh:  "math.Tanh",
+	}
+	_threes map[VmOp]string = map[VmOp]string{
+		Add:      "+",
+		Multiply: "*",
+		Divide:   "/",
+		Subtract: "-",
+	}
+	_twoArgFuncs map[VmOp]string = map[VmOp]string{
+		Pow: "math.Pow",
+	}
+)
+
 func OrganizeOps(args []string) {
 	var list []OpDef
 	for _, op := range AllOps {
 		name := op.String()
 		var t, rt string
 		switch {
-		case twos[op] != "":
+		case _twos[op] != "":
 			t = "twos"
-			rt = twos[op]
-		case threes[op] != "":
+			rt = _twos[op]
+		case _threes[op] != "":
 			t = "threes"
-			rt = threes[op]
-		case twoArgFuncs[op] != "":
+			rt = _threes[op]
+		case _twoArgFuncs[op] != "":
 			t = "funcs2"
-			rt = twoArgFuncs[op]
+			rt = _twoArgFuncs[op]
 		}
 		d := OpDef{
 			Name:        name,
-			Description: ops[name],
-			Signature:   string(sigs[name]),
+			Description: _ops[name],
+			Signature:   string(_sigs[name]),
 			Type:        t,
 			Runtime:     rt,
 		}
@@ -68,7 +99,7 @@ func OrganizeOps(args []string) {
 
 const ops_source = "ops.go"
 
-var ops map[string]string = map[string]string{
+var _ops map[string]string = map[string]string{
 	"Abs":       "absolute value",
 	"Acos":      "",
 	"Add":       "",
@@ -115,7 +146,7 @@ func (o VmOp) ToLower() string {
 	return strings.ToLower(o.String())
 }
 
-var sigs map[string]Signature = map[string]Signature{
+var _sigs map[string]Signature = map[string]Signature{
 	"Abs":             One,
 	"Acos":            One,
 	"Add":             Two,
@@ -178,6 +209,10 @@ panic("illegal state")
 
 `))
 
+	ops := make(map[string]string)
+	for _, op := range Defs {
+		ops[op.Name] = op.Description
+	}
 	t.Execute(f, map[string]interface{}{
 		"ops": ops,
 	})
