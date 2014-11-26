@@ -22,7 +22,7 @@ func Run(args []string) {
 	p := Compile(f)
 	p.Registers = 10
 	var x, model, out []float64
-	out = make([]float64, 10)
+	out = make([]float64, 1)
 	check(Execute(p, x, model, out))
 	fmt.Println(out)
 }

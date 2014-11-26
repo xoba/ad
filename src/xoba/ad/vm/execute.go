@@ -8,7 +8,7 @@ import (
 	"math"
 )
 
-func Execute(p Program, x, model, dmodel []float64) (err error) {
+func Execute(p Program, x, model, out []float64) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("recovered from: %v", r)
@@ -55,13 +55,9 @@ Loop:
 			registers[loc] = lit
 		case Registers:
 			registers = make([]float64, one())
-		case SetVectorOutput: // set output from register
+		case SetOutput: // set output from register
 			src, dest := two()
-			dmodel[dest] = registers[src]
-		case HaltIfDmodelNil:
-			if dmodel == nil {
-				break Loop
-			}
+			out[dest] = registers[src]
 		case Halt:
 			break Loop
 

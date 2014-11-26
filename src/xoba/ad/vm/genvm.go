@@ -101,12 +101,16 @@ p:=Program{}
 		case "registers":
 			putOp(Registers)
 			putInt(1)
-	        case "haltifdmodelnil":
-			putOp(HaltIfDmodelNil)
 		case "literal":
 			putOp(Literal)
 			putInt(1)
 			putFloat(2)
+		case "output":
+			putOp(Output)
+			putInt(1)
+		case "input":
+			putOp(Input)
+			putInt(1)
 		case "setoutput":
 			putOp(SetOutput)
 			putInt(1)

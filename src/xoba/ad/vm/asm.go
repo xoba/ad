@@ -45,17 +45,12 @@ func Compile(f io.Reader) Program {
 		case "registers":
 			putOp(Registers)
 			putInt(1)
-		case "haltifdmodelnil":
-			putOp(HaltIfDmodelNil)
 		case "literal":
 			putOp(Literal)
 			putInt(1)
 			putFloat(2)
-		case "setscalaroutput":
-			putOp(SetScalarOutput)
-			putInt(1)
-		case "setvectoroutput":
-			putOp(SetVectorOutput)
+		case "setoutput":
+			putOp(SetOutput)
 			putInt(1)
 			putInt(2)
 		case "multiply":

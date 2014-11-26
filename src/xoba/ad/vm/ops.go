@@ -6,36 +6,35 @@ type VmOp uint64
 const (
 	_ VmOp = iota
 
-	Abs
-	Acos
-	Add
-	Asin
-	Atan
-	Cos
-	Cosh
-	Divide
-	Exp
-	Exp10
-	Exp2
-	Halt
-	HaltIfDmodelNil
-	Inputs
-	Literal
-	Log
-	Log10
-	Log2
-	Multiply
-	Outputs
-	Pow
-	Registers
-	SetScalarOutput
-	SetVectorOutput
-	Sin
-	Sinh
-	Sqrt
-	Subtract
-	Tan
-	Tanh
+	Abs       // absolute value
+	Acos      //
+	Add       //
+	Asin      //
+	Atan      //
+	Cos       //
+	Cosh      //
+	Divide    //
+	Exp       //
+	Exp10     // 10^x
+	Exp2      // 2^x
+	Halt      //
+	Inputs    // validate input dimension is large enough
+	Literal   //
+	Log       //
+	Log10     //
+	Log2      //
+	Multiply  //
+	Outputs   // validate output dimension is large enough
+	Pow       //
+	Registers // 1 argument, sets the number of registers
+	SetOutput //
+	Sin       //
+	Sinh      //
+	Sqrt      //
+	Subtract  //
+	Tan       //
+	Tanh      //
+
 )
 
 func (o VmOp) String() string {
@@ -64,8 +63,6 @@ func (o VmOp) String() string {
 		return "Exp2"
 	case Halt:
 		return "Halt"
-	case HaltIfDmodelNil:
-		return "HaltIfDmodelNil"
 	case Inputs:
 		return "Inputs"
 	case Literal:
@@ -84,10 +81,8 @@ func (o VmOp) String() string {
 		return "Pow"
 	case Registers:
 		return "Registers"
-	case SetScalarOutput:
-		return "SetScalarOutput"
-	case SetVectorOutput:
-		return "SetVectorOutput"
+	case SetOutput:
+		return "SetOutput"
 	case Sin:
 		return "Sin"
 	case Sinh:
@@ -103,77 +98,3 @@ func (o VmOp) String() string {
 	}
 	panic("illegal state")
 }
-
-// the following can be copied over to "ops" var (self-reproduction)
-/*
-var ops []string = []string{
-"Abs",
-"Acos",
-"Add",
-"Asin",
-"Atan",
-"Cos",
-"Cosh",
-"Divide",
-"Exp",
-"Exp10",
-"Exp2",
-"Halt",
-"HaltIfDmodelNil",
-"Inputs",
-"Literal",
-"Log",
-"Log10",
-"Log2",
-"Multiply",
-"Outputs",
-"Pow",
-"Registers",
-"SetScalarOutput",
-"SetVectorOutput",
-"Sin",
-"Sinh",
-"Sqrt",
-"Subtract",
-"Tan",
-"Tanh",
-}
-*/
-
-// the following can serve as template for single-arg funcs
-/*
-
-	twos := map[VmOp]string{
-Abs:"math.Abs",
-Acos:"math.Acos",
-Add:"math.Add",
-Asin:"math.Asin",
-Atan:"math.Atan",
-Cos:"math.Cos",
-Cosh:"math.Cosh",
-Divide:"math.Divide",
-Exp:"math.Exp",
-Exp10:"math.Exp10",
-Exp2:"math.Exp2",
-Halt:"math.Halt",
-HaltIfDmodelNil:"math.HaltIfDmodelNil",
-Inputs:"math.Inputs",
-Literal:"math.Literal",
-Log:"math.Log",
-Log10:"math.Log10",
-Log2:"math.Log2",
-Multiply:"math.Multiply",
-Outputs:"math.Outputs",
-Pow:"math.Pow",
-Registers:"math.Registers",
-SetScalarOutput:"math.SetScalarOutput",
-SetVectorOutput:"math.SetVectorOutput",
-Sin:"math.Sin",
-Sinh:"math.Sinh",
-Sqrt:"math.Sqrt",
-Subtract:"math.Subtract",
-Tan:"math.Tan",
-Tanh:"math.Tanh",
-
-}
-*/
