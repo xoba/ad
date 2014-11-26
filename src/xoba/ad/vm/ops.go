@@ -6,37 +6,64 @@ type VmOp uint64
 const (
 	_ VmOp = iota
 
-	Abs       // absolute value
-	Acos      //
-	Add       //
-	Asin      //
-	Atan      //
-	Cos       //
-	Cosh      //
-	Divide    //
-	Exp       //
-	Exp10     // 10^x
-	Exp2      // 2^x
-	GetInput  // copy input to register
-	GetModel  // copy model to register
-	Halt      //
-	Inputs    // validate input dimension is large enough
-	Literal   //
-	Log       //
-	Log10     //
-	Log2      //
-	Models    // validate model dimension is large enough
-	Multiply  //
-	Outputs   // validate output dimension is large enough
-	Pow       //
-	Registers // 1 argument, sets the number of registers
-	SetOutput // copy register to output
-	Sin       //
-	Sinh      //
-	Sqrt      //
-	Subtract  //
-	Tan       //
-	Tanh      //
+	Abs           // absolute value
+	Acos          //
+	Add           //
+	Asin          //
+	Atan          //
+	Cos           //
+	Cosh          //
+	D_Abs_D0      // derivative of first argument of Abs
+	D_Acos_D0     // derivative of first argument of Acos
+	D_Add_D0      // derivative of first argument of Add
+	D_Add_D1      // derivative of second argument of Add
+	D_Asin_D0     // derivative of first argument of Asin
+	D_Atan_D0     // derivative of first argument of Atan
+	D_Cos_D0      // derivative of first argument of Cos
+	D_Cosh_D0     // derivative of first argument of Cosh
+	D_Divide_D0   // derivative of first argument of Divide
+	D_Divide_D1   // derivative of second argument of Divide
+	D_Exp10_D0    // derivative of first argument of Exp10
+	D_Exp2_D0     // derivative of first argument of Exp2
+	D_Exp_D0      // derivative of first argument of Exp
+	D_Log10_D0    // derivative of first argument of Log10
+	D_Log2_D0     // derivative of first argument of Log2
+	D_Log_D0      // derivative of first argument of Log
+	D_Multiply_D0 // derivative of first argument of Multiply
+	D_Multiply_D1 // derivative of second argument of Multiply
+	D_Pow_D0      // derivative of first argument of Pow
+	D_Pow_D1      // derivative of second argument of Pow
+	D_Sin_D0      // derivative of first argument of Sin
+	D_Sinh_D0     // derivative of first argument of Sinh
+	D_Sqrt_D0     // derivative of first argument of Sqrt
+	D_Subtract_D0 // derivative of first argument of Subtract
+	D_Subtract_D1 // derivative of second argument of Subtract
+	D_Tan_D0      // derivative of first argument of Tan
+	D_Tanh_D0     // derivative of first argument of Tanh
+	Divide        //
+	Exp           //
+	Exp10         // 10^x
+	Exp2          // 2^x
+	GetInput      // copy input to register
+	GetModel      // copy model to register
+	Halt          //
+	Inputs        // validate input dimension is large enough
+	Literal       //
+	Log           //
+	Log10         //
+	Log2          //
+	Models        // validate model dimension is large enough
+	Multiply      //
+	Outputs       // validate output dimension is large enough
+	Pow           //
+	Registers     // 1 argument, sets the number of registers
+	SetOutput     // copy register to output
+	Sin           //
+	Sinh          //
+	Sqrt          //
+	Subtract      //
+	Tan           //
+	Tanh          //
 
 )
 
@@ -48,6 +75,33 @@ var AllOps []VmOp = []VmOp{
 	Atan,
 	Cos,
 	Cosh,
+	D_Abs_D0,
+	D_Acos_D0,
+	D_Add_D0,
+	D_Add_D1,
+	D_Asin_D0,
+	D_Atan_D0,
+	D_Cos_D0,
+	D_Cosh_D0,
+	D_Divide_D0,
+	D_Divide_D1,
+	D_Exp10_D0,
+	D_Exp2_D0,
+	D_Exp_D0,
+	D_Log10_D0,
+	D_Log2_D0,
+	D_Log_D0,
+	D_Multiply_D0,
+	D_Multiply_D1,
+	D_Pow_D0,
+	D_Pow_D1,
+	D_Sin_D0,
+	D_Sinh_D0,
+	D_Sqrt_D0,
+	D_Subtract_D0,
+	D_Subtract_D1,
+	D_Tan_D0,
+	D_Tanh_D0,
 	Divide,
 	Exp,
 	Exp10,
@@ -90,6 +144,60 @@ func (o VmOp) String() string {
 		return "Cos"
 	case Cosh:
 		return "Cosh"
+	case D_Abs_D0:
+		return "D_Abs_D0"
+	case D_Acos_D0:
+		return "D_Acos_D0"
+	case D_Add_D0:
+		return "D_Add_D0"
+	case D_Add_D1:
+		return "D_Add_D1"
+	case D_Asin_D0:
+		return "D_Asin_D0"
+	case D_Atan_D0:
+		return "D_Atan_D0"
+	case D_Cos_D0:
+		return "D_Cos_D0"
+	case D_Cosh_D0:
+		return "D_Cosh_D0"
+	case D_Divide_D0:
+		return "D_Divide_D0"
+	case D_Divide_D1:
+		return "D_Divide_D1"
+	case D_Exp10_D0:
+		return "D_Exp10_D0"
+	case D_Exp2_D0:
+		return "D_Exp2_D0"
+	case D_Exp_D0:
+		return "D_Exp_D0"
+	case D_Log10_D0:
+		return "D_Log10_D0"
+	case D_Log2_D0:
+		return "D_Log2_D0"
+	case D_Log_D0:
+		return "D_Log_D0"
+	case D_Multiply_D0:
+		return "D_Multiply_D0"
+	case D_Multiply_D1:
+		return "D_Multiply_D1"
+	case D_Pow_D0:
+		return "D_Pow_D0"
+	case D_Pow_D1:
+		return "D_Pow_D1"
+	case D_Sin_D0:
+		return "D_Sin_D0"
+	case D_Sinh_D0:
+		return "D_Sinh_D0"
+	case D_Sqrt_D0:
+		return "D_Sqrt_D0"
+	case D_Subtract_D0:
+		return "D_Subtract_D0"
+	case D_Subtract_D1:
+		return "D_Subtract_D1"
+	case D_Tan_D0:
+		return "D_Tan_D0"
+	case D_Tanh_D0:
+		return "D_Tanh_D0"
 	case Divide:
 		return "Divide"
 	case Exp:

@@ -116,6 +116,9 @@ func OrganizeOps(args []string) {
 	var list []OpDef
 	for _, op := range AllOps {
 		name := op.String()
+		if strings.HasPrefix(name, "D_") {
+			continue
+		}
 		var t, rt string
 		switch {
 		case _twos[op] != "":
@@ -136,18 +139,6 @@ func OrganizeOps(args []string) {
 			Runtime:     rt,
 		}
 		list = append(list, d)
-		continue
-		switch d.Type {
-		case "threes":
-			copy := d
-			copy.Type = "twos"
-			copy.Name = fmt.Sprintf("D%sD0", d.Name)
-			copy.Runtime = "dmultiplyd0"
-			list = append(list, copy)
-			copy.Name = fmt.Sprintf("D%sD1", d.Name)
-			copy.Runtime = "dmultiplyd1"
-			list = append(list, copy)
-		}
 	}
 	f, err := os.Create("opdefs.go")
 	check(err)
@@ -216,8 +207,9 @@ panic("illegal state")
 		switch op.Type {
 		case "twos":
 			ops[fmt.Sprintf("D_%s_D0", name)] = fmt.Sprintf("derivative of first argument of %s", name)
-		case "threes":
-		case "funcs2":
+		case "threes", "funcs2":
+			ops[fmt.Sprintf("D_%s_D0", name)] = fmt.Sprintf("derivative of first argument of %s", name)
+			ops[fmt.Sprintf("D_%s_D1", name)] = fmt.Sprintf("derivative of second argument of %s", name)
 		}
 	}
 	t.Execute(f, map[string]interface{}{
