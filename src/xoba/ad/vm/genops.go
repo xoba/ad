@@ -30,7 +30,8 @@ var ops map[string]string = map[string]string{
 	"Outputs":   "validate output dimension is large enough",
 	"Pow":       "",
 	"Registers": "1 argument, sets the number of registers",
-	"SetOutput": "",
+	"GetInput":  "copy input to register",
+	"SetOutput": "copy register to output",
 	"Sin":       "",
 	"Sinh":      "",
 	"Sqrt":      "",
@@ -71,8 +72,8 @@ var sigs map[string]Signature = map[string]Signature{
 	"Outputs":         Integer, // specify dimension of output
 	"Pow":             Two,
 	"Registers":       Integer, // specify number of registers
-	"SetScalarOutput": "SR",    // register to take output from
-	"SetVectorOutput": "SR,DI", // source register, destination index
+	"SetOutput":       "SR,DI", // source register, destination index
+	"GetInput":        "SI,DR", // source index, destination register
 	"Sin":             One,
 	"Sinh":            One,
 	"Sqrt":            One,

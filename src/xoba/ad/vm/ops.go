@@ -17,6 +17,7 @@ const (
 	Exp       //
 	Exp10     // 10^x
 	Exp2      // 2^x
+	GetInput  // copy input to register
 	Halt      //
 	Inputs    // validate input dimension is large enough
 	Literal   //
@@ -27,7 +28,7 @@ const (
 	Outputs   // validate output dimension is large enough
 	Pow       //
 	Registers // 1 argument, sets the number of registers
-	SetOutput //
+	SetOutput // copy register to output
 	Sin       //
 	Sinh      //
 	Sqrt      //
@@ -61,6 +62,8 @@ func (o VmOp) String() string {
 		return "Exp10"
 	case Exp2:
 		return "Exp2"
+	case GetInput:
+		return "GetInput"
 	case Halt:
 		return "Halt"
 	case Inputs:

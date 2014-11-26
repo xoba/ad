@@ -26,6 +26,7 @@ func Run(args []string) {
 	p := Compile(f)
 	out := make([]float64, p.Outputs)
 	in := make([]float64, p.Inputs)
+	in[0] = 99
 	check(e(p, nil, in, out))
 	fmt.Println(out)
 }
@@ -61,7 +62,7 @@ type Program struct {
 }
 
 func (p Program) String() string {
-	buf, _ := json.Marshal(p)
+	buf, _ := json.MarshalIndent(p, "", "  ")
 	return string(buf)
 }
 

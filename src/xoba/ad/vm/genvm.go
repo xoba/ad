@@ -118,6 +118,10 @@ continue
 		case "inputs":
 			putOp(Inputs)
 			p.Inputs = putInt(1)
+		case "getinput":
+			putOp(GetInput)
+			putInt(1)
+			putInt(2)
 		case "setoutput":
 			putOp(SetOutput)
 			putInt(1)
@@ -229,6 +233,9 @@ Loop:
                 case SetOutput: // set output from register
 			src, dest := two()
 			out[dest] = registers[src]
+                case GetInput: // set register from input
+			src, dest := two()
+			registers[dest] = in[src]
 		case Halt:
 			break Loop
 

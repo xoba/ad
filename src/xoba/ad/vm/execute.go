@@ -71,6 +71,9 @@ Loop:
 		case SetOutput: // set output from register
 			src, dest := two()
 			out[dest] = registers[src]
+		case GetInput: // set register from input
+			src, dest := two()
+			registers[dest] = in[src]
 		case Halt:
 			break Loop
 
