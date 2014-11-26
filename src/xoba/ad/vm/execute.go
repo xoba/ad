@@ -8,7 +8,10 @@ import (
 	"math"
 )
 
-func Execute(p Program, x, model, out []float64) (err error) {
+func Execute(p Program, in, out, model []float64) (err error) {
+	if len(out) == 0 {
+		return fmt.Errorf("need at least one output")
+	}
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("recovered from: %v", r)
@@ -55,6 +58,16 @@ Loop:
 			registers[loc] = lit
 		case Registers:
 			registers = make([]float64, one())
+		case Inputs:
+			n := one()
+			if len(in) < int(n) {
+				return fmt.Errorf("needs at least %d inputs; has %d", n, len(in))
+			}
+		case Outputs:
+			n := one()
+			if len(out) < int(n) {
+				return fmt.Errorf("needs at least %d outputs; has %d", n, len(out))
+			}
 		case SetOutput: // set output from register
 			src, dest := two()
 			out[dest] = registers[src]

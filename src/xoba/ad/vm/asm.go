@@ -49,6 +49,12 @@ func Compile(f io.Reader) Program {
 			putOp(Literal)
 			putInt(1)
 			putFloat(2)
+		case "outputs":
+			putOp(Outputs)
+			putInt(1)
+		case "inputs":
+			putOp(Inputs)
+			putInt(1)
 		case "setoutput":
 			putOp(SetOutput)
 			putInt(1)
