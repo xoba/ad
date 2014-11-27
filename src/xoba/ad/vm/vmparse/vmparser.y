@@ -15,11 +15,11 @@
 
 %% 
 
-statement: IDENT ':' '=' exp { 
-  /* c := yylex.(*context); 
- c.lhs,c.rhs = $1.node, $4.node;
-  */
-}
+program: { }
+| program statement { c := yylex.(*context); c.statements = append(c.statements, $2.node.Statement); } 
+;
+ 
+statement: IDENT ':' '=' exp {  $$.node = NewStatement($1.node,$4.node); }
 ;
 
 exp: NUM { $$ = $1; } 

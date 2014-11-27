@@ -36,57 +36,57 @@ var yyExca = []int{
 	-2, 0,
 }
 
-const yyNprod = 14
+const yyNprod = 16
 const yyPrivate = 57344
 
 var yyTokenNames []string
 var yyStates []string
 
-const yyLast = 51
+const yyLast = 52
 
 var yyAct = []int{
 
-	5, 15, 3, 16, 10, 11, 12, 13, 14, 17,
-	18, 19, 20, 21, 22, 23, 27, 25, 10, 11,
-	12, 13, 14, 4, 2, 6, 7, 28, 29, 9,
-	30, 10, 11, 12, 13, 14, 8, 12, 13, 14,
-	31, 10, 11, 12, 13, 14, 24, 1, 0, 0,
-	26,
+	6, 16, 4, 17, 11, 12, 13, 14, 15, 28,
+	18, 19, 20, 21, 22, 23, 24, 5, 26, 11,
+	12, 13, 14, 15, 3, 25, 7, 8, 29, 30,
+	10, 31, 11, 12, 13, 14, 15, 9, 13, 14,
+	15, 32, 11, 12, 13, 14, 15, 2, 1, 0,
+	0, 27,
 }
 var yyPact = []int{
 
-	19, -1000, -10, 17, 21, -3, -1000, -12, 21, 21,
-	21, 21, 21, 21, 21, 42, 21, 34, -1000, 28,
-	28, -1000, -1000, -1000, 2, 11, -1000, -1000, -1000, 21,
-	24, -1000,
+	-1000, 19, -1000, -10, 11, 22, -3, -1000, -12, 22,
+	22, 22, 22, 22, 22, 22, 21, 22, 35, -1000,
+	29, 29, -1000, -1000, -1000, -5, 12, -1000, -1000, -1000,
+	22, 25, -1000,
 }
 var yyPgo = []int{
 
-	0, 47, 0,
+	0, 48, 47, 0,
 }
 var yyR1 = []int{
 
-	0, 1, 2, 2, 2, 2, 2, 2, 2, 2,
-	2, 2, 2, 2,
+	0, 1, 1, 2, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3,
 }
 var yyR2 = []int{
 
-	0, 4, 1, 1, 4, 3, 4, 6, 2, 3,
-	3, 3, 3, 3,
+	0, 0, 2, 4, 1, 1, 4, 3, 4, 6,
+	2, 3, 3, 3, 3, 3,
 }
 var yyChk = []int{
 
-	-1000, -1, 5, 12, 6, -2, 4, 5, 15, 8,
-	7, 8, 9, 10, 11, 13, 15, -2, -2, -2,
-	-2, -2, -2, -2, 4, -2, 16, 14, 16, 17,
-	-2, 16,
+	-1000, -1, -2, 5, 12, 6, -3, 4, 5, 15,
+	8, 7, 8, 9, 10, 11, 13, 15, -3, -3,
+	-3, -3, -3, -3, -3, 4, -3, 16, 14, 16,
+	17, -3, 16,
 }
 var yyDef = []int{
 
-	0, -2, 0, 0, 0, 1, 2, 3, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 8, 9,
-	10, 11, 12, 13, 0, 0, 5, 4, 6, 0,
-	0, 7,
+	1, -2, 2, 0, 0, 0, 3, 4, 5, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
+	11, 12, 13, 14, 15, 0, 0, 7, 6, 8,
+	0, 0, 9,
 }
 var yyTok1 = []int{
 
@@ -337,67 +337,75 @@ yydefault:
 	case 1:
 		//line vmparser.y:18
 		{
-			/* c := yylex.(*context);
-			c.lhs,c.rhs = $1.node, $4.node;
-			*/
 		}
 	case 2:
-		//line vmparser.y:24
+		//line vmparser.y:19
 		{
-			yyVAL = yyS[yypt-0]
+			c := yylex.(*context)
+			c.statements = append(c.statements, yyS[yypt-0].node.Statement)
 		}
 	case 3:
+		//line vmparser.y:22
+		{
+			yyVAL.node = NewStatement(yyS[yypt-3].node, yyS[yypt-0].node)
+		}
+	case 4:
 		//line vmparser.y:25
 		{
 			yyVAL = yyS[yypt-0]
 		}
-	case 4:
+	case 5:
 		//line vmparser.y:26
+		{
+			yyVAL = yyS[yypt-0]
+		}
+	case 6:
+		//line vmparser.y:27
 		{
 			yyVAL.node = IndexedIdentifier(yyS[yypt-3].node, yyS[yypt-1].node)
 		}
-	case 5:
-		//line vmparser.y:27
+	case 7:
+		//line vmparser.y:28
 		{
 			yyVAL = yyS[yypt-1]
 		}
-	case 6:
-		//line vmparser.y:28
+	case 8:
+		//line vmparser.y:29
 		{
 			yyVAL.node = Function(yyS[yypt-3].node.S, yyS[yypt-1].node)
 		}
-	case 7:
-		//line vmparser.y:29
+	case 9:
+		//line vmparser.y:30
 		{
 			yyVAL.node = Function(yyS[yypt-5].node.S, yyS[yypt-3].node, yyS[yypt-1].node)
 		}
-	case 8:
-		//line vmparser.y:30
+	case 10:
+		//line vmparser.y:31
 		{
 			yyVAL.node = Negate(yyS[yypt-0].node)
 		}
-	case 9:
-		//line vmparser.y:31
+	case 11:
+		//line vmparser.y:32
 		{
 			yyVAL.node = Function("add", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
-	case 10:
-		//line vmparser.y:32
+	case 12:
+		//line vmparser.y:33
 		{
 			yyVAL.node = Function("subtract", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
-	case 11:
-		//line vmparser.y:33
+	case 13:
+		//line vmparser.y:34
 		{
 			yyVAL.node = Function("multiply", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
-	case 12:
-		//line vmparser.y:34
+	case 14:
+		//line vmparser.y:35
 		{
 			yyVAL.node = Function("divide", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
-	case 13:
-		//line vmparser.y:35
+	case 15:
+		//line vmparser.y:36
 		{
 			yyVAL.node = Function("pow", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
