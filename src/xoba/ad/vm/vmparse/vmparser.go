@@ -8,9 +8,15 @@ func Run(args []string) {
 
 }
 
-type context struct {
+type Statement struct {
 	lhs *Node
 	rhs *Node
+}
+
+type context struct {
+	lhs        *Node
+	rhs        *Node
+	statements []Statement
 	yyLexer
 	errors []error
 }

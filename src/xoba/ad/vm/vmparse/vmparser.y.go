@@ -337,66 +337,67 @@ yydefault:
 	case 1:
 		//line vmparser.y:18
 		{
-			c := yylex.(*context)
-			c.lhs, c.rhs = yyS[yypt-3].node, yyS[yypt-0].node
+			/* c := yylex.(*context);
+			c.lhs,c.rhs = $1.node, $4.node;
+			*/
 		}
 	case 2:
-		//line vmparser.y:21
+		//line vmparser.y:24
 		{
 			yyVAL = yyS[yypt-0]
 		}
 	case 3:
-		//line vmparser.y:22
+		//line vmparser.y:25
 		{
 			yyVAL = yyS[yypt-0]
 		}
 	case 4:
-		//line vmparser.y:23
+		//line vmparser.y:26
 		{
 			yyVAL.node = IndexedIdentifier(yyS[yypt-3].node, yyS[yypt-1].node)
 		}
 	case 5:
-		//line vmparser.y:24
+		//line vmparser.y:27
 		{
 			yyVAL = yyS[yypt-1]
 		}
 	case 6:
-		//line vmparser.y:25
+		//line vmparser.y:28
 		{
 			yyVAL.node = Function(yyS[yypt-3].node.S, yyS[yypt-1].node)
 		}
 	case 7:
-		//line vmparser.y:26
+		//line vmparser.y:29
 		{
 			yyVAL.node = Function(yyS[yypt-5].node.S, yyS[yypt-3].node, yyS[yypt-1].node)
 		}
 	case 8:
-		//line vmparser.y:27
+		//line vmparser.y:30
 		{
 			yyVAL.node = Negate(yyS[yypt-0].node)
 		}
 	case 9:
-		//line vmparser.y:28
+		//line vmparser.y:31
 		{
 			yyVAL.node = Function("add", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 10:
-		//line vmparser.y:29
+		//line vmparser.y:32
 		{
 			yyVAL.node = Function("subtract", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 11:
-		//line vmparser.y:30
+		//line vmparser.y:33
 		{
 			yyVAL.node = Function("multiply", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 12:
-		//line vmparser.y:31
+		//line vmparser.y:34
 		{
 			yyVAL.node = Function("divide", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 13:
-		//line vmparser.y:32
+		//line vmparser.y:35
 		{
 			yyVAL.node = Function("pow", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
