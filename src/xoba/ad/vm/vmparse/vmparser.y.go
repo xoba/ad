@@ -342,7 +342,7 @@ yydefault:
 		//line vmparser.y:19
 		{
 			c := yylex.(*context)
-			c.statements = append(c.statements, yyS[yypt-0].node.Statement)
+			c.statements = append(c.statements, yyS[yypt-0].node)
 		}
 	case 3:
 		//line vmparser.y:22

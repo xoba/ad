@@ -16,7 +16,7 @@
 %% 
 
 program: { }
-| program statement { c := yylex.(*context); c.statements = append(c.statements, $2.node.Statement); } 
+| program statement { c := yylex.(*context); c.statements = append(c.statements, $2.node); } 
 ;
  
 statement: IDENT ':' '=' exp {  $$.node = NewStatement($1.node,$4.node); }

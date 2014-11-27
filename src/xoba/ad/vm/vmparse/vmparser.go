@@ -23,7 +23,7 @@ func Run(args []string) {
 		log.Fatal(lex.errors)
 	}
 	for i, s := range lex.statements {
-		fmt.Printf("statement %d. %s := %s\n", i, s.Lhs.Formula(), s.Rhs.Formula())
+		fmt.Printf("statement %d. %s\n", i, s.Formula())
 	}
 }
 
@@ -39,15 +39,8 @@ func (c *context) Error2(e error) {
 	c.errors = append(c.errors, e)
 }
 
-type Statement struct {
-	Lhs *Node
-	Rhs *Node
-}
-
 type context struct {
-	lhs        *Node
-	rhs        *Node
-	statements []Statement
+	statements []*Node
 	yyLexer
 	errors []error
 }
@@ -55,10 +48,10 @@ type context struct {
 type NodeType string
 
 const (
-	numberNT            NodeType = "NUM"
-	identifierNT        NodeType = "IDENT"
-	indexedIdentifierNT NodeType = "INDEXED"
-	functionNT          NodeType = "FUNC"
+	numberNT            NodeType = "NUMBER"
+	identifierNT        NodeType = "IDENTIFIER"
+	indexedIdentifierNT NodeType = "INDEXED IDENTIFIER"
+	functionNT          NodeType = "FUNCTION"
 	statementNT         NodeType = "STATEMENT"
 )
 
@@ -69,7 +62,6 @@ type Node struct {
 	I        int      `json:",omitempty"`
 	Children []*Node  `json:"C,omitempty"`
 	Name     string   `json:"N,omitempty"` // name of variable assigned by parser
-	Statement
 
 	// for vm-assembly version:
 	register, output int
@@ -112,7 +104,7 @@ func (n Node) Formula() string {
 			fmt.Fprintf(buf, "%s(%s)", n.S, strings.Join(args, ","))
 		}
 	case statementNT:
-		fmt.Fprintf(buf, "%s := %s", n.Statement.Lhs.Formula(), n.Statement.Rhs.Formula())
+		fmt.Fprintf(buf, "%s := %s", n.Children[0].Formula(), n.Children[1].Formula())
 	default:
 		panic("illegal type: " + n.Type)
 	}
@@ -141,8 +133,8 @@ func Number(n float64) *Node {
 
 func NewStatement(lhs, rhs *Node) *Node {
 	return &Node{
-		Type:      statementNT,
-		Statement: Statement{Lhs: lhs, Rhs: rhs},
+		Type:     statementNT,
+		Children: []*Node{lhs, rhs},
 	}
 }
 
