@@ -1,5 +1,8 @@
 package vmparse
 
+//go:generate go tool yacc -o vmparser.y.go vmparser.y
+//go:generate nex vmlexer.nex
+
 import (
 	"bytes"
 	"encoding/json"
@@ -12,10 +15,9 @@ import (
 const formula = `
 f:= a*b 
 g := sin(1+2)^2/sqrt(9*x)
+z := f * g
 `
 
-//go:generate go tool yacc -o vmparser.y.go vmparser.y
-//go:generate nex vmlexer.nex
 func Run(args []string) {
 	lex := NewContext(NewLexer(strings.NewReader(formula)))
 	yyParse(lex)
@@ -94,14 +96,12 @@ func (n Node) Formula() string {
 			op("-")
 		case "add":
 			op("+")
-		case "pow":
-			op("^")
 		default:
 			var args []string
 			for _, c := range n.Children {
 				args = append(args, c.Formula())
 			}
-			fmt.Fprintf(buf, "%s(%s)", n.S, strings.Join(args, ","))
+			fmt.Fprintf(buf, "%s(%s)", n.S, strings.Join(args, ", "))
 		}
 	case statementNT:
 		fmt.Fprintf(buf, "%s := %s", n.Children[0].Formula(), n.Children[1].Formula())
