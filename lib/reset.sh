@@ -4,4 +4,7 @@
 #
 git checkout src/xoba/ad/vm/ops.go src/xoba/ad/vm/execute.go src/xoba/ad/vm/asm.go src/xoba/ad/vm/opdefs.go \
     ./src/xoba/ad/vm/vmparse/vmparser.y.go \
-    ./src/xoba/ad/parser/parser.y.go
+    ./src/xoba/ad/vm/vmparse/vmlexer.nex \
+    ./src/xoba/ad/parser/parser.y.go \
+    ./src/xoba/ad/parser/lexer.nex \
+    
