@@ -3,6 +3,7 @@ package main
 import (
 	"xoba/ad/parser"
 	"xoba/ad/vm"
+	"xoba/ad/vm/vmparse"
 	"xoba/nn"
 
 	"github.com/xoba/goutil"
@@ -24,4 +25,5 @@ func init() {
 	add("genops", "generate vm ops definitions", vm.GenOps)
 	add("orgops", "generate vm ops definitions", vm.OrganizeOps)
 	add("genvm", "generate vm", vm.GenVm)
+	add("vmcompile", "compile formula for vm", vmparse.Run)
 }
