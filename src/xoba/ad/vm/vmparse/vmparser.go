@@ -23,7 +23,7 @@ func Run(args []string) {
 		log.Fatal(lex.errors)
 	}
 	for i, s := range lex.statements {
-		fmt.Printf("statement %d. %s := %s\n", i, s.lhs.Formula(), s.rhs.Formula())
+		fmt.Printf("statement %d. %s := %s\n", i, s.Lhs.Formula(), s.Rhs.Formula())
 	}
 }
 
@@ -40,8 +40,8 @@ func (c *context) Error2(e error) {
 }
 
 type Statement struct {
-	lhs *Node
-	rhs *Node
+	Lhs *Node
+	Rhs *Node
 }
 
 type context struct {
@@ -112,7 +112,7 @@ func (n Node) Formula() string {
 			fmt.Fprintf(buf, "%s(%s)", n.S, strings.Join(args, ","))
 		}
 	case statementNT:
-		fmt.Fprintf(buf, "%s := %s", n.Statement.lhs.Formula(), n.Statement.rhs.Formula())
+		fmt.Fprintf(buf, "%s := %s", n.Statement.Lhs.Formula(), n.Statement.Rhs.Formula())
 	default:
 		panic("illegal type: " + n.Type)
 	}
@@ -142,7 +142,7 @@ func Number(n float64) *Node {
 func NewStatement(lhs, rhs *Node) *Node {
 	return &Node{
 		Type:      statementNT,
-		Statement: Statement{lhs: lhs, rhs: rhs},
+		Statement: Statement{Lhs: lhs, Rhs: rhs},
 	}
 }
 
