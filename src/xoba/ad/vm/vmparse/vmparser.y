@@ -26,9 +26,11 @@ statement: IDENT '=' exp { $$.node = NewStatement($1.node,$3.node); }
 exp: NUM { $$ = $1; } 
 | IDENT { $$ = $1; } 
 | func { $$ = $1; } 
+
 | IDENT '[' NUM ']' { $$.node = IndexedIdentifier($1.node,$3.node); }
 | '(' exp ')' { $$ = $2; }
 |  '-' exp { $$.node = Negate($2.node);  }
+
 |  exp '+' exp  {  $$.node = Function("add",$1.node,$3.node);  }
 |  exp '-' exp  {  $$.node = Function("subtract",$1.node,$3.node);  }
 |  exp '*' exp  {  $$.node = Function("multiply",$1.node,$3.node);  }
