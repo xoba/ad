@@ -20,9 +20,9 @@ zz=2
 g = abc(3.14,z) + f
 h = abc(abc(1,2),abc(3,xyz(4)))
 
-nn(beta[0],beta[1]) = beta[0] *beta[1]
+nn(beta[0],beta[1],x) = beta[0] *beta[1] + x
 
-result := nn(1,2) + nn(3,4)
+result := nn(1,2,x[6]) + nn(3,4,q)
 
 `
 
