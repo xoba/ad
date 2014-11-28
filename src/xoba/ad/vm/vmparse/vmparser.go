@@ -13,13 +13,14 @@ import (
 const formula = `
 
 f := sqrt(a*b*sin(a))
+g = x[0] * y[0]
 `
 
 func Run(args []string) {
 	lex := NewContext(NewLexer(strings.NewReader(formula)))
 	yyParse(lex)
 	if len(lex.errors) > 0 {
-		log.Fatal(lex.errors)
+		log.Fatalf("oops, errors: %q\n", lex.errors)
 	}
 	idents := make(map[string]*Node)
 	funcs := make(map[string]*Node)
@@ -82,13 +83,8 @@ func (c *context) Error(e string) {
 }
 
 func (c *context) Error2(e error) {
-	log.Printf("oops: %v\n", e)
-	c.errors = append(c.errors, e)
-}
-
-func LexNumber(s string) *Node {
-	n, _ := strconv.ParseFloat(s, 64)
-	return Number(n)
+	lexer := c.yyLexer.(*Lexer)
+	c.errors = append(c.errors, fmt.Errorf("in line %d: %v", lexer.Line(), e))
 }
 
 func LexIdentifier(s string) *Node {
@@ -98,10 +94,13 @@ func LexIdentifier(s string) *Node {
 	}
 }
 
-func Number(n float64) *Node {
+func LexNumber(n string) *Node {
+	if _, err := strconv.ParseFloat(n, 64); err != nil {
+		check(err)
+	}
 	return &Node{
 		Type: numberNT,
-		F:    n,
+		S:    n,
 	}
 }
 
@@ -115,8 +114,7 @@ func NewStatement(lhs, rhs *Node) *Node {
 func IndexedIdentifier(ident, index *Node) *Node {
 	return &Node{
 		Type: indexedIdentifierNT,
-		S:    ident.S,
-		I:    int(index.F),
+		S:    fmt.Sprintf("%s[%s]", ident.S, index.S),
 	}
 }
 
@@ -148,5 +146,5 @@ func FunctionArgs(ident string, args *Node) *Node {
 }
 
 func Negate(a *Node) *Node {
-	return Function("multiply", Number(-1), a)
+	return Function("multiply", LexNumber("-1"), a)
 }

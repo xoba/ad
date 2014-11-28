@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -21,28 +23,41 @@ const (
 type Node struct {
 	Type NodeType `json:"T,omitempty"`
 	S    string   `json:"S,omitempty"`
-	F    float64  `json:"F,omitempty"`
-	I    int      `json:"I,omitempty"`
 	C    []*Node  `json:"C,omitempty"`
 }
 
-func (n Node) Name() string {
-	switch n.Type {
-	case identifierNT, functionNT:
-		return n.S
-	case indexedIdentifierNT:
-		return fmt.Sprintf("%s[%d]", n.S, n.I)
-	default:
+func (n Node) Float64() float64 {
+	f, err := strconv.ParseFloat(n.S, 64)
+	check(err)
+	return f
+}
+
+func (n Node) IndexedVar() (string, int) {
+	if n.Type != indexedIdentifierNT {
 		panic("illegal type: " + n.Type)
 	}
+	return parseIndex(n.S)
+}
+
+func parseIndex(s string) (string, int) {
+	p := regexp.MustCompile("^([a-zA-Z]+[a-zA-Z0-9_]*)\\[(\\d+)\\]$")
+	x := p.FindStringSubmatch(s)
+	if len(x) != 3 {
+		panic("can't match " + s)
+	}
+	i, err := strconv.ParseUint(x[2], 10, 64)
+	check(err)
+	return x[1], int(i)
+}
+
+func (n Node) Name() string {
+	return n.S
 }
 
 func (n *Node) DeepCopy() *Node {
 	out := &Node{
 		Type: n.Type,
 		S:    n.S,
-		F:    n.F,
-		I:    n.I,
 	}
 	for _, c := range n.C {
 		out.C = append(out.C, c.DeepCopy())
@@ -53,8 +68,6 @@ func (n *Node) DeepCopy() *Node {
 func (n *Node) CopyFrom(o *Node) {
 	n.Type = o.Type
 	n.S = o.S
-	n.F = o.F
-	n.I = o.I
 	n.C = o.C
 }
 
@@ -72,11 +85,11 @@ func (n Node) Formula() string {
 	buf := new(bytes.Buffer)
 	switch n.Type {
 	case numberNT:
-		fmt.Fprintf(buf, "%f", n.F)
+		return n.S
 	case identifierNT:
-		fmt.Fprintf(buf, "%s", n.S)
+		return n.S
 	case indexedIdentifierNT:
-		fmt.Fprintf(buf, "%s[%d]", n.S, n.I)
+		return n.S
 	case functionNT:
 		op := func(x string) {
 			fmt.Fprintf(buf, "(%s %s %s)", n.C[0].Formula(), x, n.C[1].Formula())
@@ -103,5 +116,10 @@ func (n Node) Formula() string {
 		panic("illegal type: " + n.Type)
 	}
 	return buf.String()
+}
 
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
