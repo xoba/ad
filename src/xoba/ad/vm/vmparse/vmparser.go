@@ -15,9 +15,11 @@ import (
 const formula = `
 f := sin(3.14)
 abc(x,y) = (x+1)*y
+xyz(z) = z^2
 z=1+q
 zz=2
 g = abc(3.14,z) + f
+h = abc(abc(1,2),abc(3,xyz(4)))
 `
 
 func Run(args []string) {
@@ -45,12 +47,6 @@ func Run(args []string) {
 }
 
 func substitute(idents, funcs map[string]*Node, n *Node) {
-	subsChildren := func() {
-		for _, c := range n.C {
-			substitute(idents, funcs, c)
-		}
-	}
-
 	switch n.Type {
 	case numberNT:
 	case identifierNT:
@@ -59,7 +55,9 @@ func substitute(idents, funcs map[string]*Node, n *Node) {
 		}
 	case indexedIdentifierNT:
 	case functionNT:
-		subsChildren()
+		for _, c := range n.C {
+			substitute(idents, funcs, c)
+		}
 		if v, ok := funcs[n.S]; ok {
 			lhsDef := v.C[0]
 			newIdents := make(map[string]*Node)
