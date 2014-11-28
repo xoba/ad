@@ -12,18 +12,7 @@ import (
 
 const formula = `
 
-f := sin(3.14)
-abc(x,y) = (x+1)*y+f
-xyz(z) = z^2
-z=1+q
-zz=2
-g = abc(3.14,z) + f
-h = abc(abc(1,2),abc(3,xyz(4)))
-
-nn(beta[0],beta[1],x) = beta[0] *beta[1] + x
-
-result := nn(1,2,x[6]) + nn(3,4,q)
-
+f := sqrt(a*b*sin(a))
 `
 
 func Run(args []string) {
@@ -34,7 +23,7 @@ func Run(args []string) {
 	}
 	idents := make(map[string]*Node)
 	funcs := make(map[string]*Node)
-	for i, s := range lex.statements {
+	for _, s := range lex.statements {
 		lhs := s.C[0]
 		rhs := s.C[1]
 		substitute(idents, funcs, rhs)
@@ -46,7 +35,7 @@ func Run(args []string) {
 		default:
 			panic("illegal lhs: " + lhs.Type)
 		}
-		fmt.Printf("definition %d. %s\n", i, s.Formula())
+		fmt.Println(s.Formula())
 	}
 }
 
