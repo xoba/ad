@@ -17,6 +17,8 @@ f:= sin(3.14)
 g:=sin(x,y)
 z:= f+g
 z2 := z*z
+z3 := beta[0]*z
+cos(x) := sin(x)
 `
 
 func Run(args []string) {

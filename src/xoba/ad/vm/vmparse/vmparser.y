@@ -19,7 +19,7 @@ program: { }
 | program statement { c := yylex.(*context); c.statements = append(c.statements, $2.node); } 
 ;
  
-statement: IDENT ':' '=' exp { /* lhs should be exp too!!! */  $$.node = NewStatement($1.node,$4.node); }
+statement: exp ':' '=' exp { /* lhs should be exp too!!! */  $$.node = NewStatement($1.node,$4.node); }
 ;
 
 exp: NUM { $$ = $1; } 
@@ -27,7 +27,7 @@ exp: NUM { $$ = $1; }
 | IDENT '[' NUM ']' { $$.node = IndexedIdentifier($1.node,$3.node); }
 | '(' exp ')' { $$ = $2; }
 | IDENT '(' args ')' {  $$.node = FunctionArgs($1.node.S,$3.node);  }
-|  '-' exp %prec '*' { $$.node = Negate($2.node);  }
+|  '-' exp { $$.node = Negate($2.node);  }
 |  exp '+' exp  {  $$.node = Function("add",$1.node,$3.node);  }
 |  exp '-' exp  {  $$.node = Function("subtract",$1.node,$3.node);  }
 |  exp '*' exp  {  $$.node = Function("multiply",$1.node,$3.node);  }
