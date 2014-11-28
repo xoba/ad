@@ -411,17 +411,17 @@ yydefault:
 			yyVAL.node = Function("pow", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 18:
-		//line vmparser.y:45
+		//line vmparser.y:46
 		{
 			yyVAL.node = FunctionArgs(yyS[yypt-3].node.S, yyS[yypt-1].node)
 		}
 	case 19:
-		//line vmparser.y:48
+		//line vmparser.y:49
 		{
 			yyVAL.node = NewArgList(yyS[yypt-0].node)
 		}
 	case 20:
-		//line vmparser.y:49
+		//line vmparser.y:50
 		{
 			yyVAL.node = yyS[yypt-2].node.AddChild(yyS[yypt-0].node)
 		}

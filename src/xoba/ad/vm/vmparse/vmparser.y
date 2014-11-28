@@ -40,6 +40,7 @@ exp: NUM { $$ = $1; }
 |  exp '*' exp  {  $$.node = Function("multiply",$1.node,$3.node);  }
 |  exp '/' exp  {  $$.node = Function("divide",$1.node,$3.node);  }
 |  exp '^' exp  {  $$.node = Function("pow",$1.node,$3.node);  }
+
 ;
 
 func:  IDENT '(' args ')' { $$.node = FunctionArgs($1.node.S,$3.node); }
