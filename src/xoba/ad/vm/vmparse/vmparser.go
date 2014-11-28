@@ -14,7 +14,7 @@ import (
 
 const formula = `
 f:= a*b 
-g := sin(1+2)^2/sqrt(9*x)
+g := sin(1+2)^2/sqrt(9*x) + f
 z := f * g
 `
 
@@ -24,8 +24,26 @@ func Run(args []string) {
 	if len(lex.errors) > 0 {
 		log.Fatal(lex.errors)
 	}
+	defs := make(map[string]*Node)
 	for i, s := range lex.statements {
+		substitute(defs, s)
 		fmt.Printf("statement %d. %s\n", i, s.Formula())
+		defs[s.Children[0].S] = s.Children[1]
+	}
+}
+
+func substitute(defs map[string]*Node, n *Node) {
+	switch n.Type {
+	case numberNT:
+	case identifierNT:
+		if v, ok := defs[n.S]; ok {
+			n.CopyFrom(v)
+		}
+	case indexedIdentifierNT:
+	case statementNT, functionNT:
+		for _, c := range n.Children {
+			substitute(defs, c)
+		}
 	}
 }
 
@@ -59,14 +77,18 @@ const (
 
 type Node struct {
 	Type     NodeType `json:"T,omitempty"`
-	S        string   `json:",omitempty"`
-	F        float64  `json:",omitempty"`
-	I        int      `json:",omitempty"`
+	S        string   `json:"S,omitempty"`
+	F        float64  `json:"F,omitempty"`
+	I        int      `json:"I,omitempty"`
 	Children []*Node  `json:"C,omitempty"`
-	Name     string   `json:"N,omitempty"` // name of variable assigned by parser
+}
 
-	// for vm-assembly version:
-	register, output int
+func (n *Node) CopyFrom(o *Node) {
+	n.Type = o.Type
+	n.S = o.S
+	n.F = o.F
+	n.I = o.I
+	n.Children = o.Children
 }
 
 func (n Node) String() string {

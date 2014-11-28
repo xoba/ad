@@ -35,3 +35,4 @@ exp: NUM { $$ = $1; }
 |  exp '/' exp  {  $$.node = Function("divide",$1.node,$3.node);  }
 |  exp '^' exp  {  $$.node = Function("pow",$1.node,$3.node);  }
 ;
+
