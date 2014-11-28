@@ -19,8 +19,12 @@ program: { }
 | program statement { c := yylex.(*context); c.statements = append(c.statements, $2.node); } 
 ;
  
-statement: IDENT '=' exp { $$.node = NewStatement($1.node,$3.node); }
-| func '=' exp {  $$.node = NewStatement($1.node,$3.node); }
+statement: IDENT equals exp { $$.node = NewStatement($1.node,$3.node); }
+| func equals exp {  $$.node = NewStatement($1.node,$3.node); }
+;
+
+equals: '='
+| ':' '='
 ;
 
 exp: NUM { $$ = $1; } 

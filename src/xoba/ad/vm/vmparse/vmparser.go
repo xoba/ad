@@ -13,12 +13,11 @@ import (
 )
 
 const formula = `
-f= sin(3.14)
-g=sin(x,y)
-z= f+g
-z2 = z*z
-z3 = beta[0]*z
-cos(x) = sin(x)
+f := sin(3.14)
+abc(x,y) = (x+1)*y
+z=1+q
+zz=2
+g = abc(3.14,z) + f
 `
 
 func Run(args []string) {
@@ -27,34 +26,61 @@ func Run(args []string) {
 	if len(lex.errors) > 0 {
 		log.Fatal(lex.errors)
 	}
-	defs := make(map[string]*Node)
+	idents := make(map[string]*Node)
+	funcs := make(map[string]*Node)
 	for i, s := range lex.statements {
-		substitute(defs, s)
-		fmt.Printf("statement %d. %s\n", i, s.Formula())
-		defs[s.Children[0].S] = s.Children[1]
+		lhs := s.C[0]
+		rhs := s.C[1]
+		substitute(idents, funcs, rhs)
+		switch lhs.Type {
+		case identifierNT:
+			idents[s.C[0].S] = s.C[1]
+		case functionNT:
+			funcs[s.C[0].S] = s
+		default:
+			panic("illegal lhs: " + lhs.Type)
+		}
+		fmt.Printf("definition %d. %s\n", i, s.Formula())
 	}
 }
 
-func substitute(defs map[string]*Node, n *Node) {
+func substitute(idents, funcs map[string]*Node, n *Node) {
+	subsChildren := func() {
+		for _, c := range n.C {
+			substitute(idents, funcs, c)
+		}
+	}
+
 	switch n.Type {
 	case numberNT:
 	case identifierNT:
-		if v, ok := defs[n.S]; ok {
+		if v, ok := idents[n.S]; ok {
 			n.CopyFrom(v)
 		}
 	case indexedIdentifierNT:
-	case statementNT, functionNT:
-		for _, c := range n.Children {
-			substitute(defs, c)
+	case functionNT:
+		subsChildren()
+		if v, ok := funcs[n.S]; ok {
+			lhsDef := v.C[0]
+			newIdents := make(map[string]*Node)
+			for i := 0; i < len(lhsDef.C); i++ {
+				lhs := lhsDef.C[i]
+				rhs := n.C[i]
+				newIdents[lhs.S] = rhs
+			}
+			c := v.C[1].DeepCopy()
+			substitute(newIdents, nil, c)
+			n.CopyFrom(c)
 		}
 	default:
-		panic("illegal type: " + n.Type)
+		panic(fmt.Sprintf("illegal type: %s", n.Type))
 	}
 }
 
 func NewContext(y yyLexer) *context {
 	return &context{yyLexer: y}
 }
+
 func (c *context) Error(e string) {
 	c.Error2(fmt.Errorf("%s", e))
 }
@@ -82,11 +108,24 @@ const (
 )
 
 type Node struct {
-	Type     NodeType `json:"T,omitempty"`
-	S        string   `json:"S,omitempty"`
-	F        float64  `json:"F,omitempty"`
-	I        int      `json:"I,omitempty"`
-	Children []*Node  `json:"C,omitempty"`
+	Type NodeType `json:"T,omitempty"`
+	S    string   `json:"S,omitempty"`
+	F    float64  `json:"F,omitempty"`
+	I    int      `json:"I,omitempty"`
+	C    []*Node  `json:"C,omitempty"`
+}
+
+func (n *Node) DeepCopy() *Node {
+	out := &Node{
+		Type: n.Type,
+		S:    n.S,
+		F:    n.F,
+		I:    n.I,
+	}
+	for _, c := range n.C {
+		out.C = append(out.C, c.DeepCopy())
+	}
+	return out
 }
 
 func (n *Node) CopyFrom(o *Node) {
@@ -94,7 +133,7 @@ func (n *Node) CopyFrom(o *Node) {
 	n.S = o.S
 	n.F = o.F
 	n.I = o.I
-	n.Children = o.Children
+	n.C = o.C
 }
 
 func (n Node) String() string {
@@ -113,7 +152,7 @@ func (n Node) Formula() string {
 		fmt.Fprintf(buf, "%s[%d]", n.S, n.I)
 	case functionNT:
 		op := func(x string) {
-			fmt.Fprintf(buf, "(%s %s %s)", n.Children[0].Formula(), x, n.Children[1].Formula())
+			fmt.Fprintf(buf, "(%s %s %s)", n.C[0].Formula(), x, n.C[1].Formula())
 		}
 		switch n.S {
 		case "multiply":
@@ -126,13 +165,13 @@ func (n Node) Formula() string {
 			op("+")
 		default:
 			var args []string
-			for _, c := range n.Children {
+			for _, c := range n.C {
 				args = append(args, c.Formula())
 			}
 			fmt.Fprintf(buf, "%s(%s)", n.S, strings.Join(args, ", "))
 		}
 	case statementNT:
-		fmt.Fprintf(buf, "%s := %s", n.Children[0].Formula(), n.Children[1].Formula())
+		fmt.Fprintf(buf, "%s := %s", n.C[0].Formula(), n.C[1].Formula())
 	default:
 		panic("illegal type: " + n.Type)
 	}
@@ -161,8 +200,8 @@ func Number(n float64) *Node {
 
 func NewStatement(lhs, rhs *Node) *Node {
 	return &Node{
-		Type:     statementNT,
-		Children: []*Node{lhs, rhs},
+		Type: statementNT,
+		C:    []*Node{lhs, rhs},
 	}
 }
 
@@ -176,21 +215,21 @@ func IndexedIdentifier(ident, index *Node) *Node {
 
 func Function(ident string, args ...*Node) *Node {
 	return &Node{
-		Type:     functionNT,
-		S:        ident,
-		Children: args,
+		Type: functionNT,
+		S:    ident,
+		C:    args,
 	}
 }
 
 func NewArgList(arg *Node) *Node {
 	return &Node{
-		Type:     argListNT,
-		Children: []*Node{arg},
+		Type: argListNT,
+		C:    []*Node{arg},
 	}
 }
 
 func (n *Node) AddChild(c *Node) *Node {
-	n.Children = append(n.Children, c)
+	n.C = append(n.C, c)
 	return n
 }
 
@@ -199,9 +238,9 @@ func FunctionArgs(ident string, args *Node) *Node {
 		panic("illegal type: " + args.Type)
 	}
 	n := &Node{
-		Type:     functionNT,
-		S:        ident,
-		Children: args.Children,
+		Type: functionNT,
+		S:    ident,
+		C:    args.C,
 	}
 	return n
 }
