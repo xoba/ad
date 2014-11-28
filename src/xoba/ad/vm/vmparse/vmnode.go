@@ -21,9 +21,9 @@ const (
 )
 
 type Node struct {
-	Type NodeType `json:"T,omitempty"`
-	S    string   `json:"S,omitempty"`
-	C    []*Node  `json:"C,omitempty"`
+	T NodeType `json:"T,omitempty"`
+	S string   `json:"S,omitempty"`
+	C []*Node  `json:"C,omitempty"`
 }
 
 func (n Node) Float64() float64 {
@@ -33,8 +33,8 @@ func (n Node) Float64() float64 {
 }
 
 func (n Node) IndexedVar() (string, int) {
-	if n.Type != indexedIdentifierNT {
-		panic("illegal type: " + n.Type)
+	if n.T != indexedIdentifierNT {
+		panic("illegal type: " + n.T)
 	}
 	return parseIndex(n.S)
 }
@@ -56,8 +56,8 @@ func (n Node) Name() string {
 
 func (n *Node) DeepCopy() *Node {
 	out := &Node{
-		Type: n.Type,
-		S:    n.S,
+		T: n.T,
+		S: n.S,
 	}
 	for _, c := range n.C {
 		out.C = append(out.C, c.DeepCopy())
@@ -66,7 +66,7 @@ func (n *Node) DeepCopy() *Node {
 }
 
 func (n *Node) CopyFrom(o *Node) {
-	n.Type = o.Type
+	n.T = o.T
 	n.S = o.S
 	n.C = o.C
 }
@@ -83,7 +83,7 @@ func (n *Node) AddChild(c *Node) *Node {
 
 func (n Node) Formula() string {
 	buf := new(bytes.Buffer)
-	switch n.Type {
+	switch n.T {
 	case numberNT:
 		return n.S
 	case identifierNT:
@@ -113,7 +113,7 @@ func (n Node) Formula() string {
 	case statementNT:
 		fmt.Fprintf(buf, "%s := %s", n.C[0].Formula(), n.C[1].Formula())
 	default:
-		panic("illegal type: " + n.Type)
+		panic("illegal type: " + n.T)
 	}
 	return buf.String()
 }

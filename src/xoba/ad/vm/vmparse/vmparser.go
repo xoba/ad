@@ -28,20 +28,20 @@ func Run(args []string) {
 		lhs := s.C[0]
 		rhs := s.C[1]
 		substitute(idents, funcs, rhs)
-		switch lhs.Type {
+		switch lhs.T {
 		case identifierNT:
 			idents[s.C[0].S] = s.C[1]
 		case functionNT:
 			funcs[s.C[0].S] = s
 		default:
-			panic("illegal lhs: " + lhs.Type)
+			panic("illegal lhs: " + lhs.T)
 		}
 		fmt.Println(s.Formula())
 	}
 }
 
 func substitute(idents, funcs map[string]*Node, n *Node) {
-	switch n.Type {
+	switch n.T {
 	case numberNT:
 	case identifierNT, indexedIdentifierNT:
 		if v, ok := idents[n.Name()]; ok {
@@ -64,7 +64,7 @@ func substitute(idents, funcs map[string]*Node, n *Node) {
 			n.CopyFrom(c)
 		}
 	default:
-		panic(fmt.Sprintf("illegal type: %s", n.Type))
+		panic(fmt.Sprintf("illegal type: %s", n.T))
 	}
 }
 
@@ -89,8 +89,8 @@ func (c *context) Error2(e error) {
 
 func LexIdentifier(s string) *Node {
 	return &Node{
-		Type: identifierNT,
-		S:    s,
+		T: identifierNT,
+		S: s,
 	}
 }
 
@@ -99,48 +99,48 @@ func LexNumber(n string) *Node {
 		check(err)
 	}
 	return &Node{
-		Type: numberNT,
-		S:    n,
+		T: numberNT,
+		S: n,
 	}
 }
 
 func NewStatement(lhs, rhs *Node) *Node {
 	return &Node{
-		Type: statementNT,
-		C:    []*Node{lhs, rhs},
+		T: statementNT,
+		C: []*Node{lhs, rhs},
 	}
 }
 
 func IndexedIdentifier(ident, index *Node) *Node {
 	return &Node{
-		Type: indexedIdentifierNT,
-		S:    fmt.Sprintf("%s[%s]", ident.S, index.S),
+		T: indexedIdentifierNT,
+		S: fmt.Sprintf("%s[%s]", ident.S, index.S),
 	}
 }
 
 func Function(ident string, args ...*Node) *Node {
 	return &Node{
-		Type: functionNT,
-		S:    ident,
-		C:    args,
+		T: functionNT,
+		S: ident,
+		C: args,
 	}
 }
 
 func NewArgList(arg *Node) *Node {
 	return &Node{
-		Type: argListNT,
-		C:    []*Node{arg},
+		T: argListNT,
+		C: []*Node{arg},
 	}
 }
 
 func FunctionArgs(ident string, args *Node) *Node {
-	if args.Type != argListNT {
-		panic("illegal type: " + args.Type)
+	if args.T != argListNT {
+		panic("illegal type: " + args.T)
 	}
 	n := &Node{
-		Type: functionNT,
-		S:    ident,
-		C:    args.C,
+		T: functionNT,
+		S: ident,
+		C: args.C,
 	}
 	return n
 }
