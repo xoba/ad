@@ -36,57 +36,56 @@ var yyExca = []int{
 	-2, 0,
 }
 
-const yyNprod = 16
+const yyNprod = 17
 const yyPrivate = 57344
 
 var yyTokenNames []string
 var yyStates []string
 
-const yyLast = 52
+const yyLast = 42
 
 var yyAct = []int{
 
-	6, 16, 4, 17, 11, 12, 13, 14, 15, 28,
-	18, 19, 20, 21, 22, 23, 24, 5, 26, 11,
-	12, 13, 14, 15, 3, 25, 7, 8, 29, 30,
-	10, 31, 11, 12, 13, 14, 15, 9, 13, 14,
-	15, 32, 11, 12, 13, 14, 15, 2, 1, 0,
-	0, 27,
+	6, 30, 31, 16, 3, 17, 29, 13, 14, 15,
+	18, 19, 20, 21, 22, 23, 24, 4, 27, 11,
+	12, 13, 14, 15, 5, 7, 8, 25, 28, 10,
+	26, 2, 32, 1, 0, 0, 9, 11, 12, 13,
+	14, 15,
 }
 var yyPact = []int{
 
-	-1000, 19, -1000, -10, 11, 22, -3, -1000, -12, 22,
-	22, 22, 22, 22, 22, 22, 21, 22, 35, -1000,
-	29, 29, -1000, -1000, -1000, -5, 12, -1000, -1000, -1000,
-	22, 25, -1000,
+	-1000, -1, -1000, 5, 18, 21, 30, -1000, -10, 21,
+	21, 21, 21, 21, 21, 21, 23, 21, 12, -1000,
+	-2, -2, -1000, -1000, -1000, -8, -15, 30, -1000, -1000,
+	-1000, 21, 30,
 }
 var yyPgo = []int{
 
-	0, 48, 47, 0,
+	0, 33, 31, 0, 30,
 }
 var yyR1 = []int{
 
 	0, 1, 1, 2, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 4, 4,
 }
 var yyR2 = []int{
 
-	0, 0, 2, 4, 1, 1, 4, 3, 4, 6,
-	2, 3, 3, 3, 3, 3,
+	0, 0, 2, 4, 1, 1, 4, 3, 4, 2,
+	3, 3, 3, 3, 3, 1, 3,
 }
 var yyChk = []int{
 
 	-1000, -1, -2, 5, 12, 6, -3, 4, 5, 15,
 	8, 7, 8, 9, 10, 11, 13, 15, -3, -3,
-	-3, -3, -3, -3, -3, 4, -3, 16, 14, 16,
-	17, -3, 16,
+	-3, -3, -3, -3, -3, 4, -4, -3, 16, 14,
+	16, 17, -3,
 }
 var yyDef = []int{
 
 	1, -2, 2, 0, 0, 0, 3, 4, 5, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
-	11, 12, 13, 14, 15, 0, 0, 7, 6, 8,
-	0, 0, 9,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+	10, 11, 12, 13, 14, 0, 0, 15, 7, 6,
+	8, 0, 16,
 }
 var yyTok1 = []int{
 
@@ -346,8 +345,7 @@ yydefault:
 		}
 	case 3:
 		//line vmparser.y:22
-		{
-			yyVAL.node = NewStatement(yyS[yypt-3].node, yyS[yypt-0].node)
+		{ /* lhs should be exp too!!! */ yyVAL.node = NewStatement(yyS[yypt-3].node, yyS[yypt-0].node)
 		}
 	case 4:
 		//line vmparser.y:25
@@ -372,42 +370,47 @@ yydefault:
 	case 8:
 		//line vmparser.y:29
 		{
-			yyVAL.node = Function(yyS[yypt-3].node.S, yyS[yypt-1].node)
+			yyVAL.node = FunctionArgs(yyS[yypt-3].node.S, yyS[yypt-1].node)
 		}
 	case 9:
 		//line vmparser.y:30
 		{
-			yyVAL.node = Function(yyS[yypt-5].node.S, yyS[yypt-3].node, yyS[yypt-1].node)
+			yyVAL.node = Negate(yyS[yypt-0].node)
 		}
 	case 10:
 		//line vmparser.y:31
 		{
-			yyVAL.node = Negate(yyS[yypt-0].node)
+			yyVAL.node = Function("add", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 11:
 		//line vmparser.y:32
 		{
-			yyVAL.node = Function("add", yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("subtract", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 12:
 		//line vmparser.y:33
 		{
-			yyVAL.node = Function("subtract", yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("multiply", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 13:
 		//line vmparser.y:34
 		{
-			yyVAL.node = Function("multiply", yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("divide", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 14:
 		//line vmparser.y:35
 		{
-			yyVAL.node = Function("divide", yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = Function("pow", yyS[yypt-2].node, yyS[yypt-0].node)
 		}
 	case 15:
-		//line vmparser.y:36
+		//line vmparser.y:38
 		{
-			yyVAL.node = Function("pow", yyS[yypt-2].node, yyS[yypt-0].node)
+			yyVAL.node = NewArgList(yyS[yypt-0].node)
+		}
+	case 16:
+		//line vmparser.y:39
+		{
+			yyVAL.node = yyS[yypt-2].node.AddChild(yyS[yypt-0].node)
 		}
 	}
 	goto yystack /* stack new state and value */

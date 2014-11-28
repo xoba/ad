@@ -13,9 +13,10 @@ import (
 )
 
 const formula = `
-f:= a*b 
-g := sin(1+2)^2/sqrt(9*x) + f
-z := f * g
+f:= sin(3.14)
+g:=sin(x,y)
+z:= f+g
+z2 := z*z
 `
 
 func Run(args []string) {
@@ -44,6 +45,8 @@ func substitute(defs map[string]*Node, n *Node) {
 		for _, c := range n.Children {
 			substitute(defs, c)
 		}
+	default:
+		panic("illegal type: " + n.Type)
 	}
 }
 
@@ -68,11 +71,12 @@ type context struct {
 type NodeType string
 
 const (
-	numberNT            NodeType = "NUMBER"
-	identifierNT        NodeType = "IDENTIFIER"
-	indexedIdentifierNT NodeType = "INDEXED IDENTIFIER"
-	functionNT          NodeType = "FUNCTION"
-	statementNT         NodeType = "STATEMENT"
+	argListNT           NodeType = "ARGS"
+	numberNT                     = "NUMBER"
+	identifierNT                 = "IDENTIFIER"
+	indexedIdentifierNT          = "INDEXED IDENTIFIER"
+	functionNT                   = "FUNCTION"
+	statementNT                  = "STATEMENT"
 )
 
 type Node struct {
@@ -174,6 +178,30 @@ func Function(ident string, args ...*Node) *Node {
 		S:        ident,
 		Children: args,
 	}
+}
+
+func NewArgList(arg *Node) *Node {
+	return &Node{
+		Type:     argListNT,
+		Children: []*Node{arg},
+	}
+}
+
+func (n *Node) AddChild(c *Node) *Node {
+	n.Children = append(n.Children, c)
+	return n
+}
+
+func FunctionArgs(ident string, args *Node) *Node {
+	if args.Type != argListNT {
+		panic("illegal type: " + args.Type)
+	}
+	n := &Node{
+		Type:     functionNT,
+		S:        ident,
+		Children: args.Children,
+	}
+	return n
 }
 
 func Negate(a *Node) *Node {
