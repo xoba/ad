@@ -14,7 +14,7 @@ import (
 
 const formula = `
 f := sin(3.14)
-abc(x,y) = (x+1)*y
+abc(x,y) = (x+1)*y+f
 xyz(z) = z^2
 z=1+q
 zz=2
