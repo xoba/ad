@@ -11,6 +11,7 @@ import (
 )
 
 const formula = `
+
 f := sin(3.14)
 abc(x,y) = (x+1)*y+f
 xyz(z) = z^2
@@ -18,6 +19,11 @@ z=1+q
 zz=2
 g = abc(3.14,z) + f
 h = abc(abc(1,2),abc(3,xyz(4)))
+
+nn(beta[0],beta[1]) = beta[0] *beta[1]
+
+result := nn(1,2) + nn(3,4)
+
 `
 
 func Run(args []string) {
@@ -47,22 +53,21 @@ func Run(args []string) {
 func substitute(idents, funcs map[string]*Node, n *Node) {
 	switch n.Type {
 	case numberNT:
-	case identifierNT:
-		if v, ok := idents[n.S]; ok {
+	case identifierNT, indexedIdentifierNT:
+		if v, ok := idents[n.Name()]; ok {
 			n.CopyFrom(v)
 		}
-	case indexedIdentifierNT:
 	case functionNT:
 		for _, c := range n.C {
 			substitute(idents, funcs, c)
 		}
-		if v, ok := funcs[n.S]; ok {
+		if v, ok := funcs[n.Name()]; ok {
 			lhsDef := v.C[0]
 			newIdents := make(map[string]*Node)
 			for i := 0; i < len(lhsDef.C); i++ {
 				lhs := lhsDef.C[i]
 				rhs := n.C[i]
-				newIdents[lhs.S] = rhs
+				newIdents[lhs.Name()] = rhs
 			}
 			c := v.C[1].DeepCopy()
 			substitute(newIdents, nil, c)

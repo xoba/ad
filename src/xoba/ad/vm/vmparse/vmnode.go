@@ -26,6 +26,17 @@ type Node struct {
 	C    []*Node  `json:"C,omitempty"`
 }
 
+func (n Node) Name() string {
+	switch n.Type {
+	case identifierNT, functionNT:
+		return n.S
+	case indexedIdentifierNT:
+		return fmt.Sprintf("%s[%d]", n.S, n.I)
+	default:
+		panic("illegal type: " + n.Type)
+	}
+}
+
 func (n *Node) DeepCopy() *Node {
 	out := &Node{
 		Type: n.Type,
