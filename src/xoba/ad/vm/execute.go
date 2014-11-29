@@ -243,5 +243,7 @@ Loop:
 			return fmt.Errorf("unhandled op %s", VmOp(c))
 		}
 	}
+
+	fmt.Printf("registers = %.3f\n", registers)
 	return
 }

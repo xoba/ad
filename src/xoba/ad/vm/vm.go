@@ -20,7 +20,7 @@ func Run(args []string) {
 	var e Executor = Execute
 	var asm string
 	flags := flag.NewFlagSet("vm", flag.ExitOnError)
-	flags.StringVar(&asm, "asm", "lib/test.asm", "assmebly file to run")
+	flags.StringVar(&asm, "asm", "lib/test.asm", "assembly file to run")
 	flags.Parse(args)
 	f, err := os.Open(asm)
 	check(err)

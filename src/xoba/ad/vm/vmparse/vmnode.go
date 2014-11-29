@@ -24,6 +24,8 @@ type Node struct {
 	T NodeType `json:"T,omitempty"` // type
 	S string   `json:"S,omitempty"` // string value
 	C []*Node  `json:"C,omitempty"` // children
+
+	Step Step
 }
 
 func (n Node) Float64() float64 {

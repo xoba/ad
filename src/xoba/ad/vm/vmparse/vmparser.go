@@ -4,18 +4,18 @@ package vmparse
 //go:generate nex vmlexer.nex
 
 import (
+	"bytes"
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"strings"
+	"xoba/ad/vm"
 )
 
 const formula = `
 
-xyz := 5+6
-y := x + xyz
-
-f:= 5 * sin(a*x)
+f:= 5 + sqrt(a*b*sin(a))
 
 `
 
@@ -40,7 +40,121 @@ func Run(args []string) {
 			panic("illegal lhs: " + lhs.T)
 		}
 		fmt.Println(s.Formula())
+		var steps []Step
+		var r int
+		newreg := func() (out int) {
+			out = r
+			r++
+			return
+		}
+		vars := AssignVars(rhs, newreg)
+		fmt.Printf("vars = %v\n", vars)
+		for k, v := range vars {
+			r := newreg()
+			steps = append(steps, Step{
+				Register: r,
+				Args:     []int{v},
+				Code:     fmt.Sprintf("getinput %d %d // copy variable %s from input %d to register %d", v, r, k, v, r),
+			})
+		}
+		steps = append(steps, CreateSteps(rhs, vars, newreg)...)
+		for i, s := range steps {
+			if len(s.Code) == 0 {
+				continue
+			}
+			fmt.Printf("step %d: %#v\n", i, s)
+		}
+		buf := new(bytes.Buffer)
+		fmt.Fprintf(buf, "inputs %d\n", len(vars))
+		fmt.Fprintf(buf, "outputs 1\n")
+		fmt.Fprintf(buf, "registers %d\n", r)
+		for _, s := range steps {
+			if len(s.Code) == 0 {
+				continue
+			}
+			fmt.Fprintln(buf, s.Code)
+		}
+		fmt.Fprintf(buf, "setoutput %d 0\n", r-1)
+		fmt.Println(buf.String())
+		p := vm.Compile(buf)
+		out := make([]float64, p.Outputs)
+		in := make([]float64, p.Inputs)
+		model := make([]float64, p.Models)
+		in[0] = 3
+		in[1] = 4
+		var e vm.Executor = vm.Execute
+		check(e(p, model, in, out))
+		a := in[0]
+		b := in[1]
+		fmt.Printf("output = %.3f vs %.3f\n", out, 5+math.Sqrt(a*b*math.Sin(a)))
+
 	}
+}
+
+type Step struct {
+	Register int    // register being assigned
+	Function string // the function being computed
+	Args     []int  // register args of the function
+	Code     string
+}
+
+func CreateSteps(n *Node, vars map[string]int, newreg func() int) (out []Step) {
+	switch n.T {
+	case numberNT:
+		r := newreg()
+		n.Step = Step{
+			Register: r,
+			Code:     fmt.Sprintf("literal %d %f", r, n.Float64()),
+		}
+		out = append(out, n.Step)
+	case identifierNT, indexedIdentifierNT:
+		n.Step = Step{
+			Register: vars[n.S],
+		}
+		out = append(out, n.Step)
+	case functionNT:
+		for _, c := range n.C {
+			out = append(out, CreateSteps(c, vars, newreg)...)
+		}
+		r := newreg()
+		var args []int
+		n.Step = Step{
+			Register: r,
+			Function: n.S,
+			Args:     args,
+		}
+		switch len(n.C) {
+		case 1:
+			n.Step.Code = fmt.Sprintf("%s %d %d", n.S, n.C[0].Step.Register, r)
+		case 2:
+			n.Step.Code = fmt.Sprintf("%s %d %d %d", n.S, n.C[0].Step.Register, n.C[1].Step.Register, r)
+		default:
+			panic("illegal state for " + n.S)
+		}
+		out = append(out, n.Step)
+	default:
+		panic("illegal type: " + n.T)
+	}
+	return
+}
+
+func AssignVars(n *Node, newreg func() int) map[string]int {
+	out := make(map[string]int)
+	add := func(v string) {
+		if _, ok := out[v]; !ok {
+			out[v] = len(out)
+		}
+	}
+	switch n.T {
+	case identifierNT, indexedIdentifierNT:
+		add(n.S)
+	}
+	for _, c := range n.C {
+		for k := range AssignVars(c, newreg) {
+			add(k)
+		}
+	}
+	return out
 }
 
 func substitute(idents, funcs map[string]*Node, n *Node) {
