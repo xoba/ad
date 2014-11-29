@@ -30,10 +30,10 @@ equals: '='
 exp: simple { $$ = $1; } 
 | '(' exp ')' { $$ = $2; }
 |  '-' exp { $$.node = Negate($2.node);  }
+|  exp '*' exp  {  $$.node = Function("multiply",$1.node,$3.node);  }
+|  exp '/' exp  {  $$.node = Function("divide",$1.node,$3.node);  }
 |  exp '+' exp  {  $$.node = Function("add",$1.node,$3.node);  }
 |  exp '-' exp  {  $$.node = Function("subtract",$1.node,$3.node);  }
-|  mult { $$ = $1; }
-|  exp '/' exp  {  $$.node = Function("divide",$1.node,$3.node);  }
 |  exp '^' exp  {  $$.node = Function("pow",$1.node,$3.node);  }
 ;
 
@@ -41,9 +41,6 @@ simple: NUM { $$ = $1; }
 | IDENT { $$ = $1; } 
 | IDENT '[' NUM ']' { $$.node = IndexedIdentifier($1.node,$3.node); }
 | func { $$ = $1; } 
-;
-
-mult: exp '*' exp  {  $$.node = Function("multiply",$1.node,$3.node);  }
 ;
 
 func:  IDENT '(' args ')' { $$.node = FunctionArgs($1.node.S,$3.node); }
