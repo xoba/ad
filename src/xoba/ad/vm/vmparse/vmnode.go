@@ -81,6 +81,10 @@ func (n *Node) AddChild(c *Node) *Node {
 }
 
 func (n Node) Formula() string {
+	return n.formula(true)
+}
+
+func (n Node) formula(top bool) string {
 	buf := new(bytes.Buffer)
 	switch n.T {
 	case numberNT:
@@ -91,10 +95,14 @@ func (n Node) Formula() string {
 		return n.S
 	case functionNT:
 		op := func(x string) {
-			fmt.Fprintf(buf, "%s %s %s", n.C[0].Formula(), x, n.C[1].Formula())
+			fmt.Fprintf(buf, "%s %s %s", n.C[0].formula(false), x, n.C[1].formula(false))
 		}
 		opParen := func(x string) {
-			fmt.Fprintf(buf, "(%s %s %s)", n.C[0].Formula(), x, n.C[1].Formula())
+			if top {
+				op(x)
+				return
+			}
+			fmt.Fprintf(buf, "(%s %s %s)", n.C[0].formula(false), x, n.C[1].formula(false))
 		}
 		switch n.S {
 		case "multiply":
@@ -108,12 +116,12 @@ func (n Node) Formula() string {
 		default:
 			var args []string
 			for _, c := range n.C {
-				args = append(args, c.Formula())
+				args = append(args, c.formula(false))
 			}
 			fmt.Fprintf(buf, "%s(%s)", n.S, strings.Join(args, ", "))
 		}
 	case statementNT:
-		fmt.Fprintf(buf, "%s := %s", n.C[0].Formula(), n.C[1].Formula())
+		fmt.Fprintf(buf, "%s := %s", n.C[0].formula(top), n.C[1].formula(top))
 	default:
 		panic("illegal type: " + n.T)
 	}

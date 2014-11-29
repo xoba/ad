@@ -12,6 +12,8 @@ import (
 
 const formula = `
 
+xyz := 5+6
+y := x + xyz
 f := sqrt(a*b*sin(a))
 g = x[0] * y[0]
 z := f+2*g
