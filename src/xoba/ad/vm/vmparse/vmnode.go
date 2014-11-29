@@ -21,12 +21,15 @@ const (
 )
 
 type Node struct {
-	T NodeType `json:"T,omitempty"`
-	S string   `json:"S,omitempty"`
-	C []*Node  `json:"C,omitempty"`
+	T NodeType `json:"T,omitempty"` // type
+	S string   `json:"S,omitempty"` // string value
+	C []*Node  `json:"C,omitempty"` // children
 }
 
 func (n Node) Float64() float64 {
+	if n.T != numberNT {
+		panic("illegal type: " + n.T)
+	}
 	f, err := strconv.ParseFloat(n.S, 64)
 	check(err)
 	return f
@@ -48,10 +51,6 @@ func parseIndex(s string) (string, int) {
 	i, err := strconv.ParseUint(x[2], 10, 64)
 	check(err)
 	return x[1], int(i)
-}
-
-func (n Node) Name() string {
-	return n.S
 }
 
 func (n *Node) DeepCopy() *Node {
@@ -92,6 +91,9 @@ func (n Node) Formula() string {
 		return n.S
 	case functionNT:
 		op := func(x string) {
+			fmt.Fprintf(buf, "%s %s %s", n.C[0].Formula(), x, n.C[1].Formula())
+		}
+		opParen := func(x string) {
 			fmt.Fprintf(buf, "(%s %s %s)", n.C[0].Formula(), x, n.C[1].Formula())
 		}
 		switch n.S {
@@ -100,9 +102,9 @@ func (n Node) Formula() string {
 		case "divide":
 			op("/")
 		case "subtract":
-			op("-")
+			opParen("-")
 		case "add":
-			op("+")
+			opParen("+")
 		default:
 			var args []string
 			for _, c := range n.C {

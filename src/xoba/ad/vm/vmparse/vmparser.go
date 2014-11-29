@@ -14,6 +14,7 @@ const formula = `
 
 f := sqrt(a*b*sin(a))
 g = x[0] * y[0]
+z := f+2*g
 `
 
 func Run(args []string) {
@@ -44,20 +45,20 @@ func substitute(idents, funcs map[string]*Node, n *Node) {
 	switch n.T {
 	case numberNT:
 	case identifierNT, indexedIdentifierNT:
-		if v, ok := idents[n.Name()]; ok {
+		if v, ok := idents[n.S]; ok {
 			n.CopyFrom(v)
 		}
 	case functionNT:
 		for _, c := range n.C {
 			substitute(idents, funcs, c)
 		}
-		if v, ok := funcs[n.Name()]; ok {
+		if v, ok := funcs[n.S]; ok {
 			lhsDef := v.C[0]
 			newIdents := make(map[string]*Node)
 			for i := 0; i < len(lhsDef.C); i++ {
 				lhs := lhsDef.C[i]
 				rhs := n.C[i]
-				newIdents[lhs.Name()] = rhs
+				newIdents[lhs.S] = rhs
 			}
 			c := v.C[1].DeepCopy()
 			substitute(newIdents, nil, c)
