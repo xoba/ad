@@ -208,6 +208,7 @@ return %s
 			}
 			out = append(out, strings.Join(list, ","))
 		}
+		sort.Strings(out)
 		return strings.Join(out, ", ")
 	}()
 
@@ -227,6 +228,7 @@ return %s
 			}
 			out = append(out, strings.Join(list, ",")+" []float64")
 		}
+		sort.Strings(out)
 		return strings.Join(out, ", ")
 	}()
 
@@ -515,5 +517,6 @@ func sort1(m map[string]bool) (out []string) {
 			out = append(out, k)
 		}
 	}
+	sort.Strings(out)
 	return
 }
