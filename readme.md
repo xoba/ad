@@ -35,7 +35,7 @@ to develop with emacs:
 
 to auto-generate various code:
 
-    lib/gogenerate.sh
+    ./gogenerate.sh
 
 to run a simple neural network example:
 
